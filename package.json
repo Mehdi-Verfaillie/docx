@@ -15,8 +15,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "docx.helloWorld",
-        "title": "Hello World"
+        "command": "entension.openDropdown",
+        "title": "Ouvrir la dropdown"
       }
     ]
   },
