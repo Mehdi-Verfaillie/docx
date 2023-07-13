@@ -15,7 +15,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "entension.openDropdown",
+        "command": "extension.openDropdown",
         "title": "Ouvrir la dropdown"
       }
     ]
