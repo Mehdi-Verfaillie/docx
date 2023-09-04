@@ -25,6 +25,8 @@
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
     "lint": "eslint src --ext ts",
+    "test:lint": "eslint . --cache --cache-location .cache/eslint",
+    "test:types": "tsc --noEmit",
     "test": "node ./out/test/runTest.js",
     "format": "prettier --write ./src"
   },

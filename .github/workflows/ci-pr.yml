@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  pull_request:
+    paths:
+      - './'
+concurrency:
+  group: ci-pr-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Running tests...
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --max_old_space_size=4096
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+      - name: Checkout git repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Use NodeJS 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+          cache: 'yarn'
+          cache-dependency-path: ./yarn.lock
+
+      - name: Install project dependencies (yarn)
+        run: yarn install --frozen-lockfile
+
+      - name: ESLint Cache
+        uses: actions/cache@v3
+        id: eslint-cache
+        with:
+          path: ./.cache/eslint
+          key: ${{ runner.os }}-eslint
+
+      - name: Code analysis (ESLint) and style-guide analysis (Prettier)
+        run: yarn test:lint
+
+      - name: Typings Analysis (Typescript)
+        run: yarn test:types
+
+      - name: Unit Tests Analysis (Vitest)
+        run: yarn test
