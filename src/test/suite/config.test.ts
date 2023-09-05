@@ -3,7 +3,7 @@ import * as fs from 'fs/promises'
 import { Convert } from '../../utils/configTypeGuard'
 
 suite('Config tests', () => {
-  const filePath = '.docx-error.json'
+  const filePath = '.docx.json'
   const expectedStructureError = `
     Expected structure:
 
