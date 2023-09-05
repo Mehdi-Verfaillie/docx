@@ -1,44 +1,8 @@
 {
-    "links": [
-        {
-            "targets": ["/src"],
-            "documentations": [
-                {
-                    "title": "If ternary",
-                    "url": "/docx/ifTernary.md"
-                },
-                {
-                    "title": "Async await",
-                    "url": "/docx/asyncAwait.md"
-                }
-            ]
-        },
-        {
-            "targets": ["/src/Modules"],
-            "documentations": [
-                {
-                    "title": "Modules",
-                    "url": "/docx/modules.md"
-                }
-            ]
-        },
-        {
-            "targets": ["/src/Controllers"],
-            "documentations": [
-                {
-                    "title": "Controllers",
-                    "url": "/docx/controllers.md"
-                }
-            ]
-        },
-        {
-            "targets": ["/src/Utils/dates.ts"],
-            "documentations": [
-                {
-                    "title": "Dates",
-                    "url": "/docx/utils/dates.md"
-                }
-            ]
-        }
-    ]
+    "associations": {
+        "src": ["/docx/ifTernary.md", "/docx/asyncAwait.md"],
+        "src/Controllers": ["/docx/controllers.md"],
+        "src/Modules": ["/docx/modules.md"],
+        "src/Utils/dates.ts": ["/docx/utils/dates.md"]
+    }
 }
