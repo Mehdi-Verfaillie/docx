@@ -44,5 +44,7 @@ jobs:
       - name: Typings Analysis (Typescript)
         run: yarn test:types
 
-      - name: Unit Tests Analysis (Vitest)
-        run: yarn test
+      - name: Run Headless Tests Analysis
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: yarn test
