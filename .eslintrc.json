@@ -18,7 +18,7 @@
     "no-throw-literal": "warn",
     "semi": "off",
     "no-console": [
-      "error",
+      "warn",
       {
         "allow": ["warn", "error"]
       }
