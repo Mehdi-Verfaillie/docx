@@ -28,6 +28,29 @@ export class AssociationsManager {
     return Promise.all(allDocs.map((doc) => this.checkFile(doc)))
   }
 
+  public checkDuplicateDocsInDirectory(associations: {
+    [key: string]: string[]
+  }): { docPath: string; definedIn: string; redefinedIn: string }[] {
+    const duplicates: { docPath: string; definedIn: string; redefinedIn: string }[] = []
+    const docToDirMap: { [doc: string]: string } = {}
+
+    Object.entries(associations).forEach(([directory, docs]) => {
+      docs.forEach((doc) => {
+        if (docToDirMap[doc]) {
+          duplicates.push({
+            docPath: doc,
+            definedIn: docToDirMap[doc],
+            redefinedIn: directory,
+          })
+        } else {
+          docToDirMap[doc] = directory
+        }
+      })
+    })
+
+    return duplicates
+  }
+
   private async checkDirectory(directory: string): Promise<{ directory: string; exists: boolean }> {
     const uri = Uri.file(`${this.baseDir}/${directory}`)
     try {
