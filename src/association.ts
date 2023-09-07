@@ -21,6 +21,13 @@ export class AssociationsManager {
     return Promise.all(directories.map((directory) => this.checkDirectory(directory)))
   }
 
+  public async documentationsExist(directories: {
+    [key: string]: string[]
+  }): Promise<{ documentation: string; exists: boolean }[]> {
+    const allDocs = Object.values(directories).flat()
+    return Promise.all(allDocs.map((doc) => this.checkFile(doc)))
+  }
+
   private async checkDirectory(directory: string): Promise<{ directory: string; exists: boolean }> {
     const uri = Uri.file(`${this.baseDir}/${directory}`)
     try {
@@ -28,6 +35,16 @@ export class AssociationsManager {
       return { directory, exists: true }
     } catch {
       return { directory, exists: false }
+    }
+  }
+
+  private async checkFile(file: string): Promise<{ documentation: string; exists: boolean }> {
+    const uri = Uri.file(`${this.baseDir}/${file}`)
+    try {
+      await this.statFunction(uri)
+      return { documentation: file, exists: true }
+    } catch {
+      return { documentation: file, exists: false }
     }
   }
 }
