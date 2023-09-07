@@ -1,7 +1,14 @@
 {
+    "providers": {
+        "github": [
+            {
+                "repository": "https://github.com/jeremyschiap/test-repo/"
+            }
+        ]
+    },
     "associations": {
-        "src": ["/docx/ifTernary.md", "/docx/asyncAwait.md"],
-        "src/Controllers": ["/docx/controllers.md"],
+        "src": ["https://github.com/jeremyschiap/test-repo/blob/main/README.md", "/docx/asyncAwait.md"],
+        "src/Controllers": ["README.md"],
         "src/Modules": ["/docx/modules.md"],
         "src/Utils/dates.ts": ["/docx/utils/dates.md"]
     }
