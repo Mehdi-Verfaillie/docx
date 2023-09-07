@@ -38,6 +38,7 @@ describe('Associations JSON Validation', () => {
             uri.fsPath.endsWith('/docx/asyncAwait.md') ||
             uri.fsPath.endsWith('/docx/controllers.md') ||
             uri.fsPath.endsWith('/docx/modules.md') ||
+            uri.fsPath.endsWith('/docx/general.md') ||
             uri.fsPath.endsWith('/docx/utils/dates.md')
           )
         })
@@ -70,5 +71,31 @@ describe('Associations JSON Validation', () => {
     results.forEach((result) => {
       expect(result.exists, `Documentation ${result.documentation} does not exist`).to.equal(true)
     })
+  })
+
+  it('should not find any duplicated documentation paths if none exist', () => {
+    const jsonConfig = JSON.parse(jsonMock) as JsonConfig
+
+    const duplicatesList = manager.checkDuplicateDocsInDirectory(jsonConfig.associations)
+
+    expect(duplicatesList.length, 'No duplicates should exist but found some').to.equal(0)
+  })
+
+  it('should detect and return duplicated documentation paths', () => {
+    const jsonMockWithDuplications = JSON.stringify({
+      associations: {
+        ...JSON.parse(jsonMock).associations,
+        src: ['/docx/general.md', '/docx/ifTernary.md', '/docx/asyncAwait.md', '/docx/general.md'],
+      },
+    })
+
+    const jsonConfig = JSON.parse(jsonMockWithDuplications) as JsonConfig
+
+    const duplicatesList = manager.checkDuplicateDocsInDirectory(jsonConfig.associations)
+
+    expect(duplicatesList.length, `Expected duplicates not found`).to.be.greaterThan(0)
+    expect(duplicatesList[0].docPath).to.equal('/docx/general.md')
+    expect(duplicatesList[0].definedIn).to.equal('src')
+    expect(duplicatesList[0].redefinedIn).to.equal('src')
   })
 })
