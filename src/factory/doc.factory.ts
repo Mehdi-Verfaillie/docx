@@ -1,4 +1,4 @@
-import { URLData } from '../interface/url.data.interface'
+import { UrlRequest } from '../interface/url.request.interface'
 import { getLocalDoc } from '../provider/local/local.documentation'
 import * as vscode from 'vscode'
 
