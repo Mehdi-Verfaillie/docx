@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as vscode from 'vscode'
 import { describe, setup, teardown, it } from 'mocha'
-import { JsonConfig, AssociationsManager } from '../../association'
+import { DocAssociationsConfig, AssociationsManager } from '../../association'
 
 describe('Associations JSON Validation', () => {
   const jsonMock = JSON.stringify({
@@ -54,10 +54,10 @@ describe('Associations JSON Validation', () => {
   teardown(() => statStub.restore())
 
   it('should ensure all defined directories exist', async () => {
-    const jsonConfig = JSON.parse(jsonMock) as JsonConfig
+    const jsonConfig = JSON.parse(jsonMock) as DocAssociationsConfig
     const definedDirectories = Object.keys(jsonConfig.associations)
 
-    const results = await manager.directoriesExist(definedDirectories)
+    const results = await manager.doesDirectoriesExist(definedDirectories)
 
     results.forEach((result) => {
       expect(result.exists, `Directory ${result.directory} does not exist`).to.equal(true)
@@ -65,18 +65,20 @@ describe('Associations JSON Validation', () => {
   })
 
   it('should ensure all defined documentations exist', async () => {
-    const jsonConfig = JSON.parse(jsonMock) as JsonConfig
-    const results = await manager.documentationsExist(jsonConfig.associations)
+    const jsonConfig = JSON.parse(jsonMock) as DocAssociationsConfig
+    const results = await manager.doesDocumentationFilesExist(jsonConfig.associations)
 
     results.forEach((result) => {
-      expect(result.exists, `Documentation ${result.documentation} does not exist`).to.equal(true)
+      expect(result.exists, `Documentation ${result.documentationFile} does not exist`).to.equal(
+        true
+      )
     })
   })
 
   it('should not find any duplicated documentation paths if none exist', () => {
-    const jsonConfig = JSON.parse(jsonMock) as JsonConfig
+    const jsonConfig = JSON.parse(jsonMock) as DocAssociationsConfig
 
-    const duplicatesList = manager.checkDuplicateDocsInDirectory(jsonConfig.associations)
+    const duplicatesList = manager.findDuplicateDocsInDirectory(jsonConfig.associations)
 
     expect(duplicatesList.length, 'No duplicates should exist but found some').to.equal(0)
   })
@@ -89,9 +91,9 @@ describe('Associations JSON Validation', () => {
       },
     })
 
-    const jsonConfig = JSON.parse(jsonMockWithDuplications) as JsonConfig
+    const jsonConfig = JSON.parse(jsonMockWithDuplications) as DocAssociationsConfig
 
-    const duplicatesList = manager.checkDuplicateDocsInDirectory(jsonConfig.associations)
+    const duplicatesList = manager.findDuplicateDocsInDirectory(jsonConfig.associations)
 
     expect(duplicatesList.length, `Expected duplicates not found`).to.be.greaterThan(0)
     expect(duplicatesList[0].docPath).to.equal('/docx/general.md')
