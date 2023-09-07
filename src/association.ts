@@ -14,4 +14,20 @@ export class AssociationsManager {
     this.baseDir = baseDir
     this.statFunction = statFunction
   }
+
+  public async directoriesExist(
+    directories: string[]
+  ): Promise<{ directory: string; exists: boolean }[]> {
+    return Promise.all(directories.map((directory) => this.checkDirectory(directory)))
+  }
+
+  private async checkDirectory(directory: string): Promise<{ directory: string; exists: boolean }> {
+    const uri = Uri.file(`${this.baseDir}/${directory}`)
+    try {
+      await this.statFunction(uri)
+      return { directory, exists: true }
+    } catch {
+      return { directory, exists: false }
+    }
+  }
 }
