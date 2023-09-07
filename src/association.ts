@@ -1,9 +1,13 @@
 import { Uri, FileStat } from 'vscode'
 
 export interface JsonConfig {
-  associations: {
-    [key: string]: string[]
-  }
+  associations: Record<string, string[]>
+}
+
+interface DocumentReentryError {
+  docPath: string
+  definedIn: string
+  redefinedIn: string
 }
 
 export class AssociationsManager {
@@ -21,18 +25,18 @@ export class AssociationsManager {
     return Promise.all(directories.map((directory) => this.checkDirectory(directory)))
   }
 
-  public async documentationsExist(directories: {
-    [key: string]: string[]
-  }): Promise<{ documentation: string; exists: boolean }[]> {
+  public async documentationsExist(
+    directories: Record<string, string[]>
+  ): Promise<{ documentation: string; exists: boolean }[]> {
     const allDocs = Object.values(directories).flat()
     return Promise.all(allDocs.map((doc) => this.checkFile(doc)))
   }
 
-  public checkDuplicateDocsInDirectory(associations: {
-    [key: string]: string[]
-  }): { docPath: string; definedIn: string; redefinedIn: string }[] {
-    const duplicates: { docPath: string; definedIn: string; redefinedIn: string }[] = []
-    const docToDirMap: { [doc: string]: string } = {}
+  public checkDuplicateDocsInDirectory(
+    associations: Record<string, string[]>
+  ): DocumentReentryError[] {
+    const duplicates: DocumentReentryError[] = []
+    const docToDirMap: Record<string, string> = {}
 
     Object.entries(associations).forEach(([directory, docs]) => {
       docs.forEach((doc) => {
