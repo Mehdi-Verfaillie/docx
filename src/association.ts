@@ -9,6 +9,11 @@ interface DocumentReentryError {
   definedIn: string
   redefinedIn: string
 }
+type ExistenceType = 'directory' | 'documentation'
+
+type ExistenceCheckResult<T extends ExistenceType> = { exists: boolean } & {
+  [K in T]: string
+}
 
 export class AssociationsManager {
   private baseDir: string
@@ -21,15 +26,15 @@ export class AssociationsManager {
 
   public async directoriesExist(
     directories: string[]
-  ): Promise<{ directory: string; exists: boolean }[]> {
-    return Promise.all(directories.map((directory) => this.checkDirectory(directory)))
+  ): Promise<ExistenceCheckResult<'directory'>[]> {
+    return Promise.all(directories.map((directory) => this.checkExistence(directory, 'directory')))
   }
 
   public async documentationsExist(
     directories: Record<string, string[]>
-  ): Promise<{ documentation: string; exists: boolean }[]> {
+  ): Promise<ExistenceCheckResult<'documentation'>[]> {
     const allDocs = Object.values(directories).flat()
-    return Promise.all(allDocs.map((doc) => this.checkFile(doc)))
+    return Promise.all(allDocs.map((doc) => this.checkExistence(doc, 'documentation')))
   }
 
   public checkDuplicateDocsInDirectory(
@@ -55,23 +60,16 @@ export class AssociationsManager {
     return duplicates
   }
 
-  private async checkDirectory(directory: string): Promise<{ directory: string; exists: boolean }> {
-    const uri = Uri.file(`${this.baseDir}/${directory}`)
+  private async checkExistence<T extends ExistenceType>(
+    name: string,
+    type: T
+  ): Promise<ExistenceCheckResult<T>> {
+    const uri = Uri.file(`${this.baseDir}/${name}`)
     try {
       await this.statFunction(uri)
-      return { directory, exists: true }
+      return { [type]: name, exists: true } as ExistenceCheckResult<T>
     } catch {
-      return { directory, exists: false }
-    }
-  }
-
-  private async checkFile(file: string): Promise<{ documentation: string; exists: boolean }> {
-    const uri = Uri.file(`${this.baseDir}/${file}`)
-    try {
-      await this.statFunction(uri)
-      return { documentation: file, exists: true }
-    } catch {
-      return { documentation: file, exists: false }
+      return { [type]: name, exists: false } as ExistenceCheckResult<T>
     }
   }
 }
