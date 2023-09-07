@@ -28,10 +28,17 @@ describe('Associations JSON Validation', () => {
       .withArgs(
         sinon.match((uri: vscode.Uri) => {
           return (
+            // Folder structure mock
             uri.fsPath.endsWith('src') ||
             uri.fsPath.endsWith('src/Controllers') ||
             uri.fsPath.endsWith('src/Modules') ||
-            uri.fsPath.endsWith('src/Utils/dates.ts')
+            uri.fsPath.endsWith('src/Utils/dates.ts') ||
+            // Documentations mock
+            uri.fsPath.endsWith('/docx/ifTernary.md') ||
+            uri.fsPath.endsWith('/docx/asyncAwait.md') ||
+            uri.fsPath.endsWith('/docx/controllers.md') ||
+            uri.fsPath.endsWith('/docx/modules.md') ||
+            uri.fsPath.endsWith('/docx/utils/dates.md')
           )
         })
       )
@@ -53,6 +60,15 @@ describe('Associations JSON Validation', () => {
 
     results.forEach((result) => {
       expect(result.exists, `Directory ${result.directory} does not exist`).to.equal(true)
+    })
+  })
+
+  it('should ensure all defined documentations exist', async () => {
+    const jsonConfig = JSON.parse(jsonMock) as JsonConfig
+    const results = await manager.documentationsExist(jsonConfig.associations)
+
+    results.forEach((result) => {
+      expect(result.exists, `Documentation ${result.documentation} does not exist`).to.equal(true)
     })
   })
 })
