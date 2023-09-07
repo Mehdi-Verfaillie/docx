@@ -12,9 +12,21 @@ describe('Test documentation', function () {
     const res = await documentFactory.getDoc({ url: url, type: 'local' })
     assert.notEqual(res, 'error')
   })
+
   it('fail get local documentation', async () => {
     const url = 'xxxxx'
     const res = await documentFactory.getDoc({ url: url, type: 'local' })
+    assert.equal(res, 'error')
+  })
+
+  it('get remote github documentation', async () => {
+    const url = 'https://api.github.com/repos/jeremyschiap/test-repo/contents/README.md'
+    const res = await documentFactory.getDoc({ url: url, type: 'remote' })
+    assert.notEqual(res, 'error')
+  })
+  it('fail get remote documentation', async () => {
+    const url = 'xxxxx'
+    const res = await documentFactory.getDoc({ url: url, type: 'remote' })
     assert.equal(res, 'error')
   })
 })
