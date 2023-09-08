@@ -57,22 +57,36 @@ describe('Associations JSON Validation', () => {
     const jsonConfig = JSON.parse(jsonMock) as DocAssociationsConfig
     const definedDirectories = Object.keys(jsonConfig.associations)
 
-    const results = await manager.doesDirectoriesExist(definedDirectories)
+    const errors = await manager.validateDirectoryPaths(definedDirectories)
 
-    results.forEach((result) => {
-      expect(result.exists, `Directory ${result.directory} does not exist`).to.equal(true)
+    expect(errors, `Some directories do not exist`).to.have.lengthOf(0)
+  })
+
+  it('should detect and return the undefined directories', async () => {
+    const jsonMockWithMissingDirectory = JSON.stringify({
+      associations: {
+        ...JSON.parse(jsonMock).associations,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'src/Services': ['/docx/services.md'],
+      },
     })
+    const jsonConfig = JSON.parse(jsonMockWithMissingDirectory) as DocAssociationsConfig
+    const definedDirectories = Object.keys(jsonConfig.associations)
+
+    const errors = await manager.validateDirectoryPaths(definedDirectories)
+
+    expect(errors, `Expected missing directories not found`).to.have.length.above(0)
+
+    expect(errors[0].entityPath).to.equal('src/Services')
+    expect(errors[0].entityType).to.equal('directory')
   })
 
   it('should ensure all defined documentations exist', async () => {
     const jsonConfig = JSON.parse(jsonMock) as DocAssociationsConfig
-    const results = await manager.doesDocumentationFilesExist(jsonConfig.associations)
 
-    results.forEach((result) => {
-      expect(result.exists, `Documentation ${result.documentationFile} does not exist`).to.equal(
-        true
-      )
-    })
+    const errors = await manager.validateDocumentationPaths(jsonConfig.associations)
+
+    expect(errors, `Some documentation files do not exist`).to.have.lengthOf(0)
   })
 
   it('should not find any duplicated documentation paths if none exist', () => {
@@ -96,8 +110,11 @@ describe('Associations JSON Validation', () => {
     const duplicatesList = manager.findDuplicateDocsInDirectory(jsonConfig.associations)
 
     expect(duplicatesList.length, `Expected duplicates not found`).to.be.greaterThan(0)
-    expect(duplicatesList[0].docPath).to.equal('/docx/general.md')
-    expect(duplicatesList[0].definedIn).to.equal('src')
-    expect(duplicatesList[0].redefinedIn).to.equal('src')
+    const duplicateError = duplicatesList[0]
+    expect(duplicateError.errorType).to.equal('DUPLICATE')
+    expect(duplicateError.entityType).to.equal('documentationFile')
+    expect(duplicateError.entityPath).to.equal('/docx/general.md')
+    expect(duplicateError.originalLocation).to.equal('src')
+    expect(duplicateError.duplicateLocation).to.equal('src')
   })
 })

@@ -4,16 +4,22 @@ export interface DocAssociationsConfig {
   associations: Record<string, string[]>
 }
 
-interface DocumentReentryError {
-  docPath: string
-  definedIn: string
-  redefinedIn: string
-}
-
 type ProjectEntityType = 'directory' | 'documentationFile'
 
-type ProjectEntityStatus<T extends ProjectEntityType> = { exists: boolean } & {
-  [K in T]: string
+interface EntityError {
+  errorType: 'MISSING' | 'DUPLICATE'
+  entityType: ProjectEntityType
+  entityPath: string
+}
+
+interface MissingEntityError extends EntityError {
+  errorType: 'MISSING'
+}
+
+interface DuplicateEntityError extends EntityError {
+  errorType: 'DUPLICATE'
+  originalLocation: string
+  duplicateLocation: string
 }
 
 export class AssociationsManager {
@@ -25,32 +31,38 @@ export class AssociationsManager {
     this.statFunction = statFunction
   }
 
-  public async doesDirectoriesExist(
-    directories: string[]
-  ): Promise<ProjectEntityStatus<'directory'>[]> {
-    return Promise.all(directories.map((directory) => this.checkExistence(directory, 'directory')))
+  public async validateDirectoryPaths(directories: string[]): Promise<MissingEntityError[]> {
+    const errors = await Promise.all(
+      directories.map((directory) => this.checkExistence(directory, 'directory'))
+    )
+    return errors.filter(Boolean) as MissingEntityError[]
   }
 
-  public async doesDocumentationFilesExist(
-    directories: Record<string, string[]>
-  ): Promise<ProjectEntityStatus<'documentationFile'>[]> {
-    const allDocumentPaths = Object.values(directories).flat()
-    return Promise.all(allDocumentPaths.map((doc) => this.checkExistence(doc, 'documentationFile')))
+  public async validateDocumentationPaths(
+    associations: Record<string, string[]>
+  ): Promise<MissingEntityError[]> {
+    const allDocumentPaths = Object.values(associations).flat()
+    const errors = await Promise.all(
+      allDocumentPaths.map((doc) => this.checkExistence(doc, 'documentationFile'))
+    )
+    return errors.filter(Boolean) as MissingEntityError[]
   }
 
   public findDuplicateDocsInDirectory(
     associations: Record<string, string[]>
-  ): DocumentReentryError[] {
-    const duplicates: DocumentReentryError[] = []
+  ): DuplicateEntityError[] {
+    const duplicates: DuplicateEntityError[] = []
     const docLocationMapping: Record<string, string> = {}
 
     Object.entries(associations).forEach(([directory, docs]) => {
       docs.forEach((doc) => {
         if (docLocationMapping[doc]) {
           duplicates.push({
-            docPath: doc,
-            definedIn: docLocationMapping[doc],
-            redefinedIn: directory,
+            errorType: 'DUPLICATE',
+            entityType: 'documentationFile',
+            entityPath: doc,
+            originalLocation: docLocationMapping[doc],
+            duplicateLocation: directory,
           })
         } else {
           docLocationMapping[doc] = directory
@@ -64,13 +76,17 @@ export class AssociationsManager {
   private async checkExistence<T extends ProjectEntityType>(
     name: string,
     type: T
-  ): Promise<ProjectEntityStatus<T>> {
+  ): Promise<MissingEntityError | undefined> {
     const uri = Uri.file(`${this.baseDir}/${name}`)
     try {
       await this.statFunction(uri)
-      return { [type]: name, exists: true } as ProjectEntityStatus<T>
+      return // Entity exists, no error
     } catch {
-      return { [type]: name, exists: false } as ProjectEntityStatus<T>
+      return {
+        errorType: 'MISSING',
+        entityType: type,
+        entityPath: name,
+      } // Return the error
     }
   }
 }
