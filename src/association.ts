@@ -31,6 +31,29 @@ export class AssociationsManager {
     this.statFunction = statFunction
   }
 
+  public async validateAssociationsFromJson(
+    json: string
+  ): Promise<(MissingEntityError | DuplicateEntityError)[] | undefined> {
+    let config: DocAssociationsConfig
+
+    try {
+      config = JSON.parse(json)
+    } catch (error) {
+      return // Invalid JSON, so we can't perform further validations
+    }
+
+    const dirErrors = await this.validateDirectoryPaths(Object.keys(config.associations))
+    const docErrors = await this.validateDocumentationPaths(config.associations)
+    const dupDocErrors = this.findDuplicateDocsInDirectory(config.associations)
+    const inheritedDupDocErrors = this.findInheritedDuplicateDocsInDirectory(config.associations)
+
+    const allErrors = [...dirErrors, ...docErrors, ...dupDocErrors, ...inheritedDupDocErrors]
+
+    if (allErrors.length > 0) {
+      return allErrors
+    }
+  }
+
   public async validateDirectoryPaths(directories: string[]): Promise<MissingEntityError[]> {
     const errors = await Promise.all(
       directories.map((directory) => this.checkExistence(directory, 'directory'))
