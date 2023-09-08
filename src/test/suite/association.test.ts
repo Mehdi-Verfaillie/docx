@@ -143,4 +143,43 @@ describe('Associations JSON Validation', () => {
     expect(error.errorType).to.equal('DUPLICATE')
     expect(error.entityType).to.equal('documentationFile')
   })
+
+  it('should validate provided JSON and detect all issues', async () => {
+    const faultyJson = JSON.stringify({
+      associations: {
+        'src': ['/docx/nonExistent.md', '/docx/asyncAwait.md'],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'src/nonExistentDir': ['/docx/ifTernary.md'],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'src/Controllers': ['/docx/controllers.md', '/docx/ifTernary.md'],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'src/Modules': ['/docx/asyncAwait.md'],
+      },
+    })
+
+    const errors = await manager.validateAssociationsFromJson(faultyJson)
+
+    expect(errors).to.be.an('array').that.has.length.above(0)
+
+    const missingDocErrors =
+      errors?.filter(
+        (err) => err.errorType === 'MISSING' && err.entityType === 'documentationFile'
+      ) ?? []
+    expect(missingDocErrors).to.have.lengthOf(1)
+    expect(missingDocErrors[0].entityPath).to.equal('/docx/nonExistent.md')
+
+    const missingDirErrors =
+      errors?.filter((err) => err.errorType === 'MISSING' && err.entityType === 'directory') ?? []
+    expect(missingDirErrors).to.have.lengthOf(1)
+    expect(missingDirErrors[0].entityPath).to.equal('src/nonExistentDir')
+
+    const duplicateDocErrors = errors?.filter((err) => err.errorType === 'DUPLICATE')
+
+    expect(duplicateDocErrors).to.have.lengthOf(1)
+
+    const inheritedDupDocErrors = manager.findInheritedDuplicateDocsInDirectory(
+      JSON.parse(faultyJson).associations
+    )
+    expect(inheritedDupDocErrors).to.be.an('array').that.has.length.above(0)
+  })
 })
