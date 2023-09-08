@@ -117,4 +117,30 @@ describe('Associations JSON Validation', () => {
     expect(duplicateError.originalLocation).to.equal('src')
     expect(duplicateError.duplicateLocation).to.equal('src')
   })
+
+  it('should ensure no documentation is inherited in child directories', () => {
+    const jsonConfig = JSON.parse(jsonMock) as DocAssociationsConfig
+    const duplicatesList = manager.findInheritedDuplicateDocsInDirectory(jsonConfig.associations)
+
+    expect(duplicatesList.length, `Documentation inherited in child directories`).to.equal(0)
+  })
+
+  it('should return an error object if a documentation is inherited in child directories', () => {
+    const jsonMockWithInheritedDocs = JSON.stringify({
+      associations: {
+        ...JSON.parse(jsonMock).associations,
+        'src': ['/docx/general.md', '/docx/ifTernary.md', '/docx/asyncAwait.md'],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'src/Controllers': ['/docx/controllers.md', '/docx/general.md'],
+      },
+    })
+    const jsonConfig = JSON.parse(jsonMockWithInheritedDocs) as DocAssociationsConfig
+    const duplicatesList = manager.findInheritedDuplicateDocsInDirectory(jsonConfig.associations)
+
+    expect(duplicatesList.length, `Expected inherited documentation not found`).to.be.greaterThan(0)
+
+    const error = duplicatesList[0]
+    expect(error.errorType).to.equal('DUPLICATE')
+    expect(error.entityType).to.equal('documentationFile')
+  })
 })
