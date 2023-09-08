@@ -1,60 +1,11 @@
-import * as assert from 'assert'
-import { before } from 'mocha'
-import * as fs from 'fs/promises'
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+import { expect } from 'chai'
+import { describe, setup, it } from 'mocha'
+import { Config } from '../../config'
+describe('Config tests', () => {
+  let config: Config
+  let globalMocksBadFiles: string[] = []
 
-const isFileJson = (str: string): boolean => {
-  try {
-    JSON.parse(str)
-    return true
-  } catch (e) {
-    return false
-  }
-}
-
-interface IConfig {
-  associations: { [key: string]: string[] }
-}
-
-class Config {
-  associations: IConfig['associations']
-  keys: IConfig['associations']['key']
-  values: IConfig['associations'][string][]
-  constructor(config: IConfig) {
-    this.associations = config.associations
-    this.keys = Object.keys(this.associations)
-    this.values = Object.values(this.associations)
-  }
-  isAllTypesCorrect(): boolean {
-    return (
-      this.isTypeAssociationsCorrect() &&
-      this.isTypeAssociationsKeysCorrect() &&
-      this.isTypeAssociationsValuesCorrect()
-    )
-  }
-  isTypeAssociationsCorrect(): boolean {
-    return typeof this.associations === 'object'
-  }
-  isTypeAssociationsKeysCorrect(): boolean {
-    return this.keys.every((key) => typeof key === 'string' && key !== '')
-  }
-  isTypeAssociationsValuesCorrect(): boolean {
-    return this.values.every(
-      (value) =>
-        Array.isArray(value) && value.every((item) => typeof item === 'string' && item !== '')
-    )
-  }
-  hasReverseSlash(): boolean {
-    return !(
-      this.values.every((value) => value.every((item) => !item.includes('\\'))) &&
-      this.keys.every((key) => !key.includes('\\'))
-    )
-  }
-}
-
-suite('Config tests', () => {
-  const configFilePath = '.docx.json'
-  let configStr: string
-  let configData: IConfig = { associations: {} }
   const expectedStructureError = `
     Expected structure:
 
@@ -79,176 +30,255 @@ suite('Config tests', () => {
       }
     }
   `
-  before(async () => {
-    try {
-      configStr = await fs.readFile(configFilePath, 'utf-8')
-      configData = JSON.parse(configStr)
-    } catch (e) {
-      console.error(e as Error)
-    }
+  setup(() => {
+    config = new Config()
   })
 
-  test('Configuration file exist', async () => {
-    try {
-      await fs.access(configFilePath, fs.constants.F_OK)
-      assert.ok(true)
-    } catch (e) {
-      assert.fail(
-        `Configuration file "${configFilePath}" was not found.\nError: ${(e as Error).message}`
-      )
-    }
-  })
-
-  test('Check if mocks data is JSON.', () => {
-    const error = `Configuration file is not a JSON file.\n\n${expectedStructureError}`
-    assert.strictEqual(isFileJson(''), false, error)
-    assert.strictEqual(isFileJson('["a": "1"]'), false, error)
-    assert.strictEqual(isFileJson('[1, "a", b]'), false, error)
-    assert.strictEqual(isFileJson('[]'), true, error)
-    assert.strictEqual(isFileJson('["a", 1, 2, 3, "z"]'), true, error)
-    assert.strictEqual(isFileJson('{}'), true, error)
-    assert.strictEqual(isFileJson('{"a": "1"}'), true, error)
-    assert.strictEqual(isFileJson('{"a": 1, "b": 2}'), true, error)
-    assert.strictEqual(
-      isFileJson(`{
+  it('should ensure that file type is json', () => {
+    const error = `isJsonFile function is not working correctly.\n\n${expectedStructureError}`
+    const mocksBadFiles = [``, `["a": "1"]`, `[1, "a", b]`]
+    const mocksGoodFiles = [
+      `[]`,
+      `["a", 1, 2, 3, "z"]`,
+      `{}`,
+      `{"a": "1"}`,
+      `{"a": 1, "b": 2}`,
+      `{
         "associations": {
           "src": ["docs/global.md", "docs/global2.md"],
           "src/Services": ["docs/services.md"],
           "src/Utils/dates.ts": ["docs/utils/dates.md"]
         }
-      }`),
-      true,
-      error
-    )
+      }`,
+    ]
+    mocksBadFiles.forEach((mockFile) => {
+      expect(config.isJsonFile(mockFile), error).to.be.false
+    })
+    mocksGoodFiles.forEach((mockFile) => {
+      expect(config.isJsonFile(mockFile), error).to.be.true
+    })
   })
 
-  test('Check if configuration file data is JSON.', async () => {
-    const error = `Configuration file is not a JSON file.\n\n${expectedStructureError}`
-    assert.strictEqual(isFileJson(configStr), true, error)
+  it('should ensure type association is correct.', async () => {
+    const error = `isTypeAssociationsCorrect method is not working correctly.\n\n${expectedStructureError}`
+    const mocksBadFiles = [``, `[]`, `{}`, `1`, `true`, `false`]
+    const mocksGoodFiles = [
+      `{"associations": {}}`,
+      `{"associations": {"": [""]}}`,
+      `{"associations": {"src": ["docs/global.md"]}}`,
+      `{
+        "associations": {
+          "src": ["docs/global.md", "docs/global2.md"],
+          "src/Controllers": ["docs/controllers.md"]
+        }
+      }`,
+    ]
+    globalMocksBadFiles = globalMocksBadFiles.concat(mocksBadFiles)
+
+    mocksBadFiles.forEach((mockFile) => {
+      if (config.isJsonFile(mockFile)) {
+        const mockConfigData = JSON.parse(mockFile)
+        expect(config.isTypeAssociationsCorrect(mockConfigData), error).to.be.false
+      }
+    })
+
+    mocksGoodFiles.forEach((mockFile) => {
+      if (config.isJsonFile(mockFile)) {
+        const mockConfigData = JSON.parse(mockFile)
+        expect(config.isTypeAssociationsCorrect(mockConfigData), error).to.be.true
+      }
+    })
   })
 
-  test('Check if mocks data has good structure.', async () => {
+  it('should ensure type association keys is correct.', async () => {
+    const error = `isTypeAssociationsKeysCorrect method is not working correctly.\n\n${expectedStructureError}`
+    const mocksBadFiles = [
+      `{ 
+        associations: { 
+          '': ['docs/global.md', 'docs/global2.md'] 
+        } 
+      }`,
+      `{
+        associations: {
+          '': ['docs/global.md', 'docs/global2.md'],
+          'src': ['docs/global.md', 'docs/global2.md']
+        }
+      }`,
+      `{
+        associations: {
+          '': ['docs/global.md', 'docs/global2.md'],
+          'src': ['docs/global.md', 'docs/global2.md']
+        }
+      }`,
+      `{ associations: ['docs/global.md', 'docs/global2.md'] }`,
+      `{ assos: { 'src': ['docs/global.md', 'docs/global2.md'] } }`,
+    ]
+    const mocksGoodFiles = [
+      `{
+        associations: {
+          'src': ['docs/global.md', 'docs/global2.md']
+        }
+      }`,
+      `{
+        associations: {
+          'src': ['docs/global.md', 'docs/global2.md'],
+          'src/Controllers': ['docs/controllers.md']
+        }
+      }`,
+      `{
+        associations: {
+          'src': ['docs/global.md', 'docs/global2.md'],
+          true: ['docs/controllers.md'],
+          false: ['docs/controllers.md'],
+          1: ['docs/controllers.md'],
+          0: ['docs/controllers.md'],
+        },
+      }`,
+    ]
+    globalMocksBadFiles = globalMocksBadFiles.concat(mocksBadFiles)
+    mocksBadFiles.forEach((mockFile) => {
+      if (config.isJsonFile(mockFile)) {
+        const mockConfigData = JSON.parse(mockFile)
+        expect(config.isTypeAssociationsTargetsCorrect(mockConfigData), error).to.be.false
+      }
+    })
+
+    mocksGoodFiles.forEach((mockFile) => {
+      if (config.isJsonFile(mockFile)) {
+        const mockConfigData = JSON.parse(mockFile)
+        expect(config.isTypeAssociationsTargetsCorrect(mockConfigData), error).to.be.true
+      }
+    })
+  })
+
+  it('should ensure type association documentations is correct.', async () => {
     const error = `Configuration file has not good structure.\n\n${expectedStructureError}`
+    const mocksBadFiles = [
+      `{ associations: { 'src': '' } }`,
+      `{ associations: { 'src': 'docs/global.md' } }`,
+      `{ associations: { 'src': true } }`,
+      `{ associations: { 'src': 1 } }`,
+      `{ associations: { 'src': null } }`,
+      `{ associations: { 'src': undefined } }`,
+      `{ associations: { 'src': [] } }`,
+      `{ associations: { 'src': [''] } }`,
+      `{
+        associations: {
+          'src': ['docs/global.md', 'docs/global2.md', ''],
+          'src/Controllers': ['docs/controllers.md']
+        }
+      }`,
+      `{ associations: ['docs/global.md', 'docs/global2.md', ''] }`,
+      `{ assos: { 'src': ['docs/global.md', 'docs/global2.md'] } }`,
+    ]
+    const mocksGoodFiles = [
+      `{ associations: { 'src': ['docs/global.md'] } }`,
+      `{
+        associations: {
+          'src': ['docs/global.md', 'docs/global2.md'],
+          'src/Controllers': ['docs/controllers.md']
+        }
+      }`,
+    ]
+    globalMocksBadFiles = globalMocksBadFiles.concat(mocksBadFiles)
 
-    // Mock data 1 - Empty key
-    const mockConfigData1 = {
-      associations: {
-        'src': ['docs/global.md', 'docs/global2.md'],
-        'src/Services': ['docs/services.md'],
-        'src/Utils/dates.ts': ['docs/utils/dates.md'],
-        '': ['docs/global.md'],
-      },
-    }
-    const config1 = new Config(mockConfigData1)
-    assert.strictEqual(config1.isTypeAssociationsCorrect(), true, error)
-    assert.strictEqual(config1.isTypeAssociationsKeysCorrect(), false, error)
-    assert.strictEqual(config1.isTypeAssociationsValuesCorrect(), true, error)
-    assert.strictEqual(config1.isAllTypesCorrect(), false, error)
+    mocksBadFiles.forEach((mockFile) => {
+      if (config.isJsonFile(mockFile)) {
+        const mockConfigData = JSON.parse(mockFile)
+        expect(config.isTypeAssociationsDocsCorrect(mockConfigData), error).to.be.false
+      }
+    })
 
-    // Mock data 2 - Empty value
-    const mockConfigData2 = {
-      associations: {
-        'src': ['docs/global.md', 'docs/global2.md'],
-        'src/Services': ['docs/services.md'],
-        'src/Utils/dates.ts': ['docs/utils/dates.md'],
-        'src/test': [''],
-      },
-    }
-    const config2 = new Config(mockConfigData2)
-    assert.strictEqual(config2.isTypeAssociationsCorrect(), true, error)
-    assert.strictEqual(config2.isTypeAssociationsKeysCorrect(), true, error)
-    assert.strictEqual(config2.isTypeAssociationsValuesCorrect(), false, error)
-    assert.strictEqual(config2.isAllTypesCorrect(), false, error)
-
-    // Mock data 3 - Empty key and value
-    const mockConfigData3 = {
-      associations: {
-        'src': ['docs/global.md', 'docs/global2.md'],
-        'src/Services': ['docs/services.md'],
-        'src/Utils/dates.ts': ['docs/utils/dates.md'],
-        '': [''],
-      },
-    }
-    const config3 = new Config(mockConfigData3)
-    assert.strictEqual(config3.isTypeAssociationsCorrect(), true, error)
-    assert.strictEqual(config3.isTypeAssociationsKeysCorrect(), false, error)
-    assert.strictEqual(config3.isTypeAssociationsValuesCorrect(), false, error)
-    assert.strictEqual(config3.isAllTypesCorrect(), false, error)
-
-    // Mock data 4 - Good data
-    const mockConfigData4 = {
-      associations: {
-        'src': ['docs/global.md', 'docs/global2.md'],
-        'src/Services': ['docs/services.md'],
-        'src/Utils/dates.ts': ['docs/utils/dates.md'],
-      },
-    }
-    const config4 = new Config(mockConfigData4)
-    assert.strictEqual(config4.isTypeAssociationsCorrect(), true, error)
-    assert.strictEqual(config4.isTypeAssociationsKeysCorrect(), true, error)
-    assert.strictEqual(config4.isTypeAssociationsValuesCorrect(), true, error)
-    assert.strictEqual(config4.isAllTypesCorrect(), true, error)
+    mocksGoodFiles.forEach((mockFile) => {
+      if (config.isJsonFile(mockFile)) {
+        const mockConfigData = JSON.parse(mockFile)
+        expect(config.isTypeAssociationsDocsCorrect(mockConfigData), error).to.be.true
+      }
+    })
   })
 
-  test('Check if configuration file has good structure.', async () => {
+  it("should ensure there's no back slash in path", async () => {
+    const error = `Invalid path or url. Expected "/" but got "\\"`
+    const mocksBadFiles = [
+      `{
+        associations: {
+          'src': ['docs/global.md', 'docs/global2.md'],
+          'src/Services': ['docs/services.md'],
+          'src\\Utils\\dates.ts': ['docs/utils/dates.md']
+        }
+      }`,
+      `{
+        associations: {
+          'src': ['docs/global.md', 'docs/global2.md'],
+          'src/Services': ['docs\\services.md'],
+          'src/Utils/dates.ts': ['docs\\utils\\dates.md']
+        }
+      }`,
+      `{
+        associations: {
+          'src': ['docs\\global.md', 'docs\\global2.md'],
+          'src\\Services': ['docs\\services.md'],
+          'src\\Utils\\dates.ts': ['docs\\utils\\dates.md'],
+        },
+      }`,
+    ]
+
+    const mocksGoodFiles = [
+      `{
+        associations: {
+          'src': ['docs/global.md', 'docs/global2.md'],
+          'src/Services': ['docs/services.md'],
+          'src/Utils/dates.ts': ['docs/utils/dates.md'],
+        },
+      }`,
+    ]
+    globalMocksBadFiles = globalMocksBadFiles.concat(mocksBadFiles)
+
+    mocksBadFiles.forEach((mockFile) => {
+      if (config.isJsonFile(mockFile)) {
+        const mockConfigData = JSON.parse(mockFile)
+        expect(config.hasReverseSlash(mockConfigData), error).to.be.true
+      }
+    })
+
+    mocksGoodFiles.forEach((mockFile) => {
+      if (config.isJsonFile(mockFile)) {
+        const mockConfigData = JSON.parse(mockFile)
+        expect(config.hasReverseSlash(mockConfigData), error).to.be.false
+      }
+    })
+  })
+
+  it('should ensure structure, typing, path is correct', async () => {
     const error = `Configuration file has not good structure.\n\n${expectedStructureError}`
-    const config = new Config(configData)
-    assert.strictEqual(config.isTypeAssociationsCorrect(), true, error)
-    assert.strictEqual(config.isTypeAssociationsKeysCorrect(), true, error)
-    assert.strictEqual(config.isTypeAssociationsValuesCorrect(), true, error)
-    assert.strictEqual(config.isAllTypesCorrect(), true, error)
-  })
+    const mocksBadFiles = globalMocksBadFiles
+    const mocksGoodFiles = [
+      `{
+        associations: {
+          'src': ['docs/global.md', 'docs/global2.md'],
+        },
+      }`,
+      `{
+        associations: {
+          'src': ['docs/global.md', 'docs/global2.md'],
+          'src/Services': ['docs/services.md'],
+          'src/Utils/dates.ts': ['docs/utils/dates.md'],
+        },
+      }`,
+    ]
 
-  test('Check if mocks data has reverse slash.', async () => {
-    const error = `Invalid path or url. Expected "/" but got "\\"`
-    // Mock data 1 - Reverse slash in key
-    const mockConfigData1 = {
-      associations: {
-        'src': ['docs/global.md', 'docs/global2.md'],
-        'src/Services': ['docs/services.md'],
-        'src\\Utils\\dates.ts': ['docs/utils/dates.md'],
-      },
-    }
-    const config1 = new Config(mockConfigData1)
-    assert.strictEqual(config1.hasReverseSlash(), true, error)
+    mocksBadFiles.forEach((mockFile) => {
+      if (config.isJsonFile(mockFile)) {
+        const mockConfigData = JSON.parse(mockFile)
+        expect(config.isEverythingCorrect(mockConfigData), error).to.be.false
+      }
+    })
 
-    // Mock data 2 - Reverse slash in value
-    const mockConfigData2 = {
-      associations: {
-        'src': ['docs/global.md', 'docs/global2.md'],
-        'src/Services': ['docs\\services.md'],
-        'src/Utils/dates.ts': ['docs\\utils\\dates.md'],
-      },
-    }
-    const config2 = new Config(mockConfigData2)
-    assert.strictEqual(config2.hasReverseSlash(), true, error)
-
-    // Mock data 3 - Reverse slash in key and value
-    const mockConfigData3 = {
-      associations: {
-        'src': ['docs\\global.md', 'docs\\global2.md'],
-        'src\\Services': ['docs\\services.md'],
-        'src\\Utils\\dates.ts': ['docs\\utils\\dates.md'],
-      },
-    }
-    const config3 = new Config(mockConfigData3)
-    assert.strictEqual(config3.hasReverseSlash(), true, error)
-
-    // Mock data 4 - Good data
-    const mockConfigData4 = {
-      associations: {
-        'src': ['docs/global.md', 'docs/global2.md'],
-        'src/Services': ['docs/services.md'],
-        'src/Utils/dates.ts': ['docs/utils/dates.md'],
-      },
-    }
-    const config4 = new Config(mockConfigData4)
-    assert.strictEqual(config4.hasReverseSlash(), false, error)
-  })
-
-  test('Check if configuration file has reverse slash.', async () => {
-    const error = `Invalid path or url. Expected "/" but got "\\"`
-    const config = new Config(configData)
-    assert.strictEqual(config.hasReverseSlash(), false, error)
+    mocksGoodFiles.forEach((mockFile) => {
+      if (config.isJsonFile(mockFile)) {
+        const mockConfigData = JSON.parse(mockFile)
+        expect(config.isEverythingCorrect(mockConfigData), error).to.be.true
+      }
+    })
   })
 })
