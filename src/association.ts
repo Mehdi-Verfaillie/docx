@@ -73,6 +73,32 @@ export class AssociationsManager {
     return duplicates
   }
 
+  public findInheritedDuplicateDocsInDirectory(associations: {
+    [key: string]: string[]
+  }): DuplicateEntityError[] {
+    const errors: DuplicateEntityError[] = []
+
+    for (const [parentDir, parentDocs] of Object.entries(associations)) {
+      for (const [childDir, childDocs] of Object.entries(associations)) {
+        if (childDir.startsWith(parentDir) && childDir !== parentDir) {
+          for (const doc of parentDocs) {
+            if (childDocs.includes(doc)) {
+              errors.push({
+                errorType: 'DUPLICATE',
+                entityType: 'documentationFile',
+                entityPath: doc,
+                originalLocation: parentDir,
+                duplicateLocation: childDir,
+              })
+            }
+          }
+        }
+      }
+    }
+
+    return errors
+  }
+
   private async checkExistence<T extends ProjectEntityType>(
     name: string,
     type: T
