@@ -75,20 +75,21 @@ export class AssociationsManager {
     associations: Record<string, string[]>
   ): DuplicateEntityError[] {
     const duplicates: DuplicateEntityError[] = []
-    const docLocationMapping: Record<string, string> = {}
 
     Object.entries(associations).forEach(([directory, docs]) => {
+      const seenDocs: Set<string> = new Set()
+
       docs.forEach((doc) => {
-        if (docLocationMapping[doc]) {
+        if (seenDocs.has(doc)) {
           duplicates.push({
             errorType: 'DUPLICATE',
             entityType: 'documentationFile',
             entityPath: doc,
-            originalLocation: docLocationMapping[doc],
+            originalLocation: directory,
             duplicateLocation: directory,
           })
         } else {
-          docLocationMapping[doc] = directory
+          seenDocs.add(doc)
         }
       })
     })
