@@ -3,7 +3,7 @@ import { FileSystemManager } from './utils/fileSystem.utils'
 
 export interface Documentation {
   name: string
-  type: 'md'
+  type: 'md' | 'unknown'
   content: string
 }
 
