@@ -32,6 +32,14 @@ export class AssociationsValidator {
     this.fileManager = fileManager
   }
 
+  public async validateAssociations({
+    associations,
+  }: DocAssociationsConfig): Promise<(MissingEntityError | DuplicateEntityError)[] | undefined> {
+    const dirErrors = await this.validateDirectoryPaths(Object.keys(associations))
+    const docErrors = await this.validateDocumentationPaths(associations)
+    const dupDocErrors = this.findDuplicateDocsInDirectory(associations)
+    const inheritedDupDocErrors = this.findInheritedDuplicateDocsInDirectory(associations)
+
     const allErrors = [...dirErrors, ...docErrors, ...dupDocErrors, ...inheritedDupDocErrors]
 
     if (allErrors.length > 0) {
