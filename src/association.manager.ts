@@ -41,7 +41,7 @@ export class AssociationsManager {
 
     if (errors?.length) return [] // TODO: Return the errors in the terminal
 
-    const associatedDocsPaths = this.getAssociatedDocsPaths(currUserPath, config.associations)
+    const associatedDocsPaths = this.getAssociatedDocsPaths(currUserPath, config)
 
     if (!associatedDocsPaths.length) return []
 
@@ -53,16 +53,13 @@ export class AssociationsManager {
    *
    * @private
    * @param {string} currUserPath - The current user path.
-   * @param {Object} associations - The associations object mapping directories to their document paths.
+   * @param {Object} config - Contain the associations object mapping directories to their document paths.
    * @returns {string[]} - A list of document paths associated with the given user path.
    */
-  private getAssociatedDocsPaths(
-    currUserPath: string,
-    associations: { [key: string]: string[] }
-  ): string[] {
-    let docsPaths: string[] = associations[currUserPath] || []
+  private getAssociatedDocsPaths(currUserPath: string, config: DocAssociationsConfig): string[] {
+    let docsPaths: string[] = config.associations[currUserPath] || []
 
-    for (const [dir, docs] of Object.entries(associations)) {
+    for (const [dir, docs] of Object.entries(config.associations)) {
       if (currUserPath.startsWith(dir) && currUserPath !== dir) {
         // If dir is a parent of currUserPath
         docsPaths = [...docsPaths, ...docs]
