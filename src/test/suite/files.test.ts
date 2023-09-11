@@ -56,6 +56,18 @@ describe('File Validation', () => {
       expect(error as Error).to.be.instanceOf(vscode.FileSystemError)
     }
   })
+
+  it('should retrieve the file content successfully', async () => {
+    const result = await manager.getFileContent('association.json')
+    expect(result).to.be.equal(jsonMock)
+  })
+
+  it('should throw an error if reading the file fails', async () => {
+    try {
+      await manager.getFileContent('nonexistentfile.json')
+      expect.fail('Expected getFileContent to throw, but it did not.')
+    } catch (error) {
+      expect((error as Error).message).to.equal(`Failed to read file content: nonexistentfile.json`)
     }
   })
 })
