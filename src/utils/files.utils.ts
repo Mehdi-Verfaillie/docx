@@ -27,4 +27,8 @@ export class FileManager {
       throw new Error(`Failed to read file content: ${filePath}`)
     }
   }
+
+  public processFileContent<T>(fileContent: string): T {
+    return JSON.parse(fileContent) as T
+  }
 }
