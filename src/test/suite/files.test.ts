@@ -38,12 +38,12 @@ describe('File Validation', () => {
   })
 
   it('should return true if the file exists', async () => {
-    const result = await manager.ensureFileExists('association.json')
+    const result = await manager.ensureFileExists(vscode.Uri.file('association.json'))
     expect(result).to.be.equal(true)
   })
 
   it('should return false if the file does not exist', async () => {
-    const result = await manager.ensureFileExists('nonexistentfile.json')
+    const result = await manager.ensureFileExists(vscode.Uri.file('nonexistentfile.json'))
     expect(result).to.be.equal(false)
   })
 

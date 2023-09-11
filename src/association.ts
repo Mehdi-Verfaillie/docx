@@ -1,4 +1,5 @@
-import { Uri, FileStat } from 'vscode'
+import { Uri } from 'vscode'
+import { FileManager } from './utils/files.utils'
 
 export interface DocAssociationsConfig {
   associations: Record<string, string[]>
@@ -24,28 +25,12 @@ interface DuplicateEntityError extends EntityError {
 
 export class AssociationsManager {
   private baseDir: string
-  private statFunction: (uri: Uri) => Promise<FileStat>
+  private fileManager: FileManager
 
-  constructor(baseDir: string, statFunction: (uri: Uri) => Promise<FileStat>) {
+  constructor(baseDir: string, fileManager: FileManager) {
     this.baseDir = baseDir
-    this.statFunction = statFunction
+    this.fileManager = fileManager
   }
-
-  public async validateAssociationsFromJson(
-    json: string
-  ): Promise<(MissingEntityError | DuplicateEntityError)[] | undefined> {
-    let config: DocAssociationsConfig
-
-    try {
-      config = JSON.parse(json)
-    } catch (error) {
-      return // Invalid JSON, so we can't perform further validations
-    }
-
-    const dirErrors = await this.validateDirectoryPaths(Object.keys(config.associations))
-    const docErrors = await this.validateDocumentationPaths(config.associations)
-    const dupDocErrors = this.findDuplicateDocsInDirectory(config.associations)
-    const inheritedDupDocErrors = this.findInheritedDuplicateDocsInDirectory(config.associations)
 
     const allErrors = [...dirErrors, ...docErrors, ...dupDocErrors, ...inheritedDupDocErrors]
 
@@ -129,7 +114,7 @@ export class AssociationsManager {
   ): Promise<MissingEntityError | undefined> {
     const uri = Uri.file(`${this.baseDir}/${name}`)
     try {
-      await this.statFunction(uri)
+      await this.fileManager.ensureFileExists(uri)
       return // Entity exists, no error
     } catch {
       return {

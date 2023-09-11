@@ -7,15 +7,15 @@ export class FileManager {
     this.fs = fs
   }
 
-  public async ensureFileExists(filePath: string): Promise<boolean> {
+  public async ensureFileExists(uri: Uri): Promise<boolean> {
     try {
-      await this.fs.stat(Uri.file(filePath))
+      await this.fs.stat(uri)
       return true
     } catch (error) {
       if (error instanceof Error && error?.message === 'File not found') {
         return false
       }
-      throw FileSystemError.FileNotFound(filePath)
+      throw FileSystemError.FileNotFound(uri)
     }
   }
 

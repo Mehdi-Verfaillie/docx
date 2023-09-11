@@ -1,8 +1,9 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
-import * as vscode from 'vscode'
+import { Uri, workspace } from 'vscode'
 import { describe, setup, teardown, it } from 'mocha'
 import { DocAssociationsConfig, AssociationsManager } from '../../association'
+import { FileManager } from '../../utils/files.utils'
 
 describe('Associations JSON Validation', () => {
   const jsonMock = JSON.stringify({
@@ -17,16 +18,15 @@ describe('Associations JSON Validation', () => {
     },
   })
 
-  let statStub: sinon.SinonStub
+  let fileManagerStub: sinon.SinonStubbedInstance<FileManager>
   let manager: AssociationsManager
 
   setup(() => {
-    const workspaceFs = { ...vscode.workspace.fs }
-    statStub = sinon.stub(workspaceFs, 'stat')
+    fileManagerStub = sinon.createStubInstance(FileManager)
 
-    statStub
+    fileManagerStub.ensureFileExists
       .withArgs(
-        sinon.match((uri: vscode.Uri) => {
+        sinon.match((uri: Uri) => {
           return (
             // Folder structure mock
             uri.fsPath.endsWith('src') ||
@@ -45,13 +45,13 @@ describe('Associations JSON Validation', () => {
       )
       .resolves()
 
-    statStub.rejects(new Error('File not found'))
+    fileManagerStub.ensureFileExists.rejects(new Error('File not found'))
 
-    const baseDir = vscode.workspace.workspaceFolders?.[0]?.uri?.fsPath ?? ''
-    manager = new AssociationsManager(baseDir, statStub)
+    const baseDir = workspace.workspaceFolders?.[0]?.uri?.fsPath ?? ''
+    manager = new AssociationsManager(baseDir, fileManagerStub)
   })
 
-  teardown(() => statStub.restore())
+  teardown(() => fileManagerStub.ensureFileExists.restore())
 
   it('should ensure all defined directories exist', async () => {
     const jsonConfig = JSON.parse(jsonMock) as DocAssociationsConfig
@@ -145,7 +145,7 @@ describe('Associations JSON Validation', () => {
   })
 
   it('should validate provided JSON and detect all issues', async () => {
-    const faultyJson = JSON.stringify({
+    const faultyData = {
       associations: {
         'src': ['/docx/nonExistent.md', '/docx/asyncAwait.md'],
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -155,9 +155,9 @@ describe('Associations JSON Validation', () => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'src/Modules': ['/docx/asyncAwait.md'],
       },
-    })
+    }
 
-    const errors = await manager.validateAssociationsFromJson(faultyJson)
+    const errors = await manager.validateAssociations(faultyData)
 
     expect(errors).to.be.an('array').that.has.length.above(0)
 
@@ -178,7 +178,7 @@ describe('Associations JSON Validation', () => {
     expect(duplicateDocErrors).to.have.lengthOf(1)
 
     const inheritedDupDocErrors = manager.findInheritedDuplicateDocsInDirectory(
-      JSON.parse(faultyJson).associations
+      faultyData.associations
     )
     expect(inheritedDupDocErrors).to.be.an('array').that.has.length.above(0)
   })
