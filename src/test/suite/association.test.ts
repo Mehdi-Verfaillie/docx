@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { Uri, workspace } from 'vscode'
 import { describe, setup, teardown, it } from 'mocha'
-import { DocAssociationsConfig, AssociationsValidator } from '../../association'
+import { DocAssociationsConfig, AssociationsValidator } from '../../association.validator'
 import { FileManager } from '../../utils/files.utils'
 
 describe('Associations JSON Validation', () => {
