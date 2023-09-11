@@ -13,7 +13,6 @@
   ],
   "rules": {
     "@typescript-eslint/naming-convention": "warn",
-    "curly": "warn",
     "eqeqeq": ["error", "always"],
     "no-throw-literal": "warn",
     "semi": "off",

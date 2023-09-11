@@ -1,5 +1,6 @@
 {
   "name": "docx",
+  "license": "MIT",
   "displayName": "docx",
   "description": "",
   "version": "0.0.1",
