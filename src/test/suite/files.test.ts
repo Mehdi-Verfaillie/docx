@@ -1,3 +1,4 @@
+import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as vscode from 'vscode'
 import { describe, setup, teardown, it } from 'mocha'
@@ -35,4 +36,26 @@ describe('File Validation', () => {
     readFileStub.restore()
     statStub.restore()
   })
+
+  it('should return true if the file exists', async () => {
+    const result = await manager.ensureFileExists('association.json')
+    expect(result).to.be.equal(true)
   })
+
+  it('should return false if the file does not exist', async () => {
+    const result = await manager.ensureFileExists('nonexistentfile.json')
+    expect(result).to.be.equal(false)
+  })
+
+  it('should throw a FileSystemError for unexpected errors', async () => {
+    try {
+      // @ts-expect-error
+      await manager.ensureFileExists(undefined)
+      expect.fail('Expected ensureFileExists to throw, but it did not.')
+    } catch (error) {
+      expect(error as Error).to.be.instanceOf(vscode.FileSystemError)
+    }
+  })
+    }
+  })
+})
