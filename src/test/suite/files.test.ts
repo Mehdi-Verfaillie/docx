@@ -70,4 +70,20 @@ describe('File Validation', () => {
       expect((error as Error).message).to.equal(`Failed to read file content: nonexistentfile.json`)
     }
   })
+
+  it('should correctly parse valid JSON content', () => {
+    const mockContent = '{"name":"John","age":30,"city":"New York"}'
+    const expectedOutput = { name: 'John', age: 30, city: 'New York' }
+
+    const result = manager.processFileContent<typeof expectedOutput>(mockContent)
+    expect(result).to.deep.equal(expectedOutput)
+  })
+
+  it('should throw an error for invalid JSON content', () => {
+    // Missing quote -> "name":"John <--
+    const mockContent = '{"name":"John,"age":30,"city":"New York"}'
+    const expectedOutput = { name: 'John', age: 30, city: 'New York' }
+
+    expect(() => manager.processFileContent<typeof expectedOutput>(mockContent)).to.throw()
+  })
 })
