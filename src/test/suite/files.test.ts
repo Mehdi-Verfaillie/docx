@@ -1,0 +1,38 @@
+import * as sinon from 'sinon'
+import * as vscode from 'vscode'
+import { describe, setup, teardown, it } from 'mocha'
+import { FileManager } from '../../utils/files.utils'
+
+describe('File Validation', () => {
+  let readFileStub: sinon.SinonStub
+  let statStub: sinon.SinonStub
+  let manager: FileManager
+
+  const jsonMock =
+    '{"associations":{"src":["/docx/ifTernary.md","/docx/asyncAwait.md"],"src/Controllers":["/docx/controllers.md"],"src/Modules":["/docx/modules.md"],"src/Utils/dates.ts":["/docx/utils/dates.md"]}}'
+
+  setup(() => {
+    const workspaceFs = { ...vscode.workspace.fs }
+
+    // Stubbing for readFile
+    readFileStub = sinon.stub(workspaceFs, 'readFile')
+    readFileStub
+      .withArgs(sinon.match((uri: vscode.Uri) => uri.fsPath.endsWith('association.json')))
+      .resolves(new Uint8Array(Buffer.from(jsonMock)))
+    readFileStub.rejects(new Error('File not found'))
+
+    // Stubbing for stat
+    statStub = sinon.stub(workspaceFs, 'stat')
+    statStub
+      .withArgs(sinon.match((uri: vscode.Uri) => uri.fsPath.endsWith('association.json')))
+      .resolves()
+    statStub.rejects(new Error('File not found'))
+
+    manager = new FileManager(workspaceFs)
+  })
+
+  teardown(() => {
+    readFileStub.restore()
+    statStub.restore()
+  })
+  })
