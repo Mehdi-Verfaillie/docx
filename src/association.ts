@@ -23,7 +23,7 @@ interface DuplicateEntityError extends EntityError {
   duplicateLocation: string
 }
 
-export class AssociationsManager {
+export class AssociationsValidator {
   private baseDir: string
   private fileManager: FileManager
 

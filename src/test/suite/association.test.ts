@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { Uri, workspace } from 'vscode'
 import { describe, setup, teardown, it } from 'mocha'
-import { DocAssociationsConfig, AssociationsManager } from '../../association'
+import { DocAssociationsConfig, AssociationsValidator } from '../../association'
 import { FileManager } from '../../utils/files.utils'
 
 describe('Associations JSON Validation', () => {
@@ -19,7 +19,7 @@ describe('Associations JSON Validation', () => {
   })
 
   let fileManagerStub: sinon.SinonStubbedInstance<FileManager>
-  let manager: AssociationsManager
+  let validator: AssociationsValidator
 
   setup(() => {
     fileManagerStub = sinon.createStubInstance(FileManager)
@@ -48,7 +48,7 @@ describe('Associations JSON Validation', () => {
     fileManagerStub.ensureFileExists.rejects(new Error('File not found'))
 
     const baseDir = workspace.workspaceFolders?.[0]?.uri?.fsPath ?? ''
-    manager = new AssociationsManager(baseDir, fileManagerStub)
+    validator = new AssociationsValidator(baseDir, fileManagerStub)
   })
 
   teardown(() => fileManagerStub.ensureFileExists.restore())
@@ -57,7 +57,7 @@ describe('Associations JSON Validation', () => {
     const jsonConfig = JSON.parse(jsonMock) as DocAssociationsConfig
     const definedDirectories = Object.keys(jsonConfig.associations)
 
-    const errors = await manager.validateDirectoryPaths(definedDirectories)
+    const errors = await validator.validateDirectoryPaths(definedDirectories)
 
     expect(errors, `Some directories do not exist`).to.have.lengthOf(0)
   })
@@ -73,7 +73,7 @@ describe('Associations JSON Validation', () => {
     const jsonConfig = JSON.parse(jsonMockWithMissingDirectory) as DocAssociationsConfig
     const definedDirectories = Object.keys(jsonConfig.associations)
 
-    const errors = await manager.validateDirectoryPaths(definedDirectories)
+    const errors = await validator.validateDirectoryPaths(definedDirectories)
 
     expect(errors, `Expected missing directories not found`).to.have.length.above(0)
 
@@ -84,7 +84,7 @@ describe('Associations JSON Validation', () => {
   it('should ensure all defined documentations exist', async () => {
     const jsonConfig = JSON.parse(jsonMock) as DocAssociationsConfig
 
-    const errors = await manager.validateDocumentationPaths(jsonConfig.associations)
+    const errors = await validator.validateDocumentationPaths(jsonConfig.associations)
 
     expect(errors, `Some documentation files do not exist`).to.have.lengthOf(0)
   })
@@ -92,7 +92,7 @@ describe('Associations JSON Validation', () => {
   it('should not find any duplicated documentation paths if none exist', () => {
     const jsonConfig = JSON.parse(jsonMock) as DocAssociationsConfig
 
-    const duplicatesList = manager.findDuplicateDocsInDirectory(jsonConfig.associations)
+    const duplicatesList = validator.findDuplicateDocsInDirectory(jsonConfig.associations)
 
     expect(duplicatesList.length, 'No duplicates should exist but found some').to.equal(0)
   })
@@ -107,7 +107,7 @@ describe('Associations JSON Validation', () => {
 
     const jsonConfig = JSON.parse(jsonMockWithDuplications) as DocAssociationsConfig
 
-    const duplicatesList = manager.findDuplicateDocsInDirectory(jsonConfig.associations)
+    const duplicatesList = validator.findDuplicateDocsInDirectory(jsonConfig.associations)
 
     expect(duplicatesList.length, `Expected duplicates not found`).to.be.greaterThan(0)
     const duplicateError = duplicatesList[0]
@@ -120,7 +120,7 @@ describe('Associations JSON Validation', () => {
 
   it('should ensure no documentation is inherited in child directories', () => {
     const jsonConfig = JSON.parse(jsonMock) as DocAssociationsConfig
-    const duplicatesList = manager.findInheritedDuplicateDocsInDirectory(jsonConfig.associations)
+    const duplicatesList = validator.findInheritedDuplicateDocsInDirectory(jsonConfig.associations)
 
     expect(duplicatesList.length, `Documentation inherited in child directories`).to.equal(0)
   })
@@ -135,7 +135,7 @@ describe('Associations JSON Validation', () => {
       },
     })
     const jsonConfig = JSON.parse(jsonMockWithInheritedDocs) as DocAssociationsConfig
-    const duplicatesList = manager.findInheritedDuplicateDocsInDirectory(jsonConfig.associations)
+    const duplicatesList = validator.findInheritedDuplicateDocsInDirectory(jsonConfig.associations)
 
     expect(duplicatesList.length, `Expected inherited documentation not found`).to.be.greaterThan(0)
 
@@ -157,7 +157,7 @@ describe('Associations JSON Validation', () => {
       },
     }
 
-    const errors = await manager.validateAssociations(faultyData)
+    const errors = await validator.validateAssociations(faultyData)
 
     expect(errors).to.be.an('array').that.has.length.above(0)
 
@@ -177,7 +177,7 @@ describe('Associations JSON Validation', () => {
 
     expect(duplicateDocErrors).to.have.lengthOf(1)
 
-    const inheritedDupDocErrors = manager.findInheritedDuplicateDocsInDirectory(
+    const inheritedDupDocErrors = validator.findInheritedDuplicateDocsInDirectory(
       faultyData.associations
     )
     expect(inheritedDupDocErrors).to.be.an('array').that.has.length.above(0)
