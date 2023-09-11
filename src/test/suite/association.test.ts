@@ -4,6 +4,7 @@ import { Uri, workspace } from 'vscode'
 import { describe, setup, teardown, it } from 'mocha'
 import { DocAssociationsConfig, AssociationsValidator } from '../../association.validator'
 import { FileManager } from '../../utils/files.utils'
+import { AssociationsManager, Documentation } from '../../association.manager'
 
 describe('Associations JSON Validation', () => {
   const jsonMock = JSON.stringify({
@@ -19,10 +20,14 @@ describe('Associations JSON Validation', () => {
   })
 
   let fileManagerStub: sinon.SinonStubbedInstance<FileManager>
+  let validatorStub: sinon.SinonStubbedInstance<AssociationsValidator>
+
   let validator: AssociationsValidator
+  let manager: AssociationsManager
 
   setup(() => {
     fileManagerStub = sinon.createStubInstance(FileManager)
+    validatorStub = sinon.createStubInstance(AssociationsValidator)
 
     fileManagerStub.ensureFileExists
       .withArgs(
@@ -49,6 +54,7 @@ describe('Associations JSON Validation', () => {
 
     const baseDir = workspace.workspaceFolders?.[0]?.uri?.fsPath ?? ''
     validator = new AssociationsValidator(baseDir, fileManagerStub)
+    manager = new AssociationsManager(baseDir, fileManagerStub)
   })
 
   teardown(() => fileManagerStub.ensureFileExists.restore())
@@ -181,5 +187,57 @@ describe('Associations JSON Validation', () => {
       faultyData.associations
     )
     expect(inheritedDupDocErrors).to.be.an('array').that.has.length.above(0)
+  })
+
+  it('should return an empty array if validation errors occur', async () => {
+    validatorStub.validateAssociations.resolves([])
+    const result = await manager.associate([], jsonMock, 'src')
+    expect(result).to.deep.equal([])
+  })
+
+  it('should return an empty array if no associated docs for currUserPath', async () => {
+    validatorStub.validateAssociations.resolves([])
+    fileManagerStub.processFileContent.returns({ associations: {} })
+
+    const result = await manager.associate([], jsonMock, 'nonexistentPath')
+    expect(result).to.deep.equal([])
+  })
+
+  it('should return associated documentations for currUserPath', async () => {
+    const mockDoc: Documentation[] = [
+      { name: '/docx/ifTernary.md', type: 'md', content: 'content' },
+      { name: '/docx/asyncAwait.md', type: 'md', content: 'content' },
+      { name: '/docx/someOtherDoc.md', type: 'md', content: 'content' },
+    ]
+
+    fileManagerStub.processFileContent.returns(JSON.parse(jsonMock))
+
+    const srcResult = await manager.associate(mockDoc, jsonMock, 'src')
+
+    expect(srcResult).to.have.length(2)
+    expect(srcResult[0].name).to.equal('/docx/ifTernary.md')
+    expect(srcResult[1].name).to.equal('/docx/asyncAwait.md')
+
+    fileManagerStub.processFileContent.returns(JSON.parse(jsonMock))
+  })
+
+  it('should return associated documentations for currUserPath including parent associations', async () => {
+    const mockDoc: Documentation[] = [
+      { name: '/docx/ifTernary.md', type: 'md', content: 'content' },
+      { name: '/docx/asyncAwait.md', type: 'md', content: 'content' },
+      { name: '/docx/controllers.md', type: 'md', content: 'content' },
+      { name: '/docx/modules.md', type: 'md', content: 'content' },
+      { name: '/docx/utils/dates.md', type: 'md', content: 'content' },
+    ]
+
+    fileManagerStub.processFileContent.returns(JSON.parse(jsonMock))
+
+    // Test for a child directory. Expecting both parent (src) and its own (src/Modules) associations.
+    const modulesResult = await manager.associate(mockDoc, jsonMock, 'src/Modules')
+
+    expect(modulesResult).to.have.length(3) // Including parent's documentation
+    expect(modulesResult.some((doc) => doc.name === '/docx/ifTernary.md')).to.be.equal(true)
+    expect(modulesResult.some((doc) => doc.name === '/docx/asyncAwait.md')).to.be.equal(true)
+    expect(modulesResult.some((doc) => doc.name === '/docx/modules.md')).to.be.equal(true)
   })
 })
