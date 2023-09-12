@@ -5,15 +5,16 @@ export interface DocAssociationsConfig {
   associations: Record<string, string[]>
 }
 
-type ProjectEntityType = 'directory' | 'documentationFile'
+type ProjectEntityType = 'directory' | 'documentationFile' | 'associationsKey' | 'config'
 
-interface EntityError {
-  errorType: 'MISSING' | 'DUPLICATE'
+export interface EntityError {
+  errorType: 'MISSING' | 'DUPLICATE' | 'INVALID'
   entityType: ProjectEntityType
   entityPath: string
+  errorMsg?: string
 }
 
-interface MissingEntityError extends EntityError {
+export interface MissingEntityError extends EntityError {
   errorType: 'MISSING'
 }
 
