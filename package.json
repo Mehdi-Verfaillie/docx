@@ -7,110 +7,25 @@
     "vscode": "^1.80.0"
   },
   "categories": [
-    "Education",
-    "Visualization"
+    "Other"
   ],
-  "activationEvents": [
-    "onCommand:ShortcutMenuBar.openFilesList",
-    "onCommand:ShortcutMenuBar.openFile",
-    "onCommand:ShortcutMenuBar.userButton01",
-    "onStartupFinished",
-    "onCommand:extension.showDropdown"
-  ],
-  "main": "./out/extension.ts",
+  "activationEvents": [],
+  "main": "./out/extension.js",
   "contributes": {
-    "configuration":[
-      {
-        "title": "Get your documentaion",
-        "properties": {
-          "extension.openDropdown": {
-            "title": "show opened files list",
-            "type": "boolean",
-            "default": true,
-            "description": "show icon for Opened files list"
-          },
-          "ShortcutMenuBar.openFile": {
-            "title": "Open file",
-            "type": "boolean",
-            "default": false,
-            "description": "show icon for 'Open File'"
-          },
-          "ShortcutMenuBar.userButton01Command": {
-            "title": "command",
-            "type": "string",
-            "default": null,
-            "markdownDescription": "command executed with 'user action 1'; _icon is shown if set_"
-          }
-        }
-      }
-    ], 
     "commands": [
       {
-        "command": "ShortcutMenuBar.openFilesList",
-        "title": "Show opened files list",
-        "category": "ShortcutMenuBar",
+        "command": "extension.showDropdownIcon",
+        "title": "Show related documentations",
         "icon": {
-          "light": "images/book-dark.svg",
+          "light": "images/book-light.svg",
           "dark": "images/book-light.svg"
         }
-      },
-      {
-        "command": "ShortcutMenuBar.openFile",
-        "title": "Open file",
-        "category": "ShortcutMenuBar",
-        "icon": {
-          "light": "images/book-dark.svg",
-          "dark": "images/book-light.svg"
-        }
-      },
-      {
-        "command": "ShortcutMenuBar.userButton01",
-        "title": "Affiche laaa",
-        "category": "ShortcutMenuBar",
-        "icon": {
-          "light": "images/book-dark.svg",
-          "dark": "images/book-light.svg"
-        }
-      },
-      {
-        "category": "extension",
-        "title": "Affiche moi ca laa",
-        "icon": {
-          "light": "images/book-dark.svg",
-          "dark": "images/book-light.svg"
-        }
-      }
-    ],
-    "keybindings": [
-      {
-        "command": "ShortcutMenuBar.userButton01",
-        "key": "ctrl+alt+1",
-        "mac": "shift+cmd+1"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "when": "!isInDiffEditor && !markdownPreviewFocus && config.ShortcutMenuBar.openFilesList",
-          "command": "ShortcutMenuBar.openFilesList",
-          "group": "navigation@7"
-        },
-        {
-          "when": "config.ShortcutMenuBar.openFile",
-          "command": "ShortcutMenuBar.openFile",
-          "group": "navigation@17"
-        },
-        {
-          "when": "config.ShortcutMenuBar.userButton01Command",
-          "command": "ShortcutMenuBar.userButton01",
-          "group": "navigation@30"
-        }
-      ],
-      "editor/context": [
-        {
-          "when": "resourceLangId == markdown",
-          "command": "markdown.showPreview",
-          "alt": "markdown.showPreviewToSide",
+          "command": "extension.showDropdownIcon",
           "group": "navigation"
         }
       ]
