@@ -86,6 +86,20 @@ describe('File Validation', () => {
 
     expect(() => manager.processFileContent<typeof expectedOutput>(mockContent)).to.throw()
   })
+
+  it('should correctly return the extension for files of interest', () => {
+    expect(manager.getExtension('document.md')).to.be.equal('.md')
+    expect(manager.getExtension('diagram.bpmn')).to.be.equal('.bpmn')
+  })
+
+  it('should return undefined for files not of interest', () => {
+    expect(manager.getExtension('image.ts')).to.be.equal(undefined)
+    expect(manager.getExtension('audio.yml')).to.be.equal(undefined)
+  })
+
+  it('should handle filenames without extensions', () => {
+    expect(manager.getExtension('README')).to.be.equal(undefined)
+  })
 })
 
 describe('Folder Validation', () => {
