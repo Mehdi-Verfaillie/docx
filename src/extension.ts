@@ -18,3 +18,4 @@ export function activate(context: vscode.ExtensionContext) {
   //ref collection fourni par API vscode pour stocker toutes les ressources ki doiv resT activ pendant ddv extension et les libere si necessaire
   context.subscriptions.push(disposable)
 }
+export function deactivate() {}
