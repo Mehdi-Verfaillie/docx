@@ -3,7 +3,7 @@ import { Uri, workspace, FileSystemError, FileType } from 'vscode'
 const extensionsOfInterest = ['.md', '.bpmn'] as const
 type Extension = (typeof extensionsOfInterest)[number]
 
-export class FileManager {
+export class FileSystemManager {
   private fs: typeof workspace.fs
 
   constructor(fs: typeof workspace.fs = workspace.fs) {
