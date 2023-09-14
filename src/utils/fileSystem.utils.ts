@@ -1,4 +1,4 @@
-import { Uri, workspace, FileSystemError, FileType } from 'vscode'
+import { Uri, workspace, FileSystemError, FileSystem, FileType } from 'vscode'
 import { Documentation } from '../association.manager'
 import * as vscode from 'vscode'
 
@@ -6,9 +6,7 @@ const extensionsOfInterest = ['.md', '.bpmn'] as const
 export type Extension = (typeof extensionsOfInterest)[number]
 
 export class FileSystemManager {
-  private fs: typeof workspace.fs
-
-  constructor(fs: typeof workspace.fs = workspace.fs) {
+  constructor(private fs: FileSystem = workspace.fs) {
     this.fs = fs
   }
 
