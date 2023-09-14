@@ -5,14 +5,6 @@ import * as vscode from 'vscode'
 const extensionsOfInterest = ['.md', '.bpmn'] as const
 export type Extension = (typeof extensionsOfInterest)[number]
 
-export interface ProjectStructure {
-  [key: string]: FileData | ProjectStructure
-}
-
-interface FileData {
-  text: string
-}
-
 export class FileSystemManager {
   private fs: typeof workspace.fs
 
