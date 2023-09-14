@@ -1,46 +1,35 @@
-import { describe, it } from 'mocha'
+import { describe, it, setup, teardown } from 'mocha'
 import * as sinon from 'sinon'
 import { expect } from 'chai'
 import * as vscode from 'vscode'
 import { FileSystemManager } from '../../utils/fileSystem.utils'
 
 describe('fetchDocumentation', () => {
-  let readDirectoryStub: sinon.SinonStub
-  let readFileStub: sinon.SinonStub
-  let manager: FileSystemManager
+  let fileSystem: FileSystemManager
 
   setup(() => {
-    const workspaceFs = { ...vscode.workspace.fs }
+    fileSystem = new FileSystemManager()
 
-    // Stubbing for readDirectory
-    readDirectoryStub = sinon.stub(workspaceFs, 'readDirectory')
-    readDirectoryStub
-      .withArgs(sinon.match((uri: vscode.Uri) => uri.fsPath.endsWith('/test-directory')))
+    sinon
+      .stub(fileSystem, 'readDirectory')
+      .withArgs(vscode.Uri.file('/test-directory').fsPath)
       .resolves([
         ['document.md', vscode.FileType.File],
         ['diagram.bpmn', vscode.FileType.File],
       ])
 
-    // Stubbing for readFile
-    readFileStub = sinon.stub(workspaceFs, 'readFile')
-    readFileStub
-      .withArgs(vscode.Uri.file('/test-directory/document.md'))
-      .resolves(new Uint8Array(Buffer.from('MD Content')))
-    readFileStub
-      .withArgs(vscode.Uri.file('/test-directory/diagram.bpmn'))
-      .resolves(new Uint8Array(Buffer.from('BPMN Content')))
-
-    manager = new FileSystemManager(workspaceFs)
+    sinon
+      .stub(fileSystem, 'readFile')
+      .withArgs(vscode.Uri.file('/test-directory/document.md').fsPath)
+      .resolves(Buffer.from('MD Content').toString())
+      .withArgs(vscode.Uri.file('/test-directory/diagram.bpmn').fsPath)
+      .resolves(Buffer.from('BPMN Content').toString())
   })
 
-  teardown(() => {
-    readDirectoryStub.restore()
-    readFileStub.restore()
-  })
+  teardown(() => sinon.restore())
 
   it('should fetch documentation for files of interest', async () => {
-    const result = await manager.fetchDocumentation(vscode.Uri.file('/test-directory'))
-
+    const result = await fileSystem.fetchDocumentation(vscode.Uri.file('/test-directory'))
     expect(result).to.deep.equal([
       {
         name: 'document.md',
@@ -56,11 +45,7 @@ describe('fetchDocumentation', () => {
   })
 
   it('should return an empty array if no documentation files are found', async () => {
-    readDirectoryStub
-      .withArgs(sinon.match((uri: vscode.Uri) => uri.fsPath.endsWith('/empty-directory')))
-      .resolves([])
-
-    const result = await manager.fetchDocumentation(vscode.Uri.file('/empty-directory'))
+    const result = await fileSystem.fetchDocumentation(vscode.Uri.file('/empty-directory'))
     expect(result).to.deep.equal([])
   })
 })
