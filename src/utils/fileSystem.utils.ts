@@ -1,7 +1,17 @@
 import { Uri, workspace, FileSystemError, FileType } from 'vscode'
+import { Documentation } from '../association.manager'
+import * as vscode from 'vscode'
 
 const extensionsOfInterest = ['.md', '.bpmn'] as const
-type Extension = (typeof extensionsOfInterest)[number]
+export type Extension = (typeof extensionsOfInterest)[number]
+
+export interface ProjectStructure {
+  [key: string]: FileData | ProjectStructure
+}
+
+interface FileData {
+  text: string
+}
 
 export class FileSystemManager {
   private fs: typeof workspace.fs
@@ -31,9 +41,9 @@ export class FileSystemManager {
     }
   }
 
-  public async readDirectory(uri: Uri): Promise<[string, FileType][]> {
+  public async readDirectory(directoryPath: string): Promise<[string, FileType][]> {
     try {
-      return await this.fs.readDirectory(uri)
+      return await this.fs.readDirectory(Uri.file(directoryPath))
     } catch (error) {
       return []
     }
@@ -50,5 +60,26 @@ export class FileSystemManager {
 
   public isFileOfInterest(filename: string): boolean {
     return !!this.getExtension(filename)
+  }
+
+  public async fetchDocumentation(directoryUri: vscode.Uri): Promise<Documentation[]> {
+    console.debug(directoryUri)
+
+    const allFiles = await this.readDirectory(directoryUri.fsPath)
+
+    const documentationFiles = allFiles.filter(([filename]) => this.isFileOfInterest(filename))
+
+    const documentationPromises = documentationFiles.map(async ([filename]) => {
+      const filePath = vscode.Uri.joinPath(directoryUri, filename)
+      const contentBuffer = await vscode.workspace.fs.readFile(filePath)
+      const content = contentBuffer.toString()
+      return {
+        name: filename,
+        type: this.getExtension(filename)!,
+        content: content,
+      }
+    })
+
+    return Promise.all(documentationPromises)
   }
 }

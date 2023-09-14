@@ -14,4 +14,13 @@ export class WorkspaceManager {
       return workspaceFolders[0].uri.fsPath
     }
   }
+  static getWorkspaceFolderUri(): Uri {
+    const workspaceFolders = workspace.workspaceFolders
+    if (!workspaceFolders) {
+      window.showErrorMessage("Aucun dossier n'est ouvert dans VSCode.")
+    } else {
+      return workspaceFolders[0].uri
+    }
+    return Uri.parse('')
+  }
 }

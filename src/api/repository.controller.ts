@@ -21,7 +21,8 @@ export class RepositoryController {
 
   constructor(json: string) {
     this.repository = new RepositoryFactory(this.configNormalizer(json))
-    this.fileManager = new FileManager()
+    //@ts-ignore
+    this.fileManager = new FileSystemManager()
   }
 
   public async getDocumentations(): Promise<Documentation[]> {
