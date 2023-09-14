@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { sortDataByTypeAndName } from '../../utils/nomalize.utils'
+import { sortDataByTypeAndName } from '../../utils/transform.utils'
 import { describe, it } from 'mocha'
 
 describe('Data Sorter', () => {
