@@ -1,5 +1,6 @@
 import { AssociationsValidator, DocAssociationsConfig } from './association.validator'
 import { Extension, FileSystemManager } from './utils/fileSystem.utils'
+import { DataTransformManager } from './utils/transform.utils'
 
 export interface Documentation {
   name: string
@@ -10,6 +11,7 @@ export interface Documentation {
 export class AssociationsManager {
   private fileSystem: FileSystemManager
   private validator: AssociationsValidator
+  private transform = DataTransformManager
 
   constructor(baseDir: string, fileSystem: FileSystemManager) {
     this.fileSystem = fileSystem
@@ -45,7 +47,9 @@ export class AssociationsManager {
 
     if (!associatedDocsPaths.length) return []
 
-    return documentations.filter((doc) => associatedDocsPaths.includes(doc.name))
+    return this.transform.sortDataByTypeAndName(
+      documentations.filter((doc) => associatedDocsPaths.includes(doc.name))
+    )
   }
 
   /**
