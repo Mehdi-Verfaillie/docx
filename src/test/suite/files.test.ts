@@ -116,4 +116,18 @@ describe('Folder Validation', () => {
   teardown(() => {
     readDirectoryStub.restore()
   })
+
+  it('should correctly read the directory content', async () => {
+    const result = await manager.readDirectory(vscode.Uri.file('/test-directory'))
+
+    expect(result).to.deep.equal([
+      ['file1.txt', vscode.FileType.File],
+      ['subdir', vscode.FileType.Directory],
+    ])
+  })
+
+  it('should return an empty array for an empty directory', async () => {
+    const result = await manager.readDirectory(vscode.Uri.file('/empty-directory'))
+    expect(result).to.deep.equal([])
+  })
 })
