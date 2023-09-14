@@ -205,9 +205,9 @@ describe('Associations JSON Validation', () => {
 
   it('should return associated documentations for currUserPath', async () => {
     const mockDoc: Documentation[] = [
-      { name: '/docx/ifTernary.md', type: 'md', content: 'content' },
-      { name: '/docx/asyncAwait.md', type: 'md', content: 'content' },
-      { name: '/docx/someOtherDoc.md', type: 'md', content: 'content' },
+      { name: '/docx/ifTernary.md', type: '.md', content: 'content' },
+      { name: '/docx/asyncAwait.md', type: '.md', content: 'content' },
+      { name: '/docx/someOtherDoc.md', type: '.md', content: 'content' },
     ]
 
     fileSystemStub.processFileContent.returns(JSON.parse(jsonMock))
@@ -223,11 +223,11 @@ describe('Associations JSON Validation', () => {
 
   it('should return associated documentations for currUserPath including parent associations', async () => {
     const mockDoc: Documentation[] = [
-      { name: '/docx/ifTernary.md', type: 'md', content: 'content' },
-      { name: '/docx/asyncAwait.md', type: 'md', content: 'content' },
-      { name: '/docx/controllers.md', type: 'md', content: 'content' },
-      { name: '/docx/modules.md', type: 'md', content: 'content' },
-      { name: '/docx/utils/dates.md', type: 'md', content: 'content' },
+      { name: '/docx/ifTernary.md', type: '.md', content: 'content' },
+      { name: '/docx/asyncAwait.md', type: '.md', content: 'content' },
+      { name: '/docx/controllers.md', type: '.md', content: 'content' },
+      { name: '/docx/modules.md', type: '.md', content: 'content' },
+      { name: '/docx/utils/dates.md', type: '.md', content: 'content' },
     ]
 
     fileSystemStub.processFileContent.returns(JSON.parse(jsonMock))

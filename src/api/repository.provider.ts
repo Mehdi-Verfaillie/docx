@@ -1,21 +1,24 @@
+import { LocalProvider } from '../provider/local.provider'
+import { FileSystemManager } from '../utils/fileSystem.utils'
 import { ProviderConfig } from './repository.controller'
 
-// @ts-ignore TODO: Create a LocalProvider & GithubProvider
+// @ts-ignore
 export type Provider = LocalProvider | GithubProvider
 
 export class RepositoryProvider {
-  private provider: Provider
+  private provider!: Provider
 
   constructor(config: ProviderConfig) {
+    const fileSystem = new FileSystemManager()
+
     switch (config.type) {
       case 'local':
-        // @ts-ignore TODO: Create a LocalProvider
-        this.provider = new LocalProvider()
+        this.provider = new LocalProvider(fileSystem)
         break
 
       case 'github':
-        // @ts-ignore TODO: Create a GithubProvider
-        this.provider = new GithubProvider()
+        // @ts-ignore
+        this.provider = new GithubProvider(config.repositories)
         break
       default:
         break

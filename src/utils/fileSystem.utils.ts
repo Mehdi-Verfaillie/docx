@@ -1,12 +1,10 @@
-import { Uri, workspace, FileSystemError, FileType } from 'vscode'
+import { Uri, workspace, FileSystemError, FileSystem, FileType } from 'vscode'
 
 const extensionsOfInterest = ['.md', '.bpmn'] as const
-type Extension = (typeof extensionsOfInterest)[number]
+export type Extension = (typeof extensionsOfInterest)[number]
 
 export class FileSystemManager {
-  private fs: typeof workspace.fs
-
-  constructor(fs: typeof workspace.fs = workspace.fs) {
+  constructor(private fs: FileSystem = workspace.fs) {
     this.fs = fs
   }
 
@@ -31,9 +29,9 @@ export class FileSystemManager {
     }
   }
 
-  public async readDirectory(uri: Uri): Promise<[string, FileType][]> {
+  public async readDirectory(directoryPath: string): Promise<[string, FileType][]> {
     try {
-      return await this.fs.readDirectory(uri)
+      return await this.fs.readDirectory(Uri.file(directoryPath))
     } catch (error) {
       return []
     }

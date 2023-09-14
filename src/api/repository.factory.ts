@@ -8,7 +8,6 @@ export interface AbstractRepositoryFactory {
 
 export class RepositoryFactory implements AbstractRepositoryFactory {
   private providers: Provider[] = []
-
   constructor(configs: ProviderConfig[]) {
     for (const config of configs) {
       this.providers.push(new RepositoryProvider(config).instance)

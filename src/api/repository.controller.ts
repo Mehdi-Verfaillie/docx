@@ -17,11 +17,12 @@ export class RepositoryController {
   private repository: RepositoryFactory
 
   // TODO: Normalize the config json file
-  // @ts-ignore
-  private fileManager: FileSystemManager
+  private fileManager
 
   constructor(json: string) {
     this.repository = new RepositoryFactory(this.configNormalizer(json))
+    //@ts-ignore
+    this.fileManager = new FileSystemManager()
   }
 
   public async getDocumentations(): Promise<Documentation[]> {
