@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
       .then((selectedOption) => {
         if (selectedOption) {
           vscode.window.showInformationMessage(`Option sélectionnée : ${selectedOption}`)
-          webView(selectedOption)
+          webView({ name: '', content: '', type: '.md' })
         }
       })
   })

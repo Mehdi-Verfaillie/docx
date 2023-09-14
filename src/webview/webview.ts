@@ -1,21 +1,18 @@
 import * as vscode from 'vscode'
+import { Documentation } from '../association.manager'
 
-export function webView(file: string) {
-  const panel = vscode.window.createWebviewPanel(
-    'markdownPreview',
-    'Aperçu du README',
-    vscode.ViewColumn.One,
-    {}
-  )
+export function webView(file: Documentation) {
+  const panel = vscode.window.createWebviewPanel(file.name, file.name, vscode.ViewColumn.One, {})
 
-  panel.webview.html = `
+  if (file.type === '.md')
+    panel.webview.html = `
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Markdown Preview</title>
+      <title>${file.name}</title>
     </head>
     <body>
-    <pre>${file}</pre>
+    <pre>${file.content}</pre>
     </body>
     </html>
   `
