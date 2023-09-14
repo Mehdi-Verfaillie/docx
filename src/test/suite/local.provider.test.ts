@@ -3,12 +3,15 @@ import * as sinon from 'sinon'
 import { expect } from 'chai'
 import * as vscode from 'vscode'
 import { FileSystemManager } from '../../utils/fileSystem.utils'
+import { LocalProvider } from '../../provider/local.provider'
 
 describe('fetchDocumentation', () => {
   let fileSystem: FileSystemManager
+  let localProvider: LocalProvider
 
   setup(() => {
     fileSystem = new FileSystemManager()
+    localProvider = new LocalProvider(fileSystem)
 
     sinon
       .stub(fileSystem, 'readDirectory')
@@ -29,7 +32,7 @@ describe('fetchDocumentation', () => {
   teardown(() => sinon.restore())
 
   it('should fetch documentation for files of interest', async () => {
-    const result = await fileSystem.fetchDocumentation(vscode.Uri.file('/test-directory'))
+    const result = await localProvider.fetchDocumentation(vscode.Uri.file('/test-directory'))
     expect(result).to.deep.equal([
       {
         name: 'document.md',
@@ -45,7 +48,7 @@ describe('fetchDocumentation', () => {
   })
 
   it('should return an empty array if no documentation files are found', async () => {
-    const result = await fileSystem.fetchDocumentation(vscode.Uri.file('/empty-directory'))
+    const result = await localProvider.fetchDocumentation(vscode.Uri.file('/empty-directory'))
     expect(result).to.deep.equal([])
   })
 })
