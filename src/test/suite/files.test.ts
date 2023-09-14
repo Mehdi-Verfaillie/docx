@@ -100,6 +100,20 @@ describe('File Validation', () => {
   it('should handle filenames without extensions', () => {
     expect(manager.getExtension('README')).to.be.equal(undefined)
   })
+
+  it('should return true for files of interest', () => {
+    expect(manager.isFileOfInterest('document.md')).to.be.equal(true)
+    expect(manager.isFileOfInterest('diagram.bpmn')).to.be.equal(true)
+  })
+
+  it('should return false for files not of interest', () => {
+    expect(manager.isFileOfInterest('image.png')).to.be.equal(false)
+    expect(manager.isFileOfInterest('audio.mp3')).to.be.equal(false)
+  })
+
+  it('should handle filenames without extensions', () => {
+    expect(manager.isFileOfInterest('README')).to.be.equal(false)
+  })
 })
 
 describe('Folder Validation', () => {
