@@ -1,4 +1,3 @@
-import { GithubProvider } from '../provider/github.provider'
 import { LocalProvider } from '../provider/local.provider'
 import { ProviderConfig } from './repository.controller'
 
