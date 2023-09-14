@@ -1,0 +1,7 @@
+{
+  "associations": {
+    "src/extension.ts": ["CHANGELOG.md"],
+    "src/association.validator.ts": ["CHANGELOG.md", "test.md"],
+    "src/utils/workspace.utils.ts": ["CHANGELOG.md", "test.md", "README.md"]
+  }
+}

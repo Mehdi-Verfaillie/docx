@@ -2,6 +2,7 @@ import { Documentation } from '../association.manager'
 import { WorkspaceManager } from '../utils/workspace.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { Uri } from 'vscode'
+import { log } from 'console'
 
 export interface ErrorHandler {
   code: string
