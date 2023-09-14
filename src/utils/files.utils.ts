@@ -1,4 +1,4 @@
-import { Uri, workspace, FileSystemError } from 'vscode'
+import { Uri, workspace, FileSystemError, FileType } from 'vscode'
 
 export class FileManager {
   private fs: typeof workspace.fs
@@ -25,6 +25,14 @@ export class FileManager {
       return new TextDecoder().decode(fileUint8Array)
     } catch (error) {
       throw new Error(`Failed to read file content: ${filePath}`)
+    }
+  }
+
+  public async readDirectory(uri: Uri): Promise<[string, FileType][]> {
+    try {
+      return await this.fs.readDirectory(uri)
+    } catch (error) {
+      return []
     }
   }
 
