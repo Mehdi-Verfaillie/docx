@@ -1,8 +1,10 @@
 import { expect } from 'chai'
-import { sortDataByTypeAndName } from '../../utils/transform.utils'
+import { DataTransformManager } from '../../utils/transform.utils'
 import { describe, it } from 'mocha'
 
 describe('Data Sorter', () => {
+  const transform = DataTransformManager
+
   it('should correctly sort data by type and then by name', () => {
     const inputData = [
       { name: 'a', type: 'md' },
@@ -16,7 +18,7 @@ describe('Data Sorter', () => {
       { name: 'l', type: 'bpmn' },
     ]
 
-    const sortedData = sortDataByTypeAndName(inputData)
+    const sortedData = transform.sortDataByTypeAndName(inputData)
 
     const expectedData = [
       { name: 'l', type: 'bpmn' },
