@@ -8,13 +8,25 @@ describe('Data Sorter', () => {
       { name: 'a', type: 'md' },
       { name: 'b', type: 'txt' },
       { name: 'c', type: 'md' },
+      { name: 'f', type: 'rtf' },
+      { name: 'r', type: 'bpmn' },
+      { name: 'e', type: 'md' },
+      { name: 'p', type: 'md' },
+      { name: 'm', type: 'bpmn' },
+      { name: 'l', type: 'bpmn' },
     ]
 
     const sortedData = sortDataByTypeAndName(inputData)
 
     const expectedData = [
+      { name: 'l', type: 'bpmn' },
+      { name: 'm', type: 'bpmn' },
+      { name: 'r', type: 'bpmn' },
       { name: 'a', type: 'md' },
       { name: 'c', type: 'md' },
+      { name: 'e', type: 'md' },
+      { name: 'p', type: 'md' },
+      { name: 'f', type: 'rtf' },
       { name: 'b', type: 'txt' },
     ]
 
