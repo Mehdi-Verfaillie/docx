@@ -1,5 +1,8 @@
 import { Uri, workspace, FileSystemError, FileType } from 'vscode'
 
+const extensionsOfInterest = ['.md', '.bpmn'] as const
+type Extension = (typeof extensionsOfInterest)[number]
+
 export class FileManager {
   private fs: typeof workspace.fs
 
@@ -38,5 +41,10 @@ export class FileManager {
 
   public processFileContent<T>(fileContent: string): T {
     return JSON.parse(fileContent) as T
+  }
+
+  public getExtension(filename: string): Extension | undefined {
+    const ext = '.' + filename.split('.').pop()?.toLowerCase()
+    return extensionsOfInterest.includes(ext as Extension) ? (ext as Extension) : undefined
   }
 }
