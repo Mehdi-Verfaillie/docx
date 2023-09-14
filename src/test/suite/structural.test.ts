@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { describe, setup, it } from 'mocha'
@@ -8,7 +7,7 @@ import { FileSystemManager } from '../../utils/fileSystem.utils'
 import { StructuralManager } from '../../structural.manager'
 import { workspace } from 'vscode'
 import { DocAssociationsConfig } from '../../association.validator'
-describe('Config structure tests', () => {
+describe('Configuration JSON Structure Validation', () => {
   let fileSystemStub: sinon.SinonStubbedInstance<FileSystemManager>
   let jsonMock: string
 
