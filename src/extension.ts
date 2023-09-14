@@ -1,24 +1,21 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode'
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+//activation de l'extension
 export function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log('Congratulations, your extension "docx" is now active!')
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
-  const disposable = vscode.commands.registerCommand('docx.helloWorld', () => {
-    // The code you place here will be executed every time your command is executed
-    // Display a message box to the user
-    vscode.window.showInformationMessage('Hello World from docx!')
+  // Créer le dropdown
+  const disposable = vscode.commands.registerCommand('extension.openDropdown', () => {
+    //commande invoqué = show dropdown avec les options
+    vscode.window
+      .showQuickPick(['Option 1', 'Option 2', 'Option 3'])
+      //méthode use pour obtenir la valeur user selected, lorsqu'une option est selectionné
+      .then((selectedOption) => {
+        if (selectedOption) {
+          vscode.window.showInformationMessage(`Option sélectionnée : ${selectedOption}`)
+        }
+      })
   })
 
+  //ref collection fourni par API vscode pour stocker toutes les ressources ki doiv resT activ pendant ddv extension et les libere si necessaire
   context.subscriptions.push(disposable)
 }
-
-// This method is called when your extension is deactivated
 export function deactivate() {}
