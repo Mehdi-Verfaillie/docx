@@ -53,16 +53,12 @@ export class FileSystemManager {
   }
 
   public async fetchDocumentation(directoryUri: vscode.Uri): Promise<Documentation[]> {
-    console.debug(directoryUri)
-
-    const allFiles = await this.readDirectory(directoryUri.fsPath)
-
+    const allFiles = (await this.readDirectory(directoryUri.fsPath)) ?? []
     const documentationFiles = allFiles.filter(([filename]) => this.isFileOfInterest(filename))
 
     const documentationPromises = documentationFiles.map(async ([filename]) => {
       const filePath = vscode.Uri.joinPath(directoryUri, filename)
-      const contentBuffer = await vscode.workspace.fs.readFile(filePath)
-      const content = contentBuffer.toString()
+      const content = await this.readFile(filePath.fsPath)
       return {
         name: filename,
         type: this.getExtension(filename)!,
