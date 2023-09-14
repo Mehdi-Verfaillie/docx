@@ -1,8 +1,7 @@
 {
   "name": "docx",
   "license": "MIT",
-  "displayName": "docx",
-  "description": "",
+  "description": "A doc just in time to access the right doc when you need it the most",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.80.0"
@@ -15,10 +14,22 @@
   "contributes": {
     "commands": [
       {
-        "command": "docx.helloWorld",
-        "title": "Hello World"
+        "command": "extension.openDropdown",
+        "title": "Show related documentations",
+        "icon": {
+          "light": "images/book-light.svg",
+          "dark": "images/book-light.svg"
+        }
       }
-    ]
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "extension.openDropdown",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
