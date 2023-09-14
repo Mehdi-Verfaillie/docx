@@ -87,3 +87,33 @@ describe('File Validation', () => {
     expect(() => manager.processFileContent<typeof expectedOutput>(mockContent)).to.throw()
   })
 })
+
+describe('Folder Validation', () => {
+  let readDirectoryStub: sinon.SinonStub
+  let manager: FileManager
+
+  setup(() => {
+    const workspaceFs = { ...vscode.workspace.fs }
+
+    // Stubbing for readDirectory
+    readDirectoryStub = sinon.stub(workspaceFs, 'readDirectory')
+    readDirectoryStub
+      .withArgs(sinon.match((uri: vscode.Uri) => uri.fsPath.endsWith('/test-directory')))
+      .resolves([
+        ['file1.txt', vscode.FileType.File],
+        ['subdir', vscode.FileType.Directory],
+      ])
+
+    readDirectoryStub
+      .withArgs(sinon.match((uri: vscode.Uri) => uri.fsPath.endsWith('/empty-directory')))
+      .resolves([])
+
+    readDirectoryStub.rejects(new Error('Directory not found'))
+
+    manager = new FileManager(workspaceFs)
+  })
+
+  teardown(() => {
+    readDirectoryStub.restore()
+  })
+})
