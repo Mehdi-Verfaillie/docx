@@ -19,7 +19,7 @@ export class FileManager {
     }
   }
 
-  public async getFileContent(filePath: string): Promise<string> {
+  public async readFile(filePath: string): Promise<string> {
     try {
       const fileUint8Array = await this.fs.readFile(Uri.file(filePath))
       return new TextDecoder().decode(fileUint8Array)
