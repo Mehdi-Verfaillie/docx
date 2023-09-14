@@ -47,4 +47,8 @@ export class FileManager {
     const ext = '.' + filename.split('.').pop()?.toLowerCase()
     return extensionsOfInterest.includes(ext as Extension) ? (ext as Extension) : undefined
   }
+
+  public isFileOfInterest(filename: string): boolean {
+    return !!this.getExtension(filename)
+  }
 }
