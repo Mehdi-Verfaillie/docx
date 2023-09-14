@@ -1,9 +1,9 @@
 import { AssociationsValidator, DocAssociationsConfig } from './association.validator'
-import { FileSystemManager } from './utils/fileSystem.utils'
+import { Extension, FileSystemManager } from './utils/fileSystem.utils'
 
 export interface Documentation {
   name: string
-  type: 'md' | 'unknown'
+  type: Extension
   content: string
 }
 

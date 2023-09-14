@@ -1,115 +1,66 @@
 import { describe, it } from 'mocha'
-
-// import path = require('path')
-// import { RepositoryFactory } from '../../api/repository.factory'
-// import { LocalProvider } from '../../provider/local.provider'
-// import { Uri } from 'vscode'
-// import { WorkspaceManager } from '../../utils/workspace.utils'
-import { FileManager, ProjectStructure } from '../../utils/files.utils'
-// import * as sinon from 'sinon'
+import * as sinon from 'sinon'
 import { expect } from 'chai'
-// import * as vscode from 'vscode'
+import * as vscode from 'vscode'
+import { FileSystemManager } from '../../utils/fileSystem.utils'
 
-describe('Test local documentation', function () {
-  this.timeout(20000)
-  // let localProvider: sinon.SinonStubbedInstance<LocalProvider>
-  // let localProvider: sinon.SinonStubbedInstance<LocalProvider>
-  // let fileManagerStub: sinon.SinonStubbedInstance<FileManager>
+describe('fetchDocumentation', () => {
+  let readDirectoryStub: sinon.SinonStub
+  let readFileStub: sinon.SinonStub
+  let manager: FileSystemManager
 
-  // setup(() => {
-  //   fileManagerStub = sinon.createStubInstance(FileManager)
-  //   localProvider = sinon.createStubInstance(LocalProvider)
+  setup(() => {
+    const workspaceFs = { ...vscode.workspace.fs }
 
-  //   localProvider.getDocumentations
-  //     .withArgs(
-  //       sinon.match((uri: Uri) => {
-  //         return (
-  //           // Folder structure mock
-  //           uri.fsPath.endsWith('/docx/') ||
-  //           // Documentations mock
-  //           uri.fsPath.endsWith('/docx/ifTernary.md') ||
-  //           uri.fsPath.endsWith('/docx/asyncAwait.md') ||
-  //           uri.fsPath.endsWith('/docx/controllers.md') ||
-  //           uri.fsPath.endsWith('/docx/modules.md') ||
-  //           uri.fsPath.endsWith('/docx/general.md') ||
-  //           uri.fsPath.endsWith('/docx/utils/dates.md')
-  //         )
-  //       })
-  //     )
-  //     .resolves()
-  //   fileManagerStub.getFiles.resolves([{}])
+    // Stubbing for readDirectory
+    readDirectoryStub = sinon.stub(workspaceFs, 'readDirectory')
+    readDirectoryStub
+      .withArgs(sinon.match((uri: vscode.Uri) => uri.fsPath.endsWith('/test-directory')))
+      .resolves([
+        ['document.md', vscode.FileType.File],
+        ['diagram.bpmn', vscode.FileType.File],
+      ])
 
-  //   const baseDir = WorkspaceManager.getWorkspaceFolder()
-  //   localProvider = new LocalProvider(baseDir, fileManagerStub)
-  // })
+    // Stubbing for readFile
+    readFileStub = sinon.stub(workspaceFs, 'readFile')
+    readFileStub
+      .withArgs(vscode.Uri.file('/test-directory/document.md'))
+      .resolves(new Uint8Array(Buffer.from('MD Content')))
+    readFileStub
+      .withArgs(vscode.Uri.file('/test-directory/diagram.bpmn'))
+      .resolves(new Uint8Array(Buffer.from('BPMN Content')))
 
-  const fileManager = new FileManager()
-  const fakeProjectStructure: ProjectStructure = {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    'CHANGELOG.md': {
-      text: 'test',
-    },
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    'test.md': {
-      text: 'eeeeee',
-    },
-    'document': {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      'eeee.md': {
-        text: 'vvvvv',
-      },
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      'xxxx.md': {
-        text: 'wwww',
-      },
-    },
-  }
-  // it('should return project structure ', async () => {
-  //   const f = fileManager.mapStructure('User/Project/docx/')
-  //   expect(JSON.stringify(f)).to.equal(JSON.stringify(fakeProjectStructure))
-  // })
-  it('should return all md file', async () => {
-    const test2 = [
+    manager = new FileSystemManager(workspaceFs)
+  })
+
+  teardown(() => {
+    readDirectoryStub.restore()
+    readFileStub.restore()
+  })
+
+  it('should fetch documentation for files of interest', async () => {
+    const result = await manager.fetchDocumentation(vscode.Uri.file('/test-directory'))
+
+    expect(result).to.deep.equal([
       {
-        name: 'CHANGELOG.md',
-        content: 'test',
-        type: 'md',
+        name: 'document.md',
+        type: '.md',
+        content: 'MD Content',
       },
       {
-        name: 'test.md',
-        content: 'eeeeee',
-        type: 'md',
+        name: 'diagram.bpmn',
+        type: '.bpmn',
+        content: 'BPMN Content',
       },
-      {
-        name: 'eeee.md',
-        content: 'vvvvv',
-        type: 'md',
-      },
-      {
-        name: 'xxxx.md',
-        content: 'wwww',
-        type: 'md',
-      },
-    ]
+    ])
+  })
 
-    const f = fileManager.filterMarkdownFiles(fakeProjectStructure)
-    expect(JSON.stringify(f)).to.equal(JSON.stringify(test2))
+  it('should return an empty array if no documentation files are found', async () => {
+    readDirectoryStub
+      .withArgs(sinon.match((uri: vscode.Uri) => uri.fsPath.endsWith('/empty-directory')))
+      .resolves([])
+
+    const result = await manager.fetchDocumentation(vscode.Uri.file('/empty-directory'))
+    expect(result).to.deep.equal([])
   })
 })
-
-//Recuperer l'architecture du projet  dans un objet
-// Fonction permettant de parcourir le projet et recuperer un type de fichier
-// Chaque fichier sera envoyé dans un tableau avec un objet type documentation
-// renvoyé
-
-//Test 1 : test la fonction de recuperation en etant sur qu'il recupere  que des fichier readme
-
-// si le path du dossier est correct
-
-// si le dossier existe
-
-// si la valeur retourné est sous le bon format
-
-// si il retournela bonne structure
-// si il retourne les fichier readme.me
-// si il retourne les bon fichier
