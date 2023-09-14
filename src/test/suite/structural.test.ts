@@ -4,12 +4,12 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { describe, setup, it } from 'mocha'
 import { StructuralValidator } from '../../structural.validator'
-import { FileManager } from '../../utils/files.utils'
+import { FileSystemManager } from '../../utils/fileSystem.utils'
 import { StructuralManager } from '../../structural.manager'
-import { Uri, workspace } from 'vscode'
+import { workspace } from 'vscode'
 import { DocAssociationsConfig } from '../../association.validator'
 describe('Config structure tests', () => {
-  let fileManagerStub: sinon.SinonStubbedInstance<FileManager>
+  let fileSystemStub: sinon.SinonStubbedInstance<FileSystemManager>
   let jsonMock: string
 
   const validator: StructuralValidator = new StructuralValidator()
@@ -41,7 +41,7 @@ describe('Config structure tests', () => {
     }
   `
   setup(() => {
-    fileManagerStub = sinon.createStubInstance(FileManager)
+    fileSystemStub = sinon.createStubInstance(FileSystemManager)
     jsonMock = `{
       "associations": {
         "src": ["/docx/ifTernary.md", "/docx/asyncAwait.md"],
@@ -52,10 +52,10 @@ describe('Config structure tests', () => {
     }`
 
     const baseDir = workspace.workspaceFolders?.[0]?.uri?.fsPath ?? ''
-    manager = new StructuralManager(baseDir, fileManagerStub)
+    manager = new StructuralManager(baseDir, fileSystemStub)
   })
 
-  teardown(() => fileManagerStub.getFileContent.restore())
+  teardown(() => fileSystemStub.readFile.restore())
 
   it('should detect that file is not json', () => {
     const error = `Expecting file to not be json.\n\n${expectedStructureError}`
@@ -276,7 +276,7 @@ describe('Config structure tests', () => {
         "src/Services": ["docs\\\\services.md"]
       }
     }`
-    fileManagerStub.getFileContent.resolves(faultyData)
+    fileSystemStub.readFile.resolves(faultyData)
     const errors = await manager.validateConfig()
 
     expect(errors).to.have.lengthOf(3)
@@ -293,7 +293,7 @@ describe('Config structure tests', () => {
   })
 
   it('should return true if no validation error occurred.', async () => {
-    fileManagerStub.getFileContent.resolves(jsonMock)
+    fileSystemStub.readFile.resolves(jsonMock)
     const errors = await manager.validateConfig()
     expect(errors).to.have.lengthOf(0)
   })

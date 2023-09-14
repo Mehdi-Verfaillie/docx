@@ -1,22 +1,22 @@
 import path = require('path')
 import { DocAssociationsConfig, MissingEntityError } from './association.validator'
 import { InvalidEntityError, StructuralValidator } from './structural.validator'
-import { FileManager } from './utils/files.utils'
+import { FileSystemManager } from './utils/fileSystem.utils'
 export class StructuralManager {
   private baseDir: string
-  private fileManager: FileManager
+  private fileSystem: FileSystemManager
   private validator: StructuralValidator
   private configFileName: string
-  constructor(baseDir: string, fileManager: FileManager) {
+  constructor(baseDir: string, fileSystem: FileSystemManager) {
     this.baseDir = baseDir
-    this.fileManager = fileManager
+    this.fileSystem = fileSystem
     this.validator = new StructuralValidator()
     this.configFileName = '.docx.json'
   }
 
   public async validateConfig(): Promise<Array<MissingEntityError | InvalidEntityError>> {
     try {
-      const configJson = await this.fileManager.getFileContent(
+      const configJson = await this.fileSystem.readFile(
         path.join(this.baseDir, this.configFileName)
       )
 
