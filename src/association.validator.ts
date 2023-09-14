@@ -1,5 +1,5 @@
 import { Uri } from 'vscode'
-import { FileManager } from './utils/files.utils'
+import { FileSystemManager } from './utils/fileSystem.utils'
 
 export interface DocAssociationsConfig {
   associations: Record<string, string[]>
@@ -25,11 +25,11 @@ interface DuplicateEntityError extends EntityError {
 
 export class AssociationsValidator {
   private baseDir: string
-  private fileManager: FileManager
+  private fileSystem: FileSystemManager
 
-  constructor(baseDir: string, fileManager: FileManager) {
+  constructor(baseDir: string, fileSystem: FileSystemManager) {
     this.baseDir = baseDir
-    this.fileManager = fileManager
+    this.fileSystem = fileSystem
   }
 
   public async validateAssociations({
@@ -122,7 +122,7 @@ export class AssociationsValidator {
   ): Promise<MissingEntityError | undefined> {
     const uri = Uri.file(`${this.baseDir}/${name}`)
     try {
-      await this.fileManager.ensureFileExists(uri)
+      await this.fileSystem.ensureFileExists(uri)
       return // Entity exists, no error
     } catch {
       return {
