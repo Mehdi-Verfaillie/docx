@@ -40,17 +40,17 @@ describe('fetchDocumentation', () => {
     const result = await localProvider.fetchDocumentation(vscode.Uri.file('/test-directory'))
     expect(result).to.deep.equal([
       {
-        name: 'document.md',
+        name: '/test-directory/document.md',
         type: '.md',
         content: 'MD Content',
       },
       {
-        name: 'diagram.bpmn',
+        name: '/test-directory/diagram.bpmn',
         type: '.bpmn',
         content: 'BPMN Content',
       },
       {
-        name: 'nested-doc.md',
+        name: '/test-directory/sub-directory/nested-doc.md',
         type: '.md',
         content: 'Nested MD Content',
       },
