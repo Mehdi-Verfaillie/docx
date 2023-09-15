@@ -1,4 +1,5 @@
 import * as vscode from 'vscode'
+import { webView } from './webview/webview'
 
 //activation de l'extension
 export function activate(context: vscode.ExtensionContext) {
@@ -11,6 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
       .then((selectedOption) => {
         if (selectedOption) {
           vscode.window.showInformationMessage(`Option sélectionnée : ${selectedOption}`)
+          webView({ name: '', content: '', type: '.md' })
         }
       })
   })
