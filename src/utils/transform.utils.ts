@@ -1,11 +1,7 @@
-type DataType = {
-  type: string
-  name: string
-  [key: string]: unknown
-}
+import { Documentation } from '../association.manager'
 
 export class DataTransformManager {
-  static sortDataByTypeAndName = (data: DataType[]): DataType[] => {
+  static sortDataByTypeAndName = (data: Documentation[]): Documentation[] => {
     const sortedData = [...data]
 
     return sortedData.sort((a, b) => {

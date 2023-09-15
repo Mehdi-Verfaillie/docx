@@ -1,23 +1,46 @@
 import * as vscode from 'vscode'
 import { webView } from './webview/webview'
+import { WorkspaceManager } from './utils/workspace.utils'
+import { RepositoryFactory } from './api/repository.factory'
+import { FileSystemManager } from './utils/fileSystem.utils'
+import { AssociationsManager } from './association.manager'
 
-//activation de l'extension
-export function activate(context: vscode.ExtensionContext) {
-  // Créer le dropdown
-  const disposable = vscode.commands.registerCommand('extension.openDropdown', () => {
-    //commande invoqué = show dropdown avec les options
+export async function activate(context: vscode.ExtensionContext) {
+  const fileSystem = new FileSystemManager()
+
+  const repository = new RepositoryFactory([{ type: 'local' }])
+  const documentations = await repository.getDocumentations()
+
+  const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
+
+  const disposable = vscode.commands.registerCommand('extension.openDropdown', async () => {
+    const currentUserPath = WorkspaceManager.getCurrentUserPath()
+    if (!currentUserPath) return
+
+    const manager = new AssociationsManager(workspaceFolder, fileSystem)
+    const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/.docx.json`)
+
+    const filteredDocumentations = await manager.associate(
+      documentations,
+      jsonConfig,
+      currentUserPath
+    )
+
     vscode.window
-      .showQuickPick(['Option 1', 'Option 2', 'Option 3'])
-      //méthode use pour obtenir la valeur user selected, lorsqu'une option est selectionné
+      .showQuickPick(filteredDocumentations.map((documentation) => documentation.name))
       .then((selectedOption) => {
         if (selectedOption) {
-          vscode.window.showInformationMessage(`Option sélectionnée : ${selectedOption}`)
-          webView({ name: '', content: '', type: '.md' })
+          const selectedDoc = documentations.find((doc) => doc.name === selectedOption)
+
+          webView({
+            name: selectedDoc?.content ?? '',
+            content: selectedDoc?.content ?? '',
+            type: selectedDoc?.type ?? '.md',
+          })
         }
       })
   })
 
-  //ref collection fourni par API vscode pour stocker toutes les ressources ki doiv resT activ pendant ddv extension et les libere si necessaire
   context.subscriptions.push(disposable)
 }
 export function deactivate() {}

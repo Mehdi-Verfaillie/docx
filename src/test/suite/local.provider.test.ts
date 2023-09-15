@@ -19,7 +19,10 @@ describe('fetchDocumentation', () => {
       .resolves([
         ['document.md', vscode.FileType.File],
         ['diagram.bpmn', vscode.FileType.File],
+        ['sub-directory', vscode.FileType.Directory],
       ])
+      .withArgs(vscode.Uri.file('/test-directory/sub-directory').fsPath)
+      .resolves([['nested-doc.md', vscode.FileType.File]])
 
     sinon
       .stub(fileSystem, 'readFile')
@@ -27,22 +30,29 @@ describe('fetchDocumentation', () => {
       .resolves(Buffer.from('MD Content').toString())
       .withArgs(vscode.Uri.file('/test-directory/diagram.bpmn').fsPath)
       .resolves(Buffer.from('BPMN Content').toString())
+      .withArgs(vscode.Uri.file('/test-directory/sub-directory/nested-doc.md').fsPath)
+      .resolves(Buffer.from('Nested MD Content').toString())
   })
 
   teardown(() => sinon.restore())
 
-  it('should fetch documentation for files of interest', async () => {
+  it('should fetch documentation for files of interest including nested directories', async () => {
     const result = await localProvider.fetchDocumentation(vscode.Uri.file('/test-directory'))
     expect(result).to.deep.equal([
       {
-        name: 'document.md',
+        name: '/test-directory/document.md',
         type: '.md',
         content: 'MD Content',
       },
       {
-        name: 'diagram.bpmn',
+        name: '/test-directory/diagram.bpmn',
         type: '.bpmn',
         content: 'BPMN Content',
+      },
+      {
+        name: '/test-directory/sub-directory/nested-doc.md',
+        type: '.md',
+        content: 'Nested MD Content',
       },
     ])
   })

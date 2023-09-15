@@ -215,8 +215,8 @@ describe('Associations JSON Validation', () => {
     const srcResult = await manager.associate(mockDoc, jsonMock, 'src')
 
     expect(srcResult).to.have.length(2)
-    expect(srcResult[0].name).to.equal('/docx/ifTernary.md')
-    expect(srcResult[1].name).to.equal('/docx/asyncAwait.md')
+    expect(srcResult[0].name).to.equal('/docx/asyncAwait.md')
+    expect(srcResult[1].name).to.equal('/docx/ifTernary.md')
 
     fileSystemStub.processFileContent.returns(JSON.parse(jsonMock))
   })
