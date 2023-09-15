@@ -25,6 +25,6 @@ describe('WorkspaceManager Tests', () => {
     sinon.stub(vscode.window, 'activeTextEditor').value(fakeEditor)
 
     const path = WorkspaceManager.getCurrentUserPath()
-    expect(path?.fsPath).to.equal('/accountController.ts')
+    expect(path).to.equal('/accountController.ts')
   })
 })
