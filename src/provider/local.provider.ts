@@ -3,11 +3,6 @@ import { WorkspaceManager } from '../utils/workspace.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { Uri, FileType, workspace } from 'vscode'
 
-export interface ErrorHandler {
-  code: string
-  message: string
-}
-
 export class LocalProvider {
   constructor(private fileSystem: FileSystemManager) {
     this.fileSystem = fileSystem
