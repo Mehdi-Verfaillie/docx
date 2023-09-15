@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { describe, setup, it } from 'mocha'
@@ -60,7 +59,7 @@ describe('Configuration JSON Structure Validation', () => {
     const error = `Expecting file to not be json.\n\n${expectedStructureError}`
     const faultiesData = [``, `["a": "1"]`, `[1, "a", b]`, `notajson`]
     faultiesData.forEach((faultyData) => {
-      expect(validator.isJsonFile(faultyData), error).to.be.false
+      expect(validator.isJsonFile(faultyData), error).to.be.equal(false)
     })
   })
 
@@ -81,7 +80,7 @@ describe('Configuration JSON Structure Validation', () => {
       }`,
     ]
     faultiesData.forEach((faultyData) => {
-      expect(validator.isJsonFile(faultyData), error).to.be.true
+      expect(validator.isJsonFile(faultyData), error).to.be.equal(true)
     })
   })
 
