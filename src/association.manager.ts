@@ -1,19 +1,19 @@
 import { AssociationsValidator, DocAssociationsConfig } from './association.validator'
-import { FileManager } from './utils/files.utils'
+import { Extension, FileSystemManager } from './utils/fileSystem.utils'
 
 export interface Documentation {
   name: string
-  type: 'md'
+  type: Extension
   content: string
 }
 
 export class AssociationsManager {
-  private fileManager: FileManager
+  private fileSystem: FileSystemManager
   private validator: AssociationsValidator
 
-  constructor(baseDir: string, fileManager: FileManager) {
-    this.fileManager = fileManager
-    this.validator = new AssociationsValidator(baseDir, fileManager)
+  constructor(baseDir: string, fileSystem: FileSystemManager) {
+    this.fileSystem = fileSystem
+    this.validator = new AssociationsValidator(baseDir, fileSystem)
   }
 
   /**
@@ -33,7 +33,7 @@ export class AssociationsManager {
     json: string,
     currUserPath: string
   ): Promise<Documentation[]> {
-    const config = this.fileManager.processFileContent<DocAssociationsConfig>(json)
+    const config = this.fileSystem.processFileContent<DocAssociationsConfig>(json)
 
     if (!config || !config.associations) return [] // TODO: Return the errors in the terminal
 

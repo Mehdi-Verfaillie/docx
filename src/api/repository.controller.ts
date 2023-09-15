@@ -1,5 +1,5 @@
 import { Documentation } from '../association.manager'
-import { FileManager } from '../utils/files.utils'
+import { FileSystemManager } from '../utils/fileSystem.utils'
 import { RepositoryFactory } from './repository.factory'
 
 interface LocalProviderConfig {
@@ -17,11 +17,12 @@ export class RepositoryController {
   private repository: RepositoryFactory
 
   // TODO: Normalize the config json file
-  // @ts-ignore
-  private fileManager: FileManager
+  private fileManager
 
   constructor(json: string) {
     this.repository = new RepositoryFactory(this.configNormalizer(json))
+    //@ts-ignore
+    this.fileManager = new FileSystemManager()
   }
 
   public async getDocumentations(): Promise<Documentation[]> {
