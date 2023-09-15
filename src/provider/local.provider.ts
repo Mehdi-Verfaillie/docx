@@ -1,7 +1,7 @@
 import { Documentation } from '../association.manager'
 import { WorkspaceManager } from '../utils/workspace.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
-import { Uri, FileType } from 'vscode'
+import { Uri, FileType, workspace } from 'vscode'
 
 export interface ErrorHandler {
   code: string
@@ -31,7 +31,7 @@ export class LocalProvider {
       } else if (this.fileSystem.isFileOfInterest(filename)) {
         const content = await this.fileSystem.readFile(filePath.fsPath)
         documentation.push({
-          name: filename,
+          name: workspace.asRelativePath(filePath.path),
           type: this.fileSystem.getExtension(filename)!,
           content: content,
         })
