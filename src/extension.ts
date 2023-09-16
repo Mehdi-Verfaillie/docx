@@ -21,16 +21,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
 
-  // const utilisateur = 'jeremyschiap'
-  // const depot = 'test-repo'
-  // const repositoryGithub = new RepositoryFactory([
-  //   { type: 'github', repositories: ['https://github.com/jeremyschiap/test-repo'] },
-  // ])
-
   const disposable = vscode.commands.registerCommand('extension.openDropdown', async () => {
-    // const documentationRemote = await repository.getDocumentations()
-    // console.log('documentationRemote')
-
     const currentUserPath = WorkspaceManager.getCurrentUserPath()
     if (!currentUserPath) return
 

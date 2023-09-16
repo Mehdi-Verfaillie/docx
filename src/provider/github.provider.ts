@@ -1,78 +1,64 @@
+import { Documentation } from '../association.manager'
+import { GithubAPIUtil } from '../utils/githubApi.utils'
+import { FileSystemManager } from '../utils/fileSystem.utils'
 import { Octokit } from 'octokit'
 
-// {
-//     "providers": {
-//         "github": [
-//             {
-//                 "repository": "https://github.com/Lynch-cai/docx-documentations-public",
-//                 "token": ""
-//             }
-//         ]
-//     },
-//     "associations": {
-//         "src": ["/documentations/ifTernary.md", "/documentations/asyncAwait.md"],
-//         "src/Controllers": ["/documentations/controllers.md"],
-//         "src/Modules": ["/documentations/modules.md"],
-//         "src/Utils/dates.ts": ["/documentations/utils/dates.md"]
-//     }
-// }
+interface GithubResponse {
+  type: string
+  name: string
+  url: string
+  download_url: string
+}
 export class GithubProvider {
-  private repositorie
+  private githubAPI
+  public octokit: Octokit
 
-  private octokit: Octokit
-  private utilisateur: string
-  private depot: string
-
-  constructor(repositorie: string[]) {
-    this.repositorie = repositorie
-    this.octokit = new Octokit()
-    this.utilisateur = 'jeremyschiap'
-    this.depot = 'test-repo'
+  private fileSystem
+  private repository
+  constructor(repository: string[], token?: string) {
+    this.githubAPI = new GithubAPIUtil()
+    this.octokit = token ? new Octokit({ auth: token }) : new Octokit()
+    this.repository = this.githubAPI.getOwnerRepo(repository)
+    this.fileSystem = new FileSystemManager()
   }
 
-  public documentation: {
-    type: string
-    title: string
-    content: string
-  }[] = []
-  public async getDocumentation(dossier: string) {
-    const { data } = await this.getContentGithub(dossier)
-    if (Array.isArray(data)) {
-      for (const element of data) {
-        if (element.type === 'file' && element.name === 'README.md') {
-          const contentFichier = await this.getContentGithub(element.path)
-          if ('content' in contentFichier.data) {
-            this.readFileGithub(contentFichier, element)
+  public async getDocumentations(): Promise<Documentation[]> {
+    const documentation: Documentation[] = []
+    const { data } = await this.getContent(
+      `GET /repos/${this.repository.owner}/${this.repository.name}/contents`
+    )
+
+    const fetchDocumentation = async (elements: GithubResponse[]) => {
+      for (const element of elements) {
+        if (
+          element.type === 'file' &&
+          element.name.endsWith(this.fileSystem.getExtension(element.name)!)
+        ) {
+          const doc = await this.readFile(element)
+          documentation.push(doc)
+        }
+        if (element.type === 'dir') {
+          const { data } = await this.getContent(element.url)
+          if (Array.isArray(data)) {
+            await fetchDocumentation(data)
           }
-        } else if (element.type === 'dir') {
-          await this.getDocumentation(element.path)
         }
       }
     }
-    return this.documentation
+
+    if (Array.isArray(data)) {
+      await fetchDocumentation(data)
+    }
+    return documentation
   }
 
-  public async getContentGithub(path: string) {
-    return await this.octokit.rest.repos.getContent({
-      owner: this.utilisateur,
-      repo: this.depot,
-      path: path,
-    })
+  public async getContent(path: string) {
+    return await this.octokit.request(path)
   }
-
-  public readFileGithub(contentFichier, element) {
-    const contentTexte = Buffer.from(contentFichier.data.content, 'base64').toString('utf-8')
-
-    // Analyser le content pour extraire l'type, le title et le content
-    const type = element.name.split('.').pop() || 'N/A'
-    const titleMatch = contentTexte.match(/^# (.+)/m)
-    const title = titleMatch ? titleMatch[1] : 'title non trouvé'
-
-    // Ajouter les informations à la liste de documentation
-    this.documentation.push({
-      type,
-      title,
-      content: contentTexte,
-    })
+  public async readFile(file: GithubResponse): Promise<Documentation> {
+    const content = (await this.octokit.request(`GET ${file.download_url}`)) as unknown as {
+      data: string
+    }
+    return { type: '.md', name: file.name, content: content.data }
   }
 }
