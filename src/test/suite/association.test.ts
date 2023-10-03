@@ -5,6 +5,7 @@ import { describe, setup, teardown, it } from 'mocha'
 import { DocAssociationsConfig, AssociationsValidator } from '../../association.validator'
 import { FileSystemManager } from '../../utils/fileSystem.utils'
 import { AssociationsManager, Documentation } from '../../association.manager'
+import { ErrorManager } from '../../utils/error.utils'
 
 describe('Associations JSON Validation', () => {
   const jsonMock = JSON.stringify({
@@ -21,6 +22,7 @@ describe('Associations JSON Validation', () => {
 
   let fileSystemStub: sinon.SinonStubbedInstance<FileSystemManager>
   let validatorStub: sinon.SinonStubbedInstance<AssociationsValidator>
+  let errorManagerStub: sinon.SinonStub
 
   let validator: AssociationsValidator
   let manager: AssociationsManager
@@ -28,6 +30,7 @@ describe('Associations JSON Validation', () => {
   setup(() => {
     fileSystemStub = sinon.createStubInstance(FileSystemManager)
     validatorStub = sinon.createStubInstance(AssociationsValidator)
+    errorManagerStub = sinon.stub(ErrorManager, 'outputError')
 
     fileSystemStub.ensureFileExists
       .withArgs(
@@ -57,7 +60,10 @@ describe('Associations JSON Validation', () => {
     manager = new AssociationsManager(baseDir, fileSystemStub)
   })
 
-  teardown(() => fileSystemStub.ensureFileExists.restore())
+  teardown(() => {
+    fileSystemStub.ensureFileExists.restore()
+    errorManagerStub.restore()
+  })
 
   it('should ensure all defined directories exist', async () => {
     const jsonConfig = JSON.parse(jsonMock) as DocAssociationsConfig
