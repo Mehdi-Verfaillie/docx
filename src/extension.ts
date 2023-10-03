@@ -4,8 +4,11 @@ import { WorkspaceManager } from './utils/workspace.utils'
 import { RepositoryFactory } from './api/repository.factory'
 import { FileSystemManager } from './utils/fileSystem.utils'
 import { AssociationsManager } from './association.manager'
+import { ErrorManager } from './utils/error.utils'
 
 export async function activate(context: vscode.ExtensionContext) {
+  ErrorManager.initialize()
+
   const fileSystem = new FileSystemManager()
 
   const repository = new RepositoryFactory([{ type: 'local' }])
