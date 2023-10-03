@@ -18,7 +18,7 @@ export interface MissingEntityError extends EntityError {
   errorType: 'MISSING'
 }
 
-interface DuplicateEntityError extends EntityError {
+export interface DuplicateEntityError extends EntityError {
   errorType: 'DUPLICATE'
   originalLocation: string
   duplicateLocation: string

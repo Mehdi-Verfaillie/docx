@@ -1,4 +1,5 @@
 import { AssociationsValidator, DocAssociationsConfig } from './association.validator'
+import { ErrorManager } from './utils/error.utils'
 import { Extension, FileSystemManager } from './utils/fileSystem.utils'
 import { DataTransformManager } from './utils/transform.utils'
 
@@ -37,11 +38,20 @@ export class AssociationsManager {
   ): Promise<Documentation[]> {
     const config = this.fileSystem.processFileContent<DocAssociationsConfig>(json)
 
-    if (!config || !config.associations) return [] // TODO: Return the errors in the terminal
+    if (!config || !config.associations) {
+      const errorMessage = !config
+        ? 'Invalid configuration: Cannot find .docx.json file.'
+        : 'Invalid configuration: missing associations.'
+      ErrorManager.outputError(errorMessage)
+      return []
+    }
 
     const errors = await this.validator.validateAssociations(config)
 
-    if (errors?.length) return [] // TODO: Return the errors in the terminal
+    if (errors?.length) {
+      ErrorManager.outputError(errors)
+      return []
+    }
 
     const associatedDocsPaths = this.getAssociatedDocsPaths(currUserPath, config)
 
