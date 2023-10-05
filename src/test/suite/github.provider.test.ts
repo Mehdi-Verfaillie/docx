@@ -26,12 +26,12 @@ describe('GithubProvider', function () {
             download_url: 'https://example.com/example.md',
           })
         )
-        .resolves({ type: '.md', name: 'example.md', content: 'Mocked file' })
+        .resolves({ type: '.md', name: 'example.md', content: 'Mocked file', path: 'path.com' })
 
       const githubProvider = new GithubProvider(['https://github.com/owner/repo'])
 
-      githubProvider.getContent = getContentGithubStub
-      githubProvider.readFile = readFileGithubStub
+      githubProvider.getRepoContent = getContentGithubStub
+      githubProvider.getFile = readFileGithubStub
       const result = await githubProvider.getDocumentations()
 
       assert.isArray(result)
@@ -40,6 +40,7 @@ describe('GithubProvider', function () {
         type: '.md',
         name: 'example.md',
         content: 'Mocked file',
+        path: 'path.com',
       })
     })
 
@@ -64,14 +65,14 @@ describe('GithubProvider', function () {
 
       readFileGithubStub
         .onFirstCall()
-        .resolves({ type: '.md', name: 'example.md', content: 'Mocked file 1' })
+        .resolves({ type: '.md', name: 'example.md', content: 'Mocked file 1', path: 'path.com' })
         .onSecondCall()
-        .resolves({ type: '.md', name: 'example2.md', content: 'Mocked file 2' })
+        .resolves({ type: '.md', name: 'example2.md', content: 'Mocked file 2', path: 'path.com' })
 
       const githubProvider = new GithubProvider(['https://github.com/owner/repo'])
 
-      githubProvider.getContent = getContentGithubStub
-      githubProvider.readFile = readFileGithubStub
+      githubProvider.getRepoContent = getContentGithubStub
+      githubProvider.getFile = readFileGithubStub
       const result = await githubProvider.getDocumentations()
 
       assert.isArray(result)
@@ -80,11 +81,13 @@ describe('GithubProvider', function () {
         type: '.md',
         name: 'example.md',
         content: 'Mocked file 1',
+        path: 'path.com',
       })
       assert.deepEqual(result[1], {
         type: '.md',
         name: 'example2.md',
         content: 'Mocked file 2',
+        path: 'path.com',
       })
     })
     it('should fetch and return list documentation from the file and all the files in the folder', async function () {
@@ -125,16 +128,16 @@ describe('GithubProvider', function () {
 
       readFileGithubStub
         .onFirstCall()
-        .resolves({ type: '.md', name: 'example.md', content: 'Mocked file 1' })
+        .resolves({ type: '.md', name: 'example.md', content: 'Mocked file 1', path: 'path.com' })
         .onSecondCall()
-        .resolves({ type: '.md', name: 'example2.md', content: 'Mocked file 2' })
+        .resolves({ type: '.md', name: 'example2.md', content: 'Mocked file 2', path: 'path.com' })
         .onThirdCall()
-        .resolves({ type: '.md', name: 'example3.md', content: 'Mocked file 3' })
+        .resolves({ type: '.md', name: 'example3.md', content: 'Mocked file 3', path: 'path.com' })
 
       const githubProvider = new GithubProvider(['https://github.com/owner/repo'])
 
-      githubProvider.getContent = getContentGithubStub
-      githubProvider.readFile = readFileGithubStub
+      githubProvider.getRepoContent = getContentGithubStub
+      githubProvider.getFile = readFileGithubStub
       const result = await githubProvider.getDocumentations()
 
       assert.isArray(result)
@@ -143,16 +146,19 @@ describe('GithubProvider', function () {
         type: '.md',
         name: 'example.md',
         content: 'Mocked file 1',
+        path: 'path.com',
       })
       assert.deepEqual(result[1], {
         type: '.md',
         name: 'example2.md',
         content: 'Mocked file 2',
+        path: 'path.com',
       })
       assert.deepEqual(result[2], {
         type: '.md',
         name: 'example3.md',
         content: 'Mocked file 3',
+        path: 'path.com',
       })
     })
   })
