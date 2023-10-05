@@ -2,6 +2,7 @@ import { Documentation } from '../association.manager'
 import { GithubAPIUtil } from '../utils/githubApi.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { Octokit } from 'octokit'
+import { ImageParse } from '../utils/imageParse.utils'
 
 interface GithubResponse {
   type: string
@@ -15,11 +16,14 @@ export class GithubProvider {
 
   private fileSystem
   private repository
+
+  private parseImage
   constructor(repository: string[], token?: string) {
     this.githubAPI = new GithubAPIUtil()
     this.octokit = token ? new Octokit({ auth: token }) : new Octokit()
     this.repository = this.githubAPI.getOwnerRepo(repository)
     this.fileSystem = new FileSystemManager()
+    this.parseImage = new ImageParse(repository[0])
   }
 
   public async getDocumentations(): Promise<Documentation[]> {
@@ -59,6 +63,8 @@ export class GithubProvider {
     const content = (await this.octokit.request(`GET ${file.download_url}`)) as unknown as {
       data: string
     }
-    return { type: '.md', name: file.name, content: content.data }
+    const parseContent = this.parseImage.readImage(content.data)
+
+    return { type: '.md', name: file.name, content: parseContent }
   }
 }

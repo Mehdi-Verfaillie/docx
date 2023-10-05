@@ -18,7 +18,7 @@ export class RepositoryProvider {
         break
 
       case 'github':
-        this.provider = new GithubProvider(config.repositories)
+        this.provider = new GithubProvider(config.repositories, config.token)
         break
       default:
         break
