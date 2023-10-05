@@ -6,19 +6,17 @@ export interface InvalidEntityError extends EntityError {
 }
 
 export class StructuralValidator {
-  public validateConfigStructure(
+  public static validateConfigStructure(
     config: DocAssociationsConfig
-  ): Array<MissingEntityError | InvalidEntityError> | undefined {
-    const associationsTypeErrors: MissingEntityError[] = this.validateAssociationsType(config)
+  ): (MissingEntityError | InvalidEntityError)[] | undefined {
+    const associationsTypeErrors: (MissingEntityError | InvalidEntityError)[] =
+      this.validateAssociationsKeyStructure(config)
 
     if (associationsTypeErrors.length > 0) return associationsTypeErrors
 
-    const associationsDirectoriesErrors: MissingEntityError[] =
-      this.validateAssociationsDirectories(config)
-
-    const associationsDocsErrors: MissingEntityError[] = this.validateAssociationsDocs(config)
-    const reverseSlashErrors: Array<MissingEntityError | InvalidEntityError> =
-      this.findReverseSlashInPaths(config)
+    const associationsDirectoriesErrors = this.validateDirectoriesKeyStructure(config)
+    const associationsDocsErrors = this.validateDocsValuesStructure(config)
+    const reverseSlashErrors = this.findBackSlashInPaths(config)
 
     const allErrors = [
       ...associationsTypeErrors,
@@ -29,24 +27,32 @@ export class StructuralValidator {
 
     return allErrors
   }
-  public validateAssociationsType(config: DocAssociationsConfig): MissingEntityError[] {
-    const errors: MissingEntityError[] = []
+  public static validateAssociationsKeyStructure(
+    config: DocAssociationsConfig
+  ): (MissingEntityError | InvalidEntityError)[] {
+    const errors: (MissingEntityError | InvalidEntityError)[] = []
 
-    if (
-      !config.associations ||
-      typeof config.associations !== 'object' ||
-      Array.isArray(config.associations)
-    ) {
+    if (!config.associations) {
       errors.push({
         errorType: 'MISSING',
         entityType: 'associationsKey',
         entityPath: '',
+        errorMsg: 'Expected a key named "associations" in the config file.',
+      })
+    } else if (typeof config.associations !== 'object' || Array.isArray(config.associations)) {
+      errors.push({
+        errorType: 'INVALID',
+        entityType: 'associationsKey',
+        entityPath: '',
+        errorMsg: 'Expected an object for the "associations" key in the config file.',
       })
     }
 
     return errors
   }
-  public validateAssociationsDirectories(config: DocAssociationsConfig): MissingEntityError[] {
+  public static validateDirectoriesKeyStructure(
+    config: DocAssociationsConfig
+  ): MissingEntityError[] {
     const errors: MissingEntityError[] = []
 
     for (const directory of Object.keys(config.associations)) {
@@ -55,30 +61,56 @@ export class StructuralValidator {
           errorType: 'MISSING',
           entityType: 'directory',
           entityPath: '',
+          errorMsg:
+            'Expected a string for directory path. Example: "src/controllers" or "src/controllers/auth.ts".',
         })
       }
     }
 
     return errors
   }
-  public validateAssociationsDocs(config: DocAssociationsConfig): MissingEntityError[] {
-    const errors: MissingEntityError[] = []
+  public static validateDocsValuesStructure(
+    config: DocAssociationsConfig
+  ): (MissingEntityError | InvalidEntityError)[] {
+    const errors: (MissingEntityError | InvalidEntityError)[] = []
 
-    for (const documentations of Object.values(config.associations)) {
-      if (!documentations || !documentations.length || !Array.isArray(documentations)) {
+    for (const [directories, documentations] of Object.entries(config.associations)) {
+      if (!Array.isArray(documentations)) {
+        errors.push({
+          errorType: 'INVALID',
+          entityType: 'documentationFile',
+          entityPath: '',
+          errorMsg:
+            'Expected an array of documentation files path. Example: ["doc1.md", "doc2.md"]',
+        })
+        break
+      } else if (!documentations || !documentations.length) {
         errors.push({
           errorType: 'MISSING',
           entityType: 'documentationFile',
           entityPath: '',
+          errorMsg: 'Missing documentation files path. Example: ["doc1.md", "doc2.md"]',
         })
         break
       }
-      for (const documentation of documentations) {
-        if (typeof documentation !== 'string' || !documentation) {
+
+      for (const [i, documentation] of documentations.entries()) {
+        if (typeof documentation !== 'string') {
+          errors.push({
+            errorType: 'INVALID',
+            entityType: 'documentationFile',
+            entityPath: '',
+            errorMsg:
+              'Expected a string in the array of documentation files path. Example: ["doc1.md", "doc2.md"]',
+          })
+        } else if (!documentation) {
           errors.push({
             errorType: 'MISSING',
             entityType: 'documentationFile',
-            entityPath: '',
+            entityPath: directories
+              ? `directory ${directories[i]}`
+              : 'not found, directory is also missing',
+            errorMsg: 'Missing documentation file path. Example: ["doc1.md", "doc2.md"].',
           })
         }
       }
@@ -86,10 +118,10 @@ export class StructuralValidator {
 
     return errors
   }
-  public findReverseSlashInPaths(
+  public static findBackSlashInPaths(
     config: DocAssociationsConfig
-  ): Array<MissingEntityError | InvalidEntityError> {
-    const errors: Array<MissingEntityError | InvalidEntityError> = []
+  ): (MissingEntityError | InvalidEntityError)[] {
+    const errors: (MissingEntityError | InvalidEntityError)[] = []
 
     for (const directory of Object.keys(config.associations)) {
       if (directory.includes('\\')) {
@@ -103,12 +135,7 @@ export class StructuralValidator {
     }
 
     for (const documentations of Object.values(config.associations)) {
-      if (!documentations || !documentations.length || !Array.isArray(documentations)) {
-        errors.push({
-          errorType: 'MISSING',
-          entityType: 'documentationFile',
-          entityPath: '',
-        })
+      if (!Array.isArray(documentations) || !documentations || !documentations.length) {
         break
       }
       for (const documentation of documentations) {
@@ -126,13 +153,11 @@ export class StructuralValidator {
 
     return errors
   }
-  public isJsonFile = (str: string): boolean => {
+  public static isJsonFile = (str: string): boolean => {
     try {
       JSON.parse(str)
-      console.warn(true, 'isJsonFile')
       return true
     } catch (e) {
-      console.warn(false, 'isJsonFile', e)
       return false
     }
   }
