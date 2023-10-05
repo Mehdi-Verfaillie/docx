@@ -1,5 +1,6 @@
 import { OutputChannel, window } from 'vscode'
 import { DuplicateEntityError, MissingEntityError } from '../association.validator'
+import { InvalidEntityError } from '../structural.validator'
 
 export class ErrorManager {
   private static outputChannel: OutputChannel
@@ -8,7 +9,9 @@ export class ErrorManager {
     this.outputChannel = window.createOutputChannel('Docx Etx Errors')
   }
 
-  public static outputError(message: string | (MissingEntityError | DuplicateEntityError)[]) {
+  public static outputError(
+    message: string | (MissingEntityError | DuplicateEntityError | InvalidEntityError)[]
+  ) {
     if (typeof message === 'string') {
       this.outputChannel.appendLine(`Error: ${message}`)
     } else {
@@ -18,7 +21,9 @@ export class ErrorManager {
     this.outputChannel.show(true)
   }
 
-  private static formatEntityErrors(errors: (MissingEntityError | DuplicateEntityError)[]): string {
+  private static formatEntityErrors(
+    errors: (MissingEntityError | DuplicateEntityError | InvalidEntityError)[]
+  ): string {
     let formattedErrors = ''
     errors.forEach((error, index) => {
       formattedErrors += `Error ${index + 1}:\n`
@@ -32,6 +37,8 @@ export class ErrorManager {
         formattedErrors += `    Duplicate Location: ${
           (error as DuplicateEntityError).duplicateLocation
         }\n`
+      } else if (error.errorType === 'INVALID') {
+        formattedErrors += `  - Invalid ${error.entityType} found at: ${error.entityPath}\n`
       }
       if (error.errorMsg) {
         formattedErrors += `  - Additional Info: ${error.errorMsg}\n`

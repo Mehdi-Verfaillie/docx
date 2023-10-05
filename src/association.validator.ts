@@ -35,7 +35,7 @@ export class AssociationsValidator {
 
   public async validateAssociations({
     associations,
-  }: DocAssociationsConfig): Promise<(MissingEntityError | DuplicateEntityError)[] | undefined> {
+  }: DocAssociationsConfig): Promise<(MissingEntityError | DuplicateEntityError)[]> {
     const dirErrors = await this.validateDirectoryPaths(Object.keys(associations))
     const docErrors = await this.validateDocumentationPaths(associations)
     const dupDocErrors = this.findDuplicateDocsInDirectory(associations)
@@ -43,9 +43,7 @@ export class AssociationsValidator {
 
     const allErrors = [...dirErrors, ...docErrors, ...dupDocErrors, ...inheritedDupDocErrors]
 
-    if (allErrors.length > 0) {
-      return allErrors
-    }
+    return allErrors
   }
 
   public async validateDirectoryPaths(directories: string[]): Promise<MissingEntityError[]> {
