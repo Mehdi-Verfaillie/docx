@@ -63,7 +63,8 @@ export class GithubProvider {
     const content = (await this.octokit.request(`GET ${file.download_url}`)) as unknown as {
       data: string
     }
-    const parseContent = this.parseImage.readImage(content.data)
+
+    const parseContent = this.parseImage.parseImageContent(content.data)
 
     return { type: '.md', name: file.name, content: parseContent }
   }
