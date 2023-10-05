@@ -5,9 +5,14 @@ import { RepositoryFactory } from './api/repository.factory'
 import { FileSystemManager } from './utils/fileSystem.utils'
 import { AssociationsManager } from './association.manager'
 import { ErrorManager } from './utils/error.utils'
+import { SchemaManager } from './config/schema.manager'
 
 export async function activate(context: vscode.ExtensionContext) {
   ErrorManager.initialize()
+  SchemaManager.initialize(
+    '/.docx.json',
+    'https://raw.githubusercontent.com/Mehdi-Verfaillie/docx/main/src/config/.docx.schema.json'
+  )
 
   const fileSystem = new FileSystemManager()
 
