@@ -1,4 +1,5 @@
 import { Documentation } from '../association.manager'
+import { DocAssociationsConfig } from '../association.validator'
 import { ErrorManager } from '../utils/error.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { RepositoryFactory } from './repository.factory'
@@ -28,7 +29,7 @@ export class RepositoryController {
 
   constructor(json: string, providerStrategies: ProviderStrategy[]) {
     this.providerStrategies = providerStrategies
-    //@ts-ignore
+    this.repository = new RepositoryFactory(this.mapConfigToProviders(json))
     this.fileManager = new FileSystemManager()
   }
 
@@ -41,11 +42,21 @@ export class RepositoryController {
     }
   }
 
-  private configNormalizer(json: string): ProviderConfig[] {
-    // TODO: Normalize the config json file
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const config = this.fileManager.processFileContent(json)
-    // ...
-    return []
+  private mapConfigToProviders(json: string): ProviderConfig[] {
+    const config = this.fileManager.processFileContent<DocAssociationsConfig>(json)
+    const providerConfigs: ProviderConfig[] = []
+
+    const docLocationsArray = Object.values(config.associations)
+    for (const docLocations of docLocationsArray) {
+      docLocations.forEach((docLocation) => {
+        const strategy = this.providerStrategies.find((strategy) => strategy.isMatch(docLocation))
+        if (strategy) {
+          const providerConfig = strategy.getProviderConfig(docLocation)
+          providerConfigs.push(providerConfig)
+        }
+      })
+    }
+
+    return providerConfigs
   }
 }
