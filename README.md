@@ -128,36 +128,43 @@ Access will only be made on your machine, no data is sent elsewhere.
 ## Usage
 
 1. Open a file linked to documentation, e.g., "myFile.ts."
+
+<!-- Add screenshot -->
+
 2. Click the book icon in the top right corner of the screen.
+
+<!-- Add screenshot -->
+
 3. Choose the documentation you're interested in from the list.
+
+<!-- Add screenshot -->
 
 For visual steps, look at the [demo](#demo).
 
 ## Features
 
-- Ability to link a file to documentation.
-- Ability to link a file to multiple documentations.
-- Linking all files in a folder to documentation.
-- Support for local documentation.
-- Support for documentation in a public or private repository.
-- Support for different file types (.md, .bpmn, etc.).
+- [x] Ability to link a file to documentation.
+- [x] Ability to link a file to multiple documentations.
+- [x] Linking all files in a folder to documentation.
+- [x] Support for local documentation.
+- [ ] Support for documentation in a public or private repository.
+- [ ] Support for different file types (.md, .bpmn, etc.).
 
 ## Roadmap
 
 Here are the upcoming planned features:
 
-- Integration with CI to provide information about documentations and associated standards for changes made by developers.
-- Adding documentation editing functionality.
-- Adding the ability to select only one file type per documentation, e.g., only "\*.controller.ts" files are related to "controllers.md."
+- [ ] Integration with CI to provide information about documentations and associated standards for changes made by developers.
+- [ ] Adding documentation editing functionality.
+- [ ] Adding the ability to select only one file type per documentation, e.g., only "\*.controller.ts" files are related to "controllers.md."
 
 ## Contribution
 
 Contributions are welcome! To contribute by proposing new features or fixing bugs, please follow these steps:
 
-1. Clone the repository.
-2. Create a branch for your contribution.
-3. Make your changes.
-4. Submit a pull request to the main branch.
+1. Fork the repository.
+2. Make your changes.
+3. Submit a pull request to the main branch.
 
 Thank you for your interest in the extension and potential contributions!
 
