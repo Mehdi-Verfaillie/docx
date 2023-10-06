@@ -1,11 +1,12 @@
 import * as vscode from 'vscode'
 import { webView } from './webview/webview'
 import { WorkspaceManager } from './utils/workspace.utils'
-import { RepositoryFactory } from './api/repository.factory'
 import { FileSystemManager } from './utils/fileSystem.utils'
 import { AssociationsManager } from './association.manager'
 import { ErrorManager } from './utils/error.utils'
 import { SchemaManager } from './config/schema.manager'
+import { RepositoryController } from './api/repository.controller'
+import { LocalProviderStrategy, WebProviderStrategy } from './api/repository.strategy'
 
 export async function activate(context: vscode.ExtensionContext) {
   ErrorManager.initialize()
@@ -13,24 +14,23 @@ export async function activate(context: vscode.ExtensionContext) {
     '/.docx.json',
     'https://raw.githubusercontent.com/Mehdi-Verfaillie/docx/main/src/config/.docx.schema.json'
   )
-
   const fileSystem = new FileSystemManager()
-
-  const repository = new RepositoryFactory([{ type: 'local' }])
-  const documentations = await repository.getDocumentations()
-
   const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
+  const providerStrategies = [new LocalProviderStrategy(), new WebProviderStrategy()]
+  const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/.docx.json`)
+
+  const repositoryController = await RepositoryController.create(jsonConfig, providerStrategies)
+  const documentations = await repositoryController.getDocumentations()
 
   const disposable = vscode.commands.registerCommand('extension.openDropdown', async () => {
     const currentUserPath = WorkspaceManager.getCurrentUserPath()
     if (!currentUserPath) return
 
-    const manager = new AssociationsManager(workspaceFolder, fileSystem)
-    const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/.docx.json`)
+    const manager = new AssociationsManager()
 
     const filteredDocumentations = await manager.associate(
       documentations,
-      jsonConfig,
+      fileSystem.processFileContent(jsonConfig),
       currentUserPath
     )
 
