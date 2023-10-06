@@ -8,33 +8,33 @@ describe('Data Sorter', () => {
 
   it('should correctly sort data by type and then by name', () => {
     const inputData: Documentation[] = [
-      { name: 'a', type: '.md', content: '' },
+      { name: 'a', path: 'a', type: '.md', content: '' },
       // @ts-ignore
-      { name: 'b', type: '.txt', content: '' },
-      { name: 'c', type: '.md', content: '' },
+      { name: 'b', path: 'b', type: '.txt', content: '' },
+      { name: 'c', path: 'c', type: '.md', content: '' },
       // @ts-ignore
-      { name: 'f', type: '.rtf', content: '' },
-      { name: 'r', type: '.bpmn', content: '' },
-      { name: 'e', type: '.md', content: '' },
-      { name: 'p', type: '.md', content: '' },
-      { name: 'm', type: '.bpmn', content: '' },
-      { name: 'l', type: '.bpmn', content: '' },
+      { name: 'f', path: 'f', type: '.rtf', content: '' },
+      { name: 'r', path: 'r', type: '.bpmn', content: '' },
+      { name: 'e', path: 'e', type: '.md', content: '' },
+      { name: 'p', path: 'p', type: '.md', content: '' },
+      { name: 'm', path: 'm', type: '.bpmn', content: '' },
+      { name: 'l', path: 'l', type: '.bpmn', content: '' },
     ]
 
     const sortedData = transform.sortDataByTypeAndName(inputData)
 
     const expectedData: Documentation[] = [
-      { name: 'l', type: '.bpmn', content: '' },
-      { name: 'm', type: '.bpmn', content: '' },
-      { name: 'r', type: '.bpmn', content: '' },
-      { name: 'a', type: '.md', content: '' },
-      { name: 'c', type: '.md', content: '' },
-      { name: 'e', type: '.md', content: '' },
-      { name: 'p', type: '.md', content: '' },
+      { name: 'l', path: 'l', type: '.bpmn', content: '' },
+      { name: 'm', path: 'm', type: '.bpmn', content: '' },
+      { name: 'r', path: 'r', type: '.bpmn', content: '' },
+      { name: 'a', path: 'a', type: '.md', content: '' },
+      { name: 'c', path: 'c', type: '.md', content: '' },
+      { name: 'e', path: 'e', type: '.md', content: '' },
+      { name: 'p', path: 'p', type: '.md', content: '' },
       // @ts-ignore
-      { name: 'f', type: '.rtf', content: '' },
+      { name: 'f', path: 'f', type: '.rtf', content: '' },
       // @ts-ignore
-      { name: 'b', type: '.txt', content: '' },
+      { name: 'b', path: 'b', type: '.txt', content: '' },
     ]
 
     expect(sortedData).to.deep.equal(expectedData)

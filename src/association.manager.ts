@@ -6,6 +6,7 @@ import { StructuralManager } from './structural.manager'
 
 export interface Documentation {
   name: string
+  path: string
   type: Extension
   content: string
 }
@@ -61,7 +62,7 @@ export class AssociationsManager {
     if (!associatedDocsPaths.length) return []
 
     return this.transform.sortDataByTypeAndName(
-      documentations.filter((doc) => associatedDocsPaths.includes(doc.name))
+      documentations.filter((doc) => associatedDocsPaths.includes(doc.path))
     )
   }
 

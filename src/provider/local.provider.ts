@@ -31,7 +31,8 @@ export class LocalProvider {
       } else if (this.fileSystem.isFileOfInterest(filename)) {
         const content = await this.fileSystem.readFile(filePath.fsPath)
         documentation.push({
-          name: workspace.asRelativePath(filePath.path),
+          name: filename,
+          path: workspace.asRelativePath(filePath.path),
           type: this.fileSystem.getExtension(filename)!,
           content: content,
         })

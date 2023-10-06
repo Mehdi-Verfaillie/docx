@@ -35,15 +35,23 @@ export async function activate(context: vscode.ExtensionContext) {
     )
 
     vscode.window
-      .showQuickPick(filteredDocumentations.map((documentation) => documentation.name))
-      .then((selectedOption) => {
-        if (selectedOption) {
-          const selectedDoc = documentations.find((doc) => doc.name === selectedOption)
-
+      .showQuickPick(
+        filteredDocumentations.map((doc) => {
+          return {
+            label: doc.name,
+            content: doc.content,
+            path: doc.path,
+            type: doc.type,
+          }
+        })
+      )
+      .then((selectedDoc) => {
+        if (selectedDoc) {
           webView({
-            name: selectedDoc?.content ?? '',
-            content: selectedDoc?.content ?? '',
-            type: selectedDoc?.type ?? '.md',
+            name: selectedDoc.label,
+            content: selectedDoc.content,
+            path: selectedDoc.path,
+            type: selectedDoc.type,
           })
         }
       })
