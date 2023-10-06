@@ -25,22 +25,32 @@ export type ProviderConfig = LocalProviderConfig | RemoteProviderConfig | Remote
 
 export class RepositoryController {
   private repository!: RepositoryFactory
-  private fileSystem = new FileSystemManager()
+  private fileSystem: FileSystemManager
   private baseDir = WorkspaceManager.getWorkspaceFolder()
   private providerStrategies: ProviderStrategy[]
   private validator: AssociationsValidator
   private structuralManager: StructuralManager
 
-  constructor(
+  private constructor(
     json: string,
     fileSystem = new FileSystemManager(),
     providerStrategies: ProviderStrategy[]
   ) {
-    this.initialize(json)
     this.fileSystem = fileSystem
     this.providerStrategies = providerStrategies
     this.structuralManager = new StructuralManager(this.baseDir)
     this.validator = new AssociationsValidator(this.baseDir, this.fileSystem)
+    this.configMapper = new ProviderConfigMapper(providerStrategies)
+  }
+
+  public static async create(
+    json: string,
+    providerStrategies: ProviderStrategy[],
+    fileSystem = new FileSystemManager()
+  ): Promise<RepositoryController> {
+    const instance = new RepositoryController(json, fileSystem, providerStrategies)
+    await instance.initialize(json)
+    return instance
   }
 
   private async initialize(json: string): Promise<void> {
