@@ -6,7 +6,7 @@ import { AssociationsManager } from './association.manager'
 import { ErrorManager } from './utils/error.utils'
 import { SchemaManager } from './config/schema.manager'
 import { RepositoryController } from './api/repository.controller'
-import { LocalProviderStrategy, WebProviderStrategy } from './api/repository.strategy'
+import { RepositoryProviderStrategy, LocalProviderStrategy } from './api/repository.strategy'
 
 export async function activate(context: vscode.ExtensionContext) {
   ErrorManager.initialize()
@@ -16,7 +16,7 @@ export async function activate(context: vscode.ExtensionContext) {
   )
   const fileSystem = new FileSystemManager()
   const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
-  const providerStrategies = [new LocalProviderStrategy(), new WebProviderStrategy()]
+  const providerStrategies = [new LocalProviderStrategy(), new RepositoryProviderStrategy()]
   const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/.docx.json`)
 
   const repositoryController = await RepositoryController.create(jsonConfig, providerStrategies)

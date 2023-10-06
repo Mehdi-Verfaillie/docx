@@ -3,7 +3,6 @@ import { LocalProvider } from '../provider/local.provider'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { ProviderConfig } from './repository.controller'
 
-// @ts-ignore
 export type Provider = LocalProvider | GithubProvider
 
 export class RepositoryProvider {
