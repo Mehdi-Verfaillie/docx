@@ -1,6 +1,7 @@
 import { Documentation } from '../association.manager'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { RepositoryFactory } from './repository.factory'
+import { ProviderStrategy } from './repository.strategy'
 
 interface LocalProviderConfig {
   type: 'local'
@@ -11,16 +12,21 @@ interface RemoteProviderConfig {
   repositories: string[]
 }
 
-export type ProviderConfig = LocalProviderConfig | RemoteProviderConfig
+interface RemoteWebConfig {
+  type: 'web'
+  url: string
+}
+
+export type ProviderConfig = LocalProviderConfig | RemoteProviderConfig | RemoteWebConfig
 
 export class RepositoryController {
   private repository: RepositoryFactory
 
-  // TODO: Normalize the config json file
   private fileManager
+  private providerStrategies: ProviderStrategy[]
 
-  constructor(json: string) {
-    this.repository = new RepositoryFactory(this.configNormalizer(json))
+  constructor(json: string, providerStrategies: ProviderStrategy[]) {
+    this.providerStrategies = providerStrategies
     //@ts-ignore
     this.fileManager = new FileSystemManager()
   }
