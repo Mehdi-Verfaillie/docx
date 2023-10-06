@@ -9,6 +9,7 @@ interface LocalProviderConfig {
 interface RemoteProviderConfig {
   type: 'github' /* | 'gitlab' */
   repositories: string[]
+  token?: string
 }
 
 export type ProviderConfig = LocalProviderConfig | RemoteProviderConfig

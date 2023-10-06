@@ -1,3 +1,4 @@
+import { GithubProvider } from '../provider/github.provider'
 import { LocalProvider } from '../provider/local.provider'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { ProviderConfig } from './repository.controller'
@@ -17,8 +18,7 @@ export class RepositoryProvider {
         break
 
       case 'github':
-        // @ts-ignore
-        this.provider = new GithubProvider(config.repositories)
+        this.provider = new GithubProvider(config.repositories, config.token)
         break
       default:
         break
