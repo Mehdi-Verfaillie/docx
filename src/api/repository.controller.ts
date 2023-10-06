@@ -30,6 +30,7 @@ export class RepositoryController {
   private providerStrategies: ProviderStrategy[]
   private validator: AssociationsValidator
   private structuralManager: StructuralManager
+  private configMapper: ProviderConfigMapper
 
   private constructor(
     json: string,
@@ -57,7 +58,7 @@ export class RepositoryController {
     const config = this.fileSystem.processFileContent<DocAssociationsConfig>(json)
     await this.validateConfig(config)
 
-    const providerConfigs = await this.mapConfigToProviders(config)
+    const providerConfigs = await this.configMapper.mapConfigToProviders(config)
     this.repository = new RepositoryFactory(providerConfigs)
   }
 
@@ -70,23 +71,6 @@ export class RepositoryController {
     }
   }
 
-  private async mapConfigToProviders(config: DocAssociationsConfig): Promise<ProviderConfig[]> {
-    const providerConfigs: ProviderConfig[] = []
-
-    const docLocationsArray = Object.values(config.associations)
-    for (const docLocations of docLocationsArray) {
-      docLocations.forEach((docLocation) => {
-        const strategy = this.providerStrategies.find((strategy) => strategy.isMatch(docLocation))
-        if (strategy) {
-          const providerConfig = strategy.getProviderConfig(docLocation)
-          providerConfigs.push(providerConfig)
-        }
-      })
-    }
-
-    return providerConfigs
-  }
-
   private async validateConfig(config: DocAssociationsConfig): Promise<void> {
     if (!config) ErrorManager.outputError('Invalid configuration: Cannot find .docx.json file.')
 
@@ -96,5 +80,28 @@ export class RepositoryController {
     const errors = [...structuralErrors, ...associationErrors]
 
     if (errors.length) ErrorManager.outputError(errors)
+  }
+}
+
+class ProviderConfigMapper {
+  constructor(private providerStrategies: ProviderStrategy[]) {}
+
+  public async mapConfigToProviders(config: DocAssociationsConfig): Promise<ProviderConfig[]> {
+    const providerConfigsMap = new Map<string, ProviderConfig>()
+
+    for (const docLocations of Object.values(config.associations)) {
+      for (const docLocation of docLocations) {
+        const matchingStrategy = this.providerStrategies.find((strategy) =>
+          strategy.isMatch(docLocation)
+        )
+        if (matchingStrategy) {
+          const providerConfig = matchingStrategy.getProviderConfig(docLocation)
+          const key = JSON.stringify(providerConfig) // Create a unique key for each config
+          providerConfigsMap.set(key, providerConfig)
+        }
+      }
+    }
+
+    return Array.from(providerConfigsMap.values())
   }
 }
