@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
-import { ReplacerTextProvider } from '../../utils/replacerText.provider.utils'
+import { ReplacerTextProvider } from '../../utils/replacerText.utils'
 
 describe('Replacer github image', () => {
   it('should transform markdown local github image  to github url html image tag', async () => {

@@ -1,7 +1,7 @@
 import { Documentation } from '../association.manager'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { Octokit } from 'octokit'
-import { ReplacerTextProvider } from '../utils/replacerText.provider.utils'
+import { ReplacerTextProvider } from '../utils/replacerText.utils'
 
 interface GithubResponse {
   type: string
@@ -12,11 +12,10 @@ interface GithubResponse {
 }
 export class GithubProvider {
   public octokit: Octokit
-
   private fileSystem
   private repository
-
   private transformImageURL
+
   constructor(repository: string[], token?: string) {
     this.octokit = new Octokit({ auth: token })
     this.repository = this.getOwnerRepo(repository)
@@ -30,35 +29,43 @@ export class GithubProvider {
       `GET /repos/${this.repository.owner}/${this.repository.name}/contents`
     )
 
-    const fetchDocumentation = async (repositoryContents: GithubResponse[]) => {
-      for (const repositoryContent of repositoryContents) {
-        if (
-          repositoryContent.type === 'file' &&
-          this.fileSystem.isFileOfInterest(repositoryContent.name)
-        ) {
-          const documentation = await this.getFile(repositoryContent)
-          documentation.content = this.transformImageURL.replacer(documentation.content)
-          documentations.push(documentation)
-        }
-        if (repositoryContent.type === 'dir') {
-          const { data } = await this.getRepoContent(repositoryContent.url)
-          await fetchDocumentation(data)
-        }
+    const documentation = await this.fetchDocumentation(data)
+    if (documentation) documentations.push(documentation)
+    return documentations
+  }
+
+  private fetchDocumentation = async (
+    repositoryContents: GithubResponse[]
+  ): Promise<Documentation | undefined> => {
+    for (const repositoryContent of repositoryContents) {
+      if (
+        repositoryContent.type === 'file' &&
+        this.fileSystem.isFileOfInterest(repositoryContent.name)
+      ) {
+        const documentation = await this.getFile(repositoryContent)
+        documentation.content = this.transformImageURL.replacer(documentation.content)
+        return documentation
+      }
+      if (repositoryContent.type === 'dir') {
+        const { data } = await this.getRepoContent(repositoryContent.url)
+        await this.fetchDocumentation(data)
       }
     }
-
-    await fetchDocumentation(data)
-
-    return documentations
   }
 
   public async getRepoContent(route: string) {
     return await this.octokit.request(route)
   }
+
   public async getFile(file: GithubResponse): Promise<Documentation> {
     const content = await this.octokit.request(`GET ${file.download_url}`)
 
-    return { type: '.md', name: file.name, content: content.data, path: file.url }
+    return {
+      type: this.fileSystem.getExtension(file.name)!,
+      name: file.name,
+      content: content.data,
+      path: file.url,
+    }
   }
 
   public getOwnerRepo(repository: string[]) {

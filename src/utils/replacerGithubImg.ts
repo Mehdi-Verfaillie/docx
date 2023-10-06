@@ -1,18 +1,19 @@
-import { ReplacerInterface } from './replacerText.provider.utils'
+import { ErrorManager } from './error.utils'
+import { ReplacerInterface } from './replacerText.utils'
 
 export class ReplacerGithubImg implements ReplacerInterface {
-  private username: string
-  private repo: string
+  private username?: string
+  private repo?: string
   private token: string | undefined
 
   constructor(repository: string, token?: string) {
     const repoInfo = this.extractRepoParams(repository)
     if (!repoInfo || !repoInfo.username || !repoInfo.repo) {
-      throw new Error('Invalid repository information')
+      ErrorManager.outputError('Invalid configuration: Cannot find .docx.json file.')
     }
 
-    this.username = repoInfo.username
-    this.repo = repoInfo.repo
+    this.username = repoInfo?.username
+    this.repo = repoInfo?.repo
     this.token = token
   }
 
