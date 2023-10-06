@@ -9,6 +9,8 @@ interface GithubResponse {
   url: string
   // eslint-disable-next-line @typescript-eslint/naming-convention
   download_url: string
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  html_url: string
 }
 export class GithubProvider {
   public octokit: Octokit
@@ -64,7 +66,7 @@ export class GithubProvider {
       type: this.fileSystem.getExtension(file.name)!,
       name: file.name,
       content: content.data,
-      path: file.url,
+      path: file.html_url,
     }
   }
 
