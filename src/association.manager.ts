@@ -1,8 +1,6 @@
-import { AssociationsValidator, DocAssociationsConfig } from './association.validator'
-import { ErrorManager } from './utils/error.utils'
-import { Extension, FileSystemManager } from './utils/fileSystem.utils'
+import { DocAssociationsConfig } from './association.validator'
+import { Extension } from './utils/fileSystem.utils'
 import { DataTransformManager } from './utils/transform.utils'
-import { StructuralManager } from './structural.manager'
 
 export interface Documentation {
   name: string
@@ -12,16 +10,9 @@ export interface Documentation {
 }
 
 export class AssociationsManager {
-  private fileSystem: FileSystemManager
-  private validator: AssociationsValidator
-  private structuralManager: StructuralManager
   private transform = DataTransformManager
 
-  constructor(baseDir: string, fileSystem: FileSystemManager) {
-    this.fileSystem = fileSystem
-    this.validator = new AssociationsValidator(baseDir, fileSystem)
-    this.structuralManager = new StructuralManager(baseDir)
-  }
+  constructor() {}
 
   /**
    * Associates the given documentations based on the provided JSON configuration and user path.
@@ -37,26 +28,9 @@ export class AssociationsManager {
    */
   public async associate(
     documentations: Documentation[],
-    json: string,
+    config: DocAssociationsConfig,
     currUserPath: string
   ): Promise<Documentation[]> {
-    const config = this.fileSystem.processFileContent<DocAssociationsConfig>(json)
-
-    if (!config) {
-      ErrorManager.outputError('Invalid configuration: Cannot find .docx.json file.')
-      return []
-    }
-
-    const structuralErrors = await this.structuralManager.validateConfig(config)
-    const associationErrors = await this.validator.validateAssociations(config)
-
-    const errors = [...structuralErrors, ...associationErrors]
-
-    if (errors?.length) {
-      ErrorManager.outputError(errors)
-      return []
-    }
-
     const associatedDocsPaths = this.getAssociatedDocsPaths(currUserPath, config)
 
     if (!associatedDocsPaths.length) return []
