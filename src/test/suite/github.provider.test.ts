@@ -97,14 +97,14 @@ describe('GithubProvider', function () {
         .resolves({
           data: [
             {
-              type: 'file',
-              name: 'example.md',
-              url: 'https://example.com/example.md',
-            },
-            {
               type: 'dir',
               name: 'example',
               url: 'https://example.com/?ref=main',
+            },
+            {
+              type: 'file',
+              name: 'example.md',
+              url: 'https://example.com/example.md',
             },
           ],
         })

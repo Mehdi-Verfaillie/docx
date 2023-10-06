@@ -29,14 +29,14 @@ export class GithubProvider {
       `GET /repos/${this.repository.owner}/${this.repository.name}/contents`
     )
 
-    const documentation = await this.fetchDocumentation(data)
-    if (documentation) documentations.push(documentation)
+    await this.fetchDocumentation(data, documentations)
     return documentations
   }
 
   private fetchDocumentation = async (
-    repositoryContents: GithubResponse[]
-  ): Promise<Documentation | undefined> => {
+    repositoryContents: GithubResponse[],
+    documentations: Documentation[]
+  ): Promise<void> => {
     for (const repositoryContent of repositoryContents) {
       if (
         repositoryContent.type === 'file' &&
@@ -44,11 +44,11 @@ export class GithubProvider {
       ) {
         const documentation = await this.getFile(repositoryContent)
         documentation.content = this.transformImageURL.replacer(documentation.content)
-        return documentation
+        documentations.push(documentation)
       }
       if (repositoryContent.type === 'dir') {
         const { data } = await this.getRepoContent(repositoryContent.url)
-        await this.fetchDocumentation(data)
+        await this.fetchDocumentation(data, documentations)
       }
     }
   }

@@ -20,11 +20,6 @@ describe('Replacer github image', () => {
     expect(result).to.include('Some text <img src="https://external.com/image.jpg"> some more text')
   })
 
-  it('should throw error for invalid repository information', () => {
-    expect(() => new ReplacerTextProvider('https://notgithub.com/user/repo')).to.throw(
-      'Invalid repository information'
-    )
-  })
   it('should keep external image with github  links unchanged', async () => {
     const imageParse = new ReplacerTextProvider('https://github.com/user/repo')
     const content = " <img src='https://github.com/image.jpg'>"

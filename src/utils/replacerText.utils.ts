@@ -11,7 +11,7 @@ export class ReplacerTextProvider {
     this.addReplacer(new ReplacerGithubImg(initialRepository, token))
   }
 
-  public addReplacer(replacer: ReplacerInterface): void {
+  public addReplacer(replacer: ReplacerInterface) {
     this.replacersList.push(replacer)
   }
 

@@ -4,12 +4,12 @@ import { ReplacerInterface } from './replacerText.utils'
 export class ReplacerGithubImg implements ReplacerInterface {
   private username?: string
   private repo?: string
-  private token: string | undefined
+  private token?: string
 
   constructor(repository: string, token?: string) {
     const repoInfo = this.extractRepoParams(repository)
     if (!repoInfo || !repoInfo.username || !repoInfo.repo) {
-      ErrorManager.outputError('Invalid configuration: Cannot find .docx.json file.')
+      ErrorManager.outputError('Invalid repository information')
     }
 
     this.username = repoInfo?.username
