@@ -211,9 +211,14 @@ describe('Associations JSON Validation', () => {
 
   it('should return associated documentations for currUserPath', async () => {
     const mockDoc: Documentation[] = [
-      { name: '/docx/ifTernary.md', type: '.md', content: 'content' },
-      { name: '/docx/asyncAwait.md', type: '.md', content: 'content' },
-      { name: '/docx/someOtherDoc.md', type: '.md', content: 'content' },
+      { name: 'ifTernary.md', path: '/docx/ifTernary.md', type: '.md', content: 'content' },
+      { name: 'asyncAwait.md', path: '/docx/asyncAwait.md', type: '.md', content: 'content' },
+      {
+        name: 'someOtherDoc.md',
+        path: '/docx/someOtherDoc.md',
+        type: '.md',
+        content: 'content',
+      },
     ]
 
     fileSystemStub.processFileContent.returns(JSON.parse(jsonMock))
@@ -221,19 +226,19 @@ describe('Associations JSON Validation', () => {
     const srcResult = await manager.associate(mockDoc, jsonMock, 'src')
 
     expect(srcResult).to.have.length(2)
-    expect(srcResult[0].name).to.equal('/docx/asyncAwait.md')
-    expect(srcResult[1].name).to.equal('/docx/ifTernary.md')
+    expect(srcResult[0].path).to.equal('/docx/asyncAwait.md')
+    expect(srcResult[1].path).to.equal('/docx/ifTernary.md')
 
     fileSystemStub.processFileContent.returns(JSON.parse(jsonMock))
   })
 
   it('should return associated documentations for currUserPath including parent associations', async () => {
     const mockDoc: Documentation[] = [
-      { name: '/docx/ifTernary.md', type: '.md', content: 'content' },
-      { name: '/docx/asyncAwait.md', type: '.md', content: 'content' },
-      { name: '/docx/controllers.md', type: '.md', content: 'content' },
-      { name: '/docx/modules.md', type: '.md', content: 'content' },
-      { name: '/docx/utils/dates.md', type: '.md', content: 'content' },
+      { name: 'ifTernary.md', path: '/docx/ifTernary.md', type: '.md', content: 'content' },
+      { name: 'asyncAwait.md', path: '/docx/asyncAwait.md', type: '.md', content: 'content' },
+      { name: 'controllers.md', path: '/docx/controllers.md', type: '.md', content: 'content' },
+      { name: 'modules.md', path: '/docx/modules.md', type: '.md', content: 'content' },
+      { name: 'dates.md', path: '/docx/utils/dates.md', type: '.md', content: 'content' },
     ]
 
     fileSystemStub.processFileContent.returns(JSON.parse(jsonMock))
@@ -242,8 +247,8 @@ describe('Associations JSON Validation', () => {
     const modulesResult = await manager.associate(mockDoc, jsonMock, 'src/Modules')
 
     expect(modulesResult).to.have.length(3) // Including parent's documentation
-    expect(modulesResult.some((doc) => doc.name === '/docx/ifTernary.md')).to.be.equal(true)
-    expect(modulesResult.some((doc) => doc.name === '/docx/asyncAwait.md')).to.be.equal(true)
-    expect(modulesResult.some((doc) => doc.name === '/docx/modules.md')).to.be.equal(true)
+    expect(modulesResult.some((doc) => doc.path === '/docx/ifTernary.md')).to.be.equal(true)
+    expect(modulesResult.some((doc) => doc.path === '/docx/asyncAwait.md')).to.be.equal(true)
+    expect(modulesResult.some((doc) => doc.path === '/docx/modules.md')).to.be.equal(true)
   })
 })
