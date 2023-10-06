@@ -2,6 +2,7 @@ import { AssociationsValidator, DocAssociationsConfig } from './association.vali
 import { ErrorManager } from './utils/error.utils'
 import { Extension, FileSystemManager } from './utils/fileSystem.utils'
 import { DataTransformManager } from './utils/transform.utils'
+import { StructuralManager } from './structural.manager'
 
 export interface Documentation {
   name: string
@@ -12,11 +13,13 @@ export interface Documentation {
 export class AssociationsManager {
   private fileSystem: FileSystemManager
   private validator: AssociationsValidator
+  private structuralManager: StructuralManager
   private transform = DataTransformManager
 
   constructor(baseDir: string, fileSystem: FileSystemManager) {
     this.fileSystem = fileSystem
     this.validator = new AssociationsValidator(baseDir, fileSystem)
+    this.structuralManager = new StructuralManager(baseDir)
   }
 
   /**
@@ -38,15 +41,15 @@ export class AssociationsManager {
   ): Promise<Documentation[]> {
     const config = this.fileSystem.processFileContent<DocAssociationsConfig>(json)
 
-    if (!config || !config.associations) {
-      const errorMessage = !config
-        ? 'Invalid configuration: Cannot find .docx.json file.'
-        : 'Invalid configuration: missing associations.'
-      ErrorManager.outputError(errorMessage)
+    if (!config) {
+      ErrorManager.outputError('Invalid configuration: Cannot find .docx.json file.')
       return []
     }
 
-    const errors = await this.validator.validateAssociations(config)
+    const structuralErrors = await this.structuralManager.validateConfig(config)
+    const associationErrors = await this.validator.validateAssociations(config)
+
+    const errors = [...structuralErrors, ...associationErrors]
 
     if (errors?.length) {
       ErrorManager.outputError(errors)
