@@ -57,7 +57,7 @@ describe('Associations JSON Validation', () => {
 
     const baseDir = workspace.workspaceFolders?.[0]?.uri?.fsPath ?? ''
     validator = new AssociationsValidator(baseDir, fileSystemStub)
-    manager = new AssociationsManager(baseDir, fileSystemStub)
+    manager = new AssociationsManager()
   })
 
   teardown(() => {
@@ -197,7 +197,7 @@ describe('Associations JSON Validation', () => {
 
   it('should return an empty array if validation errors occur', async () => {
     validatorStub.validateAssociations.resolves([])
-    const result = await manager.associate([], jsonMock, 'src')
+    const result = await manager.associate([], JSON.parse(jsonMock), 'src')
     expect(result).to.deep.equal([])
   })
 
@@ -205,7 +205,7 @@ describe('Associations JSON Validation', () => {
     validatorStub.validateAssociations.resolves([])
     fileSystemStub.processFileContent.returns({ associations: {} })
 
-    const result = await manager.associate([], jsonMock, 'nonexistentPath')
+    const result = await manager.associate([], JSON.parse(jsonMock), 'nonexistentPath')
     expect(result).to.deep.equal([])
   })
 
@@ -223,7 +223,7 @@ describe('Associations JSON Validation', () => {
 
     fileSystemStub.processFileContent.returns(JSON.parse(jsonMock))
 
-    const srcResult = await manager.associate(mockDoc, jsonMock, 'src')
+    const srcResult = await manager.associate(mockDoc, JSON.parse(jsonMock), 'src')
 
     expect(srcResult).to.have.length(2)
     expect(srcResult[0].path).to.equal('/docx/asyncAwait.md')
@@ -244,7 +244,7 @@ describe('Associations JSON Validation', () => {
     fileSystemStub.processFileContent.returns(JSON.parse(jsonMock))
 
     // Test for a child directory. Expecting both parent (src) and its own (src/Modules) associations.
-    const modulesResult = await manager.associate(mockDoc, jsonMock, 'src/Modules')
+    const modulesResult = await manager.associate(mockDoc, JSON.parse(jsonMock), 'src/Modules')
 
     expect(modulesResult).to.have.length(3) // Including parent's documentation
     expect(modulesResult.some((doc) => doc.path === '/docx/ifTernary.md')).to.be.equal(true)

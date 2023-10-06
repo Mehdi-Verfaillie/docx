@@ -1,7 +1,9 @@
 import { Documentation } from '../association.manager'
-import { DocAssociationsConfig } from '../association.validator'
+import { AssociationsValidator, DocAssociationsConfig } from '../association.validator'
+import { StructuralManager } from '../structural.manager'
 import { ErrorManager } from '../utils/error.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
+import { WorkspaceManager } from '../utils/workspace.utils'
 import { RepositoryFactory } from './repository.factory'
 import { ProviderStrategy } from './repository.strategy'
 
@@ -22,15 +24,31 @@ interface RemoteWebConfig {
 export type ProviderConfig = LocalProviderConfig | RemoteProviderConfig | RemoteWebConfig
 
 export class RepositoryController {
-  private repository: RepositoryFactory
-
-  private fileManager
+  private repository!: RepositoryFactory
+  private fileSystem = new FileSystemManager()
+  private baseDir = WorkspaceManager.getWorkspaceFolder()
   private providerStrategies: ProviderStrategy[]
+  private validator: AssociationsValidator
+  private structuralManager: StructuralManager
 
-  constructor(json: string, providerStrategies: ProviderStrategy[]) {
+  constructor(
+    json: string,
+    fileSystem = new FileSystemManager(),
+    providerStrategies: ProviderStrategy[]
+  ) {
+    this.initialize(json)
+    this.fileSystem = fileSystem
     this.providerStrategies = providerStrategies
-    this.repository = new RepositoryFactory(this.mapConfigToProviders(json))
-    this.fileManager = new FileSystemManager()
+    this.structuralManager = new StructuralManager(this.baseDir)
+    this.validator = new AssociationsValidator(this.baseDir, this.fileSystem)
+  }
+
+  private async initialize(json: string): Promise<void> {
+    const config = this.fileSystem.processFileContent<DocAssociationsConfig>(json)
+    await this.validateConfig(config)
+
+    const providerConfigs = await this.mapConfigToProviders(config)
+    this.repository = new RepositoryFactory(providerConfigs)
   }
 
   public async getDocumentations(): Promise<Documentation[]> {
@@ -42,8 +60,7 @@ export class RepositoryController {
     }
   }
 
-  private mapConfigToProviders(json: string): ProviderConfig[] {
-    const config = this.fileManager.processFileContent<DocAssociationsConfig>(json)
+  private async mapConfigToProviders(config: DocAssociationsConfig): Promise<ProviderConfig[]> {
     const providerConfigs: ProviderConfig[] = []
 
     const docLocationsArray = Object.values(config.associations)
@@ -58,5 +75,16 @@ export class RepositoryController {
     }
 
     return providerConfigs
+  }
+
+  private async validateConfig(config: DocAssociationsConfig): Promise<void> {
+    if (!config) ErrorManager.outputError('Invalid configuration: Cannot find .docx.json file.')
+
+    const structuralErrors = await this.structuralManager.validateConfig(config)
+    const associationErrors = await this.validator.validateAssociations(config)
+
+    const errors = [...structuralErrors, ...associationErrors]
+
+    if (errors.length) ErrorManager.outputError(errors)
   }
 }
