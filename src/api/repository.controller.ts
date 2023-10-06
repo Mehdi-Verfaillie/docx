@@ -1,6 +1,6 @@
 import { Documentation } from '../association.manager'
 import { AssociationsValidator, DocAssociationsConfig } from '../association.validator'
-import { StructuralManager } from '../structural.manager'
+import { StructuralValidator } from '../structural.validator'
 import { ErrorManager } from '../utils/error.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { WorkspaceManager } from '../utils/workspace.utils'
@@ -29,7 +29,6 @@ export class RepositoryController {
   private baseDir = WorkspaceManager.getWorkspaceFolder()
   private providerStrategies: ProviderStrategy[]
   private validator: AssociationsValidator
-  private structuralManager: StructuralManager
   private configMapper: ProviderConfigMapper
 
   private constructor(
@@ -39,7 +38,6 @@ export class RepositoryController {
   ) {
     this.fileSystem = fileSystem
     this.providerStrategies = providerStrategies
-    this.structuralManager = new StructuralManager(this.baseDir)
     this.validator = new AssociationsValidator(this.baseDir, this.fileSystem)
     this.configMapper = new ProviderConfigMapper(providerStrategies)
   }
@@ -74,7 +72,7 @@ export class RepositoryController {
   private async validateConfig(config: DocAssociationsConfig): Promise<void> {
     if (!config) ErrorManager.outputError('Invalid configuration: Cannot find .docx.json file.')
 
-    const structuralErrors = await this.structuralManager.validateConfig(config)
+    const structuralErrors = StructuralValidator.validateConfigStructure(config)
     const associationErrors = await this.validator.validateAssociations(config)
 
     const errors = [...structuralErrors, ...associationErrors]

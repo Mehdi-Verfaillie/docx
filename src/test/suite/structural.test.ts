@@ -2,14 +2,10 @@ import { expect } from 'chai'
 import { describe, setup, it } from 'mocha'
 import { StructuralValidator } from '../../structural.validator'
 import { FileSystemManager } from '../../utils/fileSystem.utils'
-import { StructuralManager } from '../../structural.manager'
-import { workspace } from 'vscode'
 import { DocAssociationsConfig } from '../../association.validator'
 describe('Configuration JSON Structure Validation', () => {
   const fileSystem = new FileSystemManager()
   let jsonMock: string
-
-  let manager: StructuralManager
 
   let globalFaultiesData: string[] = []
   const expectedStructureError = `
@@ -45,9 +41,6 @@ describe('Configuration JSON Structure Validation', () => {
         "src/Utils/dates.ts": ["/docx/utils/dates.md"]
       }          
     }`
-
-    const baseDir = workspace.workspaceFolders?.[0]?.uri?.fsPath ?? ''
-    manager = new StructuralManager(baseDir)
   })
 
   it('should detect that file is not json', () => {
@@ -290,7 +283,7 @@ describe('Configuration JSON Structure Validation', () => {
       }
     }`
     const jsonConfig = fileSystem.processFileContent(faultyData) as DocAssociationsConfig
-    const errors = await manager.validateConfig(jsonConfig)
+    const errors = StructuralValidator.validateConfigStructure(jsonConfig)
 
     expect(errors).to.have.lengthOf(3)
 
@@ -308,7 +301,7 @@ describe('Configuration JSON Structure Validation', () => {
   it('should return true if no validation error occurred.', async () => {
     const jsonConfig = fileSystem.processFileContent(jsonMock) as DocAssociationsConfig
 
-    const errors = await manager.validateConfig(jsonConfig)
+    const errors = StructuralValidator.validateConfigStructure(jsonConfig)
     expect(errors).to.have.lengthOf(0)
   })
 })

@@ -8,7 +8,7 @@ export interface InvalidEntityError extends EntityError {
 export class StructuralValidator {
   public static validateConfigStructure(
     config: DocAssociationsConfig
-  ): (MissingEntityError | InvalidEntityError)[] | undefined {
+  ): (MissingEntityError | InvalidEntityError)[] {
     const associationsTypeErrors: (MissingEntityError | InvalidEntityError)[] =
       this.validateAssociationsKeyStructure(config)
 
@@ -27,6 +27,7 @@ export class StructuralValidator {
 
     return allErrors
   }
+
   public static validateAssociationsKeyStructure(
     config: DocAssociationsConfig
   ): (MissingEntityError | InvalidEntityError)[] {
@@ -118,6 +119,7 @@ export class StructuralValidator {
 
     return errors
   }
+
   public static findBackSlashInPaths(
     config: DocAssociationsConfig
   ): (MissingEntityError | InvalidEntityError)[] {
