@@ -1,4 +1,5 @@
 import { Documentation } from '../association.manager'
+import { ErrorManager } from '../utils/error.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { RepositoryFactory } from './repository.factory'
 import { ProviderStrategy } from './repository.strategy'
@@ -35,7 +36,8 @@ export class RepositoryController {
     try {
       return await this.repository.getDocumentations()
     } catch (error) {
-      throw new Error(`Failed to fetch documentations ${error}`)
+      ErrorManager.outputError(`Failed to fetch documentations ${error}`)
+      return []
     }
   }
 
