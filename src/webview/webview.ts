@@ -13,12 +13,10 @@ export function webView(file: Documentation) {
     <meta charset="UTF-8">
     <title>Markdown Preview</title>
     <style>
-      /* Votre CSS personnalisé peut être ajouté ici pour le rendu Markdown. */
     </style>
   </head>
   <body>
     ${file.content}
-    <img src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif" width="300" />
   </body>
   </html>
 `
