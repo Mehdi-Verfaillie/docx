@@ -3,6 +3,7 @@ import { FileSystemManager } from './utils/fileSystem.utils'
 
 export interface DocAssociationsConfig {
   associations: Record<string, string[]>
+  ignorePatterns?: string[]
 }
 
 type ProjectEntityType = 'directory' | 'documentationFile' | 'associationsKey' | 'config'
