@@ -1,10 +1,11 @@
 import { workspace } from 'vscode'
 import { GithubProvider } from '../provider/github.provider'
+import { GitlabProvider } from '../provider/gitlab.provider'
 import { LocalProvider } from '../provider/local.provider'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { ProviderConfig } from './repository.controller'
 
-export type Provider = LocalProvider | GithubProvider
+export type Provider = LocalProvider | GithubProvider | GitlabProvider
 
 export class RepositoryProvider {
   private provider!: Provider
@@ -20,6 +21,9 @@ export class RepositoryProvider {
 
       case 'github':
         this.provider = new GithubProvider(config.repositories, config.token)
+        break
+      case 'gitlab':
+        this.provider = new GitlabProvider(config.repositories, config.token)
         break
       default:
         break
