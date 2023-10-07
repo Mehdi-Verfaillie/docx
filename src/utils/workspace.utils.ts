@@ -1,8 +1,11 @@
 import { window, Uri, workspace } from 'vscode'
 
 export class WorkspaceManager {
-  static getCurrentUserPath(): Uri | undefined {
-    return window.activeTextEditor?.document.uri
+  static getCurrentUserPath(): string | undefined {
+    const uri = window.activeTextEditor?.document.uri
+
+    if (!uri) return undefined
+    return workspace.asRelativePath(uri, false)
   }
 
   static getWorkspaceFolder(): string {

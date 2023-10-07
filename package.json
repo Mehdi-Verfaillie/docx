@@ -2,14 +2,18 @@
   "name": "docx",
   "license": "MIT",
   "description": "A doc just in time to access the right doc when you need it the most",
-  "version": "0.0.1",
+  "version": "1.0.2",
+  "publisher": "docx-mt5",
+  "icon": "images/logo.png",
   "engines": {
     "vscode": "^1.80.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "workspaceContains:.docx.json"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -43,8 +47,10 @@
     "format": "prettier --write ./src"
   },
   "devDependencies": {
+    "@octokit/types": "^11.1.0",
     "@types/chai": "^4.3.6",
     "@types/glob": "^8.1.0",
+    "@types/markdown-it": "^13.0.2",
     "@types/mocha": "^10.0.1",
     "@types/node": "20.2.5",
     "@types/sinon": "^10.0.16",
@@ -60,9 +66,11 @@
     "mocha": "^10.2.0",
     "prettier": "^3.0.3",
     "sinon": "^15.2.0",
-    "typescript": "5.1.x"
+    "typescript": "^5.2.2"
   },
   "dependencies": {
-    "axios": "^1.5.0"
+    "octokit": "^3.1.0",
+    "axios": "^1.5.0",
+    "markdown-it": "^13.0.2"
   }
 }

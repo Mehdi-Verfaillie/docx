@@ -1,20 +1,18 @@
-import { AssociationsValidator, DocAssociationsConfig } from './association.validator'
-import { Extension, FileSystemManager } from './utils/fileSystem.utils'
+import { DocAssociationsConfig } from './association.validator'
+import { Extension } from './utils/fileSystem.utils'
+import { DataTransformManager } from './utils/transform.utils'
 
 export interface Documentation {
   name: string
+  path: string
   type: Extension
   content: string
 }
 
 export class AssociationsManager {
-  private fileSystem: FileSystemManager
-  private validator: AssociationsValidator
+  private transform = DataTransformManager
 
-  constructor(baseDir: string, fileSystem: FileSystemManager) {
-    this.fileSystem = fileSystem
-    this.validator = new AssociationsValidator(baseDir, fileSystem)
-  }
+  constructor() {}
 
   /**
    * Associates the given documentations based on the provided JSON configuration and user path.
@@ -30,22 +28,16 @@ export class AssociationsManager {
    */
   public async associate(
     documentations: Documentation[],
-    json: string,
+    config: DocAssociationsConfig,
     currUserPath: string
   ): Promise<Documentation[]> {
-    const config = this.fileSystem.processFileContent<DocAssociationsConfig>(json)
-
-    if (!config || !config.associations) return [] // TODO: Return the errors in the terminal
-
-    const errors = await this.validator.validateAssociations(config)
-
-    if (errors?.length) return [] // TODO: Return the errors in the terminal
-
     const associatedDocsPaths = this.getAssociatedDocsPaths(currUserPath, config)
 
     if (!associatedDocsPaths.length) return []
 
-    return documentations.filter((doc) => associatedDocsPaths.includes(doc.name))
+    return this.transform.sortDataByTypeAndName(
+      documentations.filter((doc) => associatedDocsPaths.includes(doc.path))
+    )
   }
 
   /**
