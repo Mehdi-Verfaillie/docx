@@ -5,19 +5,20 @@ export interface DocAssociationsConfig {
   associations: Record<string, string[]>
 }
 
-type ProjectEntityType = 'directory' | 'documentationFile'
+type ProjectEntityType = 'directory' | 'documentationFile' | 'associationsKey' | 'config'
 
-interface EntityError {
-  errorType: 'MISSING' | 'DUPLICATE'
+export interface EntityError {
+  errorType: 'MISSING' | 'DUPLICATE' | 'INVALID'
   entityType: ProjectEntityType
   entityPath: string
+  errorMsg?: string
 }
 
-interface MissingEntityError extends EntityError {
+export interface MissingEntityError extends EntityError {
   errorType: 'MISSING'
 }
 
-interface DuplicateEntityError extends EntityError {
+export interface DuplicateEntityError extends EntityError {
   errorType: 'DUPLICATE'
   originalLocation: string
   duplicateLocation: string
@@ -34,7 +35,7 @@ export class AssociationsValidator {
 
   public async validateAssociations({
     associations,
-  }: DocAssociationsConfig): Promise<(MissingEntityError | DuplicateEntityError)[] | undefined> {
+  }: DocAssociationsConfig): Promise<(MissingEntityError | DuplicateEntityError)[]> {
     const dirErrors = await this.validateDirectoryPaths(Object.keys(associations))
     const docErrors = await this.validateDocumentationPaths(associations)
     const dupDocErrors = this.findDuplicateDocsInDirectory(associations)
@@ -42,9 +43,7 @@ export class AssociationsValidator {
 
     const allErrors = [...dirErrors, ...docErrors, ...dupDocErrors, ...inheritedDupDocErrors]
 
-    if (allErrors.length > 0) {
-      return allErrors
-    }
+    return allErrors
   }
 
   public async validateDirectoryPaths(directories: string[]): Promise<MissingEntityError[]> {

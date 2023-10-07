@@ -1,35 +1,40 @@
 import { expect } from 'chai'
 import { DataTransformManager } from '../../utils/transform.utils'
 import { describe, it } from 'mocha'
+import { Documentation } from '../../association.manager'
 
 describe('Data Sorter', () => {
   const transform = DataTransformManager
 
   it('should correctly sort data by type and then by name', () => {
-    const inputData = [
-      { name: 'a', type: 'md' },
-      { name: 'b', type: 'txt' },
-      { name: 'c', type: 'md' },
-      { name: 'f', type: 'rtf' },
-      { name: 'r', type: 'bpmn' },
-      { name: 'e', type: 'md' },
-      { name: 'p', type: 'md' },
-      { name: 'm', type: 'bpmn' },
-      { name: 'l', type: 'bpmn' },
+    const inputData: Documentation[] = [
+      { name: 'a', path: 'a', type: '.md', content: '' },
+      // @ts-ignore
+      { name: 'b', path: 'b', type: '.txt', content: '' },
+      { name: 'c', path: 'c', type: '.md', content: '' },
+      // @ts-ignore
+      { name: 'f', path: 'f', type: '.rtf', content: '' },
+      { name: 'r', path: 'r', type: '.bpmn', content: '' },
+      { name: 'e', path: 'e', type: '.md', content: '' },
+      { name: 'p', path: 'p', type: '.md', content: '' },
+      { name: 'm', path: 'm', type: '.bpmn', content: '' },
+      { name: 'l', path: 'l', type: '.bpmn', content: '' },
     ]
 
     const sortedData = transform.sortDataByTypeAndName(inputData)
 
-    const expectedData = [
-      { name: 'l', type: 'bpmn' },
-      { name: 'm', type: 'bpmn' },
-      { name: 'r', type: 'bpmn' },
-      { name: 'a', type: 'md' },
-      { name: 'c', type: 'md' },
-      { name: 'e', type: 'md' },
-      { name: 'p', type: 'md' },
-      { name: 'f', type: 'rtf' },
-      { name: 'b', type: 'txt' },
+    const expectedData: Documentation[] = [
+      { name: 'l', path: 'l', type: '.bpmn', content: '' },
+      { name: 'm', path: 'm', type: '.bpmn', content: '' },
+      { name: 'r', path: 'r', type: '.bpmn', content: '' },
+      { name: 'a', path: 'a', type: '.md', content: '' },
+      { name: 'c', path: 'c', type: '.md', content: '' },
+      { name: 'e', path: 'e', type: '.md', content: '' },
+      { name: 'p', path: 'p', type: '.md', content: '' },
+      // @ts-ignore
+      { name: 'f', path: 'f', type: '.rtf', content: '' },
+      // @ts-ignore
+      { name: 'b', path: 'b', type: '.txt', content: '' },
     ]
 
     expect(sortedData).to.deep.equal(expectedData)

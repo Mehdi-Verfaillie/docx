@@ -2,18 +2,22 @@ import * as vscode from 'vscode'
 import { Documentation } from '../association.manager'
 
 export function webView(file: Documentation) {
-  const panel = vscode.window.createWebviewPanel(file.name, file.name, vscode.ViewColumn.One, {})
+  //create and show panel and show window on the right
+  const panel = vscode.window.createWebviewPanel(file.type, file.name, vscode.ViewColumn.Two, {})
 
-  if (file.type === '.md')
-    panel.webview.html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>${file.name}</title>
-    </head>
-    <body>
-    <pre>${file.content}</pre>
-    </body>
-    </html>
-  `
+  //add sets its HTML shows like md preview
+  panel.webview.html = `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Markdown Preview</title>
+    <style>
+    </style>
+  </head>
+  <body>
+    <div>${file.content}</div>
+  </body>
+  </html>
+`
 }

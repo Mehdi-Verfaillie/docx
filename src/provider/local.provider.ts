@@ -1,12 +1,7 @@
 import { Documentation } from '../association.manager'
 import { WorkspaceManager } from '../utils/workspace.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
-import { Uri } from 'vscode'
-
-export interface ErrorHandler {
-  code: string
-  message: string
-}
+import { Uri, FileType, workspace } from 'vscode'
 
 export class LocalProvider {
   constructor(private fileSystem: FileSystemManager) {
@@ -20,20 +15,25 @@ export class LocalProvider {
 
   public async fetchDocumentation(directoryUri: Uri): Promise<Documentation[]> {
     const allFiles = (await this.fileSystem.readDirectory(directoryUri.fsPath)) ?? []
-    const documentationFiles = allFiles.filter(([filename]) =>
-      this.fileSystem.isFileOfInterest(filename)
-    )
+    let documentation: Documentation[] = []
 
-    const documentationPromises = documentationFiles.map(async ([filename]) => {
+    for (const [filename, fileType] of allFiles) {
       const filePath = Uri.joinPath(directoryUri, filename)
-      const content = await this.fileSystem.readFile(filePath.fsPath)
-      return {
-        name: filename,
-        type: this.fileSystem.getExtension(filename)!,
-        content: content,
-      }
-    })
 
-    return Promise.all(documentationPromises)
+      if (fileType === FileType.Directory) {
+        const nestedDocs = await this.fetchDocumentation(filePath)
+        documentation = documentation.concat(nestedDocs)
+      } else if (this.fileSystem.isFileOfInterest(filename)) {
+        const content = await this.fileSystem.readFile(filePath.fsPath)
+        documentation.push({
+          name: filename,
+          path: workspace.asRelativePath(filePath.path),
+          type: this.fileSystem.getExtension(filename)!,
+          content: content,
+        })
+      }
+    }
+
+    return documentation
   }
 }

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "associations": {
+      "type": "object",
+      "title": "[Docx] Associations",
+      "description": "The associations between targets and documentations path/url.\nExample: '\"src/myFile.js\": [\"myDocsFolder/myFirstDoc.md\", \"myDocsFolder/mySecondDoc.md\"]'.",
+      "additionalProperties": {
+        "type": "array",
+        "title": "[Docx] Target path",
+        "description": "The target path associated to the documentations.\nTarget could be file or folder.\nExample: 'src/myFile.js' will select specific file. 'src/myFolder' will select all files inside the folder src/myFolder.",
+        "items": {
+          "type": "string",
+          "title": "[Docx] Documentations path/url",
+          "description": "The documentations path or url associated to the target.\nDocumentations could be path or url (currently, only github repository is accepted, if the repository's private, add your token in the the providers informations).\n Example: '[\"myDocsFolder/myFirstDoc.md\", \"myDocsFolder/mySecondDoc.md\"]'."
+        }
+      }
+    }
+  },
+  "required": ["associations"]
+}
