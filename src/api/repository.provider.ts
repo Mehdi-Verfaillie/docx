@@ -1,3 +1,4 @@
+import { workspace } from 'vscode'
 import { GithubProvider } from '../provider/github.provider'
 import { LocalProvider } from '../provider/local.provider'
 import { FileSystemManager } from '../utils/fileSystem.utils'
@@ -9,11 +10,12 @@ export class RepositoryProvider {
   private provider!: Provider
 
   constructor(config: ProviderConfig) {
-    const fileSystem = new FileSystemManager()
-
     switch (config.type) {
       case 'local':
-        this.provider = new LocalProvider(fileSystem)
+        {
+          const fileSystem = new FileSystemManager(workspace.fs, config.ignorePatterns)
+          this.provider = new LocalProvider(fileSystem)
+        }
         break
 
       case 'github':

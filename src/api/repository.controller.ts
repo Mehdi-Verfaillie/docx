@@ -10,6 +10,7 @@ import { ProviderStrategy } from './repository.strategy'
 
 interface LocalProviderConfig {
   type: 'local'
+  ignorePatterns?: string[]
 }
 
 interface RemoteProviderConfig {

@@ -1,11 +1,18 @@
+import { minimatch } from 'minimatch'
 import { Uri, workspace, FileSystemError, FileSystem, FileType } from 'vscode'
 
 const extensionsOfInterest = ['.md', '.bpmn'] as const
 export type Extension = (typeof extensionsOfInterest)[number]
 
 export class FileSystemManager {
-  constructor(private fs: FileSystem = workspace.fs) {
+  private ignorePatterns: string[] = []
+
+  constructor(
+    private fs: FileSystem = workspace.fs,
+    ignorePatterns?: string[]
+  ) {
     this.fs = fs
+    if (ignorePatterns && ignorePatterns.length) this.ignorePatterns = ignorePatterns
   }
 
   public async ensureFileExists(uri: Uri): Promise<boolean> {
@@ -30,6 +37,8 @@ export class FileSystemManager {
   }
 
   public async readDirectory(directoryPath: string): Promise<[string, FileType][]> {
+    if (this.matchesIgnorePattern(directoryPath)) return []
+
     try {
       return await this.fs.readDirectory(Uri.file(directoryPath))
     } catch (error) {
@@ -48,5 +57,9 @@ export class FileSystemManager {
 
   public isFileOfInterest(filename: string): boolean {
     return !!this.getExtension(filename)
+  }
+
+  private matchesIgnorePattern(directoryPath: string): boolean {
+    return this.ignorePatterns.some((pattern) => minimatch(directoryPath, pattern))
   }
 }
