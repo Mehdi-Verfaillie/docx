@@ -40,12 +40,12 @@ export class ReplacerGithubImg implements ReplacerInterface {
     return content.replace(regex, (_, imageUrl) => {
       if (this.isGithubImageUrl(imageUrl)) {
         const path = imageUrl.split('/main')[1]
-        return `<img src="${this.getRawGithubUrl(path)}" ">`
+        return `<img src="${this.getRawGithubUrl(path)}"/>`
       }
       if (this.isLocalImg(imageUrl)) {
-        return `<img src="${this.getRawGithubUrl(imageUrl)}">`
+        return `<img src="${this.getRawGithubUrl(imageUrl)}"/>`
       }
-      return `<img src="${imageUrl}">`
+      return `<img src="${imageUrl}"/>`
     })
   }
 

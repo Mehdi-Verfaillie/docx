@@ -10,6 +10,7 @@ export class ReplacerGitLabImg implements ReplacerInterface {
     const repoInfo = this.extractGitlabRepoParams(repository)
     if (!repoInfo || !repoInfo.username || !repoInfo.repo) {
       ErrorManager.outputError('Invalid repository information')
+      return
     }
 
     this.username = repoInfo?.username
@@ -32,7 +33,7 @@ export class ReplacerGitLabImg implements ReplacerInterface {
     return this.replaceToGilabImgTag(content, markdownImageRegex)
   }
   private replaceTagImg = (content: string): string => {
-    const htmlImageRegex = /<img src='([^']*)'(?:\s+alt='([^']*)')?>/g // regex to get img tag ex : <img src='/image/drg.png' alt='drag'>
+    const htmlImageRegex = /<img src='([^']*)'(?:\s+alt='([^']*)')?\s*\/?>/g // regex to get img tag ex : <img src='/image/drg.png' alt='drag'>
     return this.replaceToGilabImgTag(content, htmlImageRegex)
   }
 

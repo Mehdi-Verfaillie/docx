@@ -7,7 +7,6 @@ import { ErrorManager } from './utils/error.utils'
 import { SchemaManager } from './config/schema.manager'
 import { RepositoryController } from './api/repository.controller'
 import { RepositoryProviderStrategy, LocalProviderStrategy } from './api/repository.strategy'
-import * as MarkdownIt from 'markdown-it'
 import { CredentialManager } from './utils/credentials.utils'
 
 export async function activate(context: vscode.ExtensionContext) {

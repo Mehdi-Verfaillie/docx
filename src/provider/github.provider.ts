@@ -2,6 +2,7 @@ import { Documentation } from '../association.manager'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { Octokit } from 'octokit'
 import { ReplacerTextProvider } from '../utils/replacerText.utils'
+import { AbstractRepositoryFactory } from '../api/repository.factory'
 
 interface GithubResponse {
   type: string
@@ -12,7 +13,7 @@ interface GithubResponse {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   html_url: string
 }
-export class GithubProvider {
+export class GithubProvider implements AbstractRepositoryFactory {
   public octokit: Octokit
   private fileSystem
   private repository
@@ -69,7 +70,6 @@ export class GithubProvider {
       path: file.html_url,
     }
   }
-
   public getOwnerRepo(repository: string[]) {
     const urlParts = repository[0].split('/')
     return { owner: urlParts[3], name: urlParts[4] }
