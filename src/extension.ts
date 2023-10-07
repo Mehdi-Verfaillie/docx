@@ -59,13 +59,9 @@ export async function activate(context: vscode.ExtensionContext) {
       )
       .then((selectedDoc) => {
         if (selectedDoc) {
-          // Créez une instance de markdown-it
-          const md = new MarkdownIt()
-          const htmlContent = md.render(selectedDoc.content)
-
           webView({
             name: selectedDoc.label,
-            content: htmlContent,
+            content: selectedDoc.content,
             path: selectedDoc.path,
             type: selectedDoc.type,
           })
