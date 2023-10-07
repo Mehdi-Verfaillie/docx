@@ -16,7 +16,7 @@ export function webView(file: Documentation) {
     </style>
   </head>
   <body>
-    ${file.content}
+    <div>${file.content}</div>
   </body>
   </html>
 `
