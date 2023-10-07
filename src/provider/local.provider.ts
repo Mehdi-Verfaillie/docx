@@ -2,8 +2,9 @@ import { Documentation } from '../association.manager'
 import { WorkspaceManager } from '../utils/workspace.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { Uri, FileType, workspace } from 'vscode'
+import { AbstractRepositoryFactory } from '../api/repository.factory'
 
-export class LocalProvider {
+export class LocalProvider implements AbstractRepositoryFactory {
   constructor(private fileSystem: FileSystemManager) {
     this.fileSystem = fileSystem
   }
