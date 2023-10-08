@@ -8,8 +8,16 @@ import { SchemaManager } from './config/schema.manager'
 import { RepositoryController } from './api/repository.controller'
 import { RepositoryProviderStrategy, LocalProviderStrategy } from './api/repository.strategy'
 import * as MarkdownIt from 'markdown-it'
+import { CredentialManager } from './utils/credentials.utils'
 
 export async function activate(context: vscode.ExtensionContext) {
+  const credentialManager = new CredentialManager(context.secrets)
+  let tokens = await credentialManager.getTokens()
+
+  credentialManager.onTokenChange(async () => {
+    tokens = await credentialManager.getTokens()
+  })
+
   ErrorManager.initialize()
   SchemaManager.initialize(
     '/.docx.json',
@@ -19,8 +27,11 @@ export async function activate(context: vscode.ExtensionContext) {
   const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
   const providerStrategies = [new LocalProviderStrategy(), new RepositoryProviderStrategy()]
   const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/.docx.json`)
-
-  const repositoryController = await RepositoryController.create(jsonConfig, providerStrategies)
+  const repositoryController = await RepositoryController.create(
+    jsonConfig,
+    providerStrategies,
+    tokens
+  )
   const documentations = await repositoryController.getDocumentations()
 
   const disposable = vscode.commands.registerCommand('extension.openDropdown', async () => {
@@ -62,6 +73,18 @@ export async function activate(context: vscode.ExtensionContext) {
       })
   })
 
+  const commandGithubAddToken = vscode.commands.registerCommand(
+    'Docx Github Add Token',
+    async () => await credentialManager.openTokenInputBox('github')
+  )
+
+  const commandGitlabAddToken = vscode.commands.registerCommand(
+    'Docx Gitlab Add Token',
+    async () => await credentialManager.openTokenInputBox('gitlab')
+  )
+
+  context.subscriptions.push(commandGithubAddToken)
+  context.subscriptions.push(commandGitlabAddToken)
   context.subscriptions.push(disposable)
 }
 export function deactivate() {}

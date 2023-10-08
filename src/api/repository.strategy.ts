@@ -1,11 +1,12 @@
 import { ErrorManager } from '../utils/error.utils'
 import { ProviderConfig } from './repository.controller'
+import { Token } from '../utils/credentials.utils'
 
 const knownRepositories = ['github.com'] as const
 
 export interface ProviderStrategy {
   isMatch(docLocation: string): boolean
-  getProviderConfig(docLocation: string): ProviderConfig
+  getProviderConfig(docLocation: string, tokens: Token[]): ProviderConfig
 }
 
 export class LocalProviderStrategy implements ProviderStrategy {
@@ -22,13 +23,19 @@ export class RepositoryProviderStrategy implements ProviderStrategy {
     return knownRepositories.some((domain) => docLocation.includes(domain))
   }
 
-  getProviderConfig(docLocation: string): ProviderConfig {
+  getProviderConfig(docLocation: string, tokens: Token[]): ProviderConfig {
     const domain = knownRepositories.find((domain) => docLocation.includes(domain))
     if (!domain) {
       ErrorManager.outputError(`Unrecognized repository domain in URL: ${docLocation}`)
       throw new Error(`Unrecognized repository domain in URL: ${docLocation}`)
     }
-    return { type: this.extractRepositoryName(domain), repositories: [docLocation] }
+    const repositoryName = this.extractRepositoryName(domain)
+    const token = tokens.find((token) => token.provider === repositoryName)!.key
+    return {
+      type: repositoryName,
+      repositories: [docLocation],
+      token: token,
+    }
   }
 
   private extractRepositoryName(domain: string): 'github' | never {

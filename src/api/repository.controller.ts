@@ -1,6 +1,7 @@
 import { Documentation } from '../association.manager'
 import { AssociationsValidator, DocAssociationsConfig } from '../association.validator'
 import { StructuralValidator } from '../structural.validator'
+import { Token } from '../utils/credentials.utils'
 import { ErrorManager } from '../utils/error.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { WorkspaceManager } from '../utils/workspace.utils'
@@ -46,18 +47,20 @@ export class RepositoryController {
   public static async create(
     json: string,
     providerStrategies: ProviderStrategy[],
+    tokens: Token[] = [],
     fileSystem = new FileSystemManager()
   ): Promise<RepositoryController> {
     const instance = new RepositoryController(json, fileSystem, providerStrategies)
-    await instance.initialize(json)
+    await instance.initialize(json, tokens)
     return instance
   }
 
-  private async initialize(json: string): Promise<void> {
+  private async initialize(json: string, tokens: Token[]): Promise<void> {
     const config = this.fileSystem.processFileContent<DocAssociationsConfig>(json)
     await this.validateConfig(config)
 
-    const providerConfigs = await this.configMapper.mapConfigToProviders(config)
+    const providerConfigs = await this.configMapper.mapConfigToProviders(config, tokens)
+
     this.repository = new RepositoryFactory(providerConfigs)
   }
 
@@ -85,7 +88,10 @@ export class RepositoryController {
 class ProviderConfigMapper {
   constructor(private providerStrategies: ProviderStrategy[]) {}
 
-  public async mapConfigToProviders(config: DocAssociationsConfig): Promise<ProviderConfig[]> {
+  public async mapConfigToProviders(
+    config: DocAssociationsConfig,
+    tokens: Token[]
+  ): Promise<ProviderConfig[]> {
     const providerConfigsMap = new Map<string, ProviderConfig>()
 
     for (const docLocations of Object.values(config.associations)) {
@@ -94,7 +100,7 @@ class ProviderConfigMapper {
           strategy.isMatch(docLocation)
         )
         if (matchingStrategy) {
-          const providerConfig = matchingStrategy.getProviderConfig(docLocation)
+          const providerConfig = matchingStrategy.getProviderConfig(docLocation, tokens)
           const key = JSON.stringify(providerConfig) // Create a unique key for each config
           providerConfigsMap.set(key, providerConfig)
         }

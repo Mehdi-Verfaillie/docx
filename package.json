@@ -24,6 +24,14 @@
           "light": "images/book-light.svg",
           "dark": "images/book-light.svg"
         }
+      },
+      {
+        "command": "Docx Github Add Token",
+        "title": "Docx Github - Add token"
+      },
+      {
+        "command": "Docx Gitlab Add Token",
+        "title": "Docx Gitlab - Add token"
       }
     ],
     "menus": {
