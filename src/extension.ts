@@ -27,8 +27,11 @@ export async function activate(context: vscode.ExtensionContext) {
   const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
   const providerStrategies = [new LocalProviderStrategy(), new RepositoryProviderStrategy()]
   const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/.docx.json`)
-
-  const repositoryController = await RepositoryController.create(jsonConfig, providerStrategies)
+  const repositoryController = await RepositoryController.create(
+    jsonConfig,
+    providerStrategies,
+    tokens
+  )
   const documentations = await repositoryController.getDocumentations()
 
   const disposable = vscode.commands.registerCommand('extension.openDropdown', async () => {
