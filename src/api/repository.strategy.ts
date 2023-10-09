@@ -2,7 +2,7 @@ import { ErrorManager } from '../utils/error.utils'
 import { ProviderConfig } from './repository.controller'
 import { Token } from '../utils/credentials.utils'
 
-const knownRepositories = ['github.com'] as const
+const knownRepositories = ['github.com', 'gitlab.com'] as const
 
 export interface ProviderStrategy {
   isMatch(docLocation: string): boolean
@@ -46,9 +46,10 @@ export class RepositoryProviderStrategy implements ProviderStrategy {
     }
   }
 
-  private extractRepositoryName(domain: string): 'github' | never {
+  private extractRepositoryName(domain: string): 'github' | 'gitlab' | never {
     const type = domain.split('.')[0]
     if (type === 'github') return type
+    if (type === 'gitlab') return type
 
     ErrorManager.outputError(`Unrecognized repository type: ${type}`)
     throw new Error(`Unrecognized repository type: ${type}`)
