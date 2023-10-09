@@ -2,8 +2,9 @@ import { Documentation } from '../association.manager'
 import { WorkspaceManager } from '../utils/workspace.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { Uri, FileType, workspace } from 'vscode'
+import { AbstractRepositoryFactory } from '../api/repository.factory'
 
-export class LocalProvider {
+export class LocalProvider implements AbstractRepositoryFactory {
   constructor(private fileSystem: FileSystemManager) {
     this.fileSystem = fileSystem
   }
@@ -14,10 +15,10 @@ export class LocalProvider {
   }
 
   public async fetchDocumentation(directoryUri: Uri): Promise<Documentation[]> {
-    const allFiles = (await this.fileSystem.readDirectory(directoryUri.fsPath)) ?? []
+    const entries = (await this.fileSystem.retrieveNonIgnoredEntries(directoryUri.fsPath)) ?? []
     let documentation: Documentation[] = []
 
-    for (const [filename, fileType] of allFiles) {
+    for (const [filename, fileType] of entries) {
       const filePath = Uri.joinPath(directoryUri, filename)
 
       if (fileType === FileType.Directory) {

@@ -16,6 +16,16 @@
           "description": "The documentations path or url associated to the target.\nDocumentations could be path or url (currently, only github repository is accepted, if the repository's private, add your token in the the providers informations).\n Example: '[\"myDocsFolder/myFirstDoc.md\", \"myDocsFolder/mySecondDoc.md\"]'."
         }
       }
+    },
+    "ignorePatterns": {
+      "type": "array",
+      "title": "[Docx] Ignore Patterns",
+      "description": "An array of patterns to ignore while fetching local documentations. Example: ['node_modules', 'dist'].",
+      "items": {
+        "type": "string",
+        "title": "[Docx] Ignore Pattern",
+        "description": "A string pattern to be ignored. Example: 'node_modules'."
+      }
     }
   },
   "required": ["associations"]

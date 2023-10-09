@@ -14,7 +14,7 @@ describe('fetchDocumentation', () => {
     localProvider = new LocalProvider(fileSystem)
 
     sinon
-      .stub(fileSystem, 'readDirectory')
+      .stub(fileSystem, 'retrieveNonIgnoredEntries')
       .withArgs(vscode.Uri.file('/test-directory').fsPath)
       .resolves([
         ['document.md', vscode.FileType.File],

@@ -6,15 +6,23 @@ const knownRepositories = ['github.com'] as const
 
 export interface ProviderStrategy {
   isMatch(docLocation: string): boolean
-  getProviderConfig(docLocation: string, tokens: Token[]): ProviderConfig
+  getProviderConfig(
+    docLocation: string,
+    tokens?: Token[],
+    ignorePatterns?: string[]
+  ): ProviderConfig
 }
 
 export class LocalProviderStrategy implements ProviderStrategy {
   isMatch(docLocation: string): boolean {
     return !docLocation.startsWith('http')
   }
-  getProviderConfig(): ProviderConfig {
-    return { type: 'local' }
+  getProviderConfig(
+    docLocation: string,
+    tokens?: Token[],
+    ignorePatterns?: string[]
+  ): ProviderConfig {
+    return { type: 'local', ignorePatterns }
   }
 }
 
