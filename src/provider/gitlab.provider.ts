@@ -1,7 +1,7 @@
 import { AbstractRepositoryFactory } from '../api/repository.factory'
 import { Documentation } from '../association.manager'
-import { FileSystemManager } from '../utils/fileSystem.utils'
-import { ReplacerTextProvider } from '../utils/replacerText.utils'
+import { FormatterContent } from '../utils/formatterContent'
+import { AbstractGit } from './abstractGit.provider'
 
 interface GitlabResponse {
   type: string
@@ -9,40 +9,36 @@ interface GitlabResponse {
   path: string
 }
 
-export class GitlabProvider implements AbstractRepositoryFactory {
+export class GitlabProvider extends AbstractGit implements AbstractRepositoryFactory {
   private baseUrl = 'https://gitlab.com/api/v4'
-  private fileSystem
-  private repository
-  private transformImageURL
+  protected formatterContent
 
   constructor(repository: string[], token?: string) {
-    this.repository = this.getOwnerRepo(repository)
-    this.fileSystem = new FileSystemManager()
-    this.transformImageURL = new ReplacerTextProvider(repository[0], token)
+    super('gitlab', repository)
+    this.formatterContent = new FormatterContent('gitlab', token)
   }
 
   public async getDocumentations(): Promise<Documentation[]> {
     const documentations: Documentation[] = []
-
     const data = await this.getRepoContent(
-      `/projects/${this.repository.owner}%2F${this.repository.name}/repository/tree?ref=main&recursive=true`
+      `/projects/${this.repositoryParams.owner}%2F${this.repositoryParams.name}/repository/tree?ref=main&recursive=true`
     )
 
     await this.fetchDocumentation(data, documentations)
     return documentations
   }
 
-  private fetchDocumentation = async (
+  private async fetchDocumentation(
     repositoryContents: GitlabResponse[],
     documentations: Documentation[]
-  ) => {
+  ): Promise<void> {
     for (const repositoryContent of repositoryContents) {
       if (
         repositoryContent.type === 'blob' &&
         this.fileSystem.isFileOfInterest(repositoryContent.name)
       ) {
         const documentation = await this.getFile(repositoryContent)
-        documentation.content = this.transformImageURL.replacer(documentation.content)
+        documentation.content = this.formatterContent.formatter(documentation.content)
         documentations.push(documentation)
       }
     }
@@ -55,19 +51,15 @@ export class GitlabProvider implements AbstractRepositoryFactory {
 
   public async getFile(file: GitlabResponse): Promise<Documentation> {
     const filePathEncoded = encodeURIComponent(file.path)
-    const url = `https://gitlab.com/api/v4/projects/${this.repository.owner}%2F${this.repository.name}/repository/files/${filePathEncoded}/raw`
+    const url = `${this.baseUrl}/projects/${this.repositoryParams.owner}%2F${this.repositoryParams.name}/repository/files/${filePathEncoded}/raw`
     const response = await fetch(url)
     const content = await response.text()
+
     return {
       type: this.fileSystem.getExtension(file.name)!,
       name: file.name,
       content: content,
-      path: `https://gitlab.com/${this.repository.owner}/${this.repository.name}/-/blob/main/${file.path}`,
+      path: `https://gitlab.com/${this.repositoryParams.owner}/${this.repositoryParams.name}/-/blob/main/${file.path}`,
     }
-  }
-
-  public getOwnerRepo(repository: string[]) {
-    const urlParts = repository[0].split('/')
-    return { owner: urlParts[3], name: urlParts[4] }
   }
 }

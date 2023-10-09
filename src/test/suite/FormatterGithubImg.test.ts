@@ -1,47 +1,47 @@
 import { expect } from 'chai'
 import { describe, it } from 'mocha'
-import { ReplacerTextProvider } from '../../utils/replacerText.utils'
+import { FormatterContent } from '../../utils/formatterContent'
 
-describe('Replacer github image', () => {
+describe('Formatter github image', () => {
   it('should transform markdown local github image  to github url html image tag', async () => {
-    const imageParse = new ReplacerTextProvider('https://github.com/user/repo')
+    const imageParse = new FormatterContent('https://github.com/user/repo')
     const content = 'Some text ![alt text](/image.jpg) some more text'
-    const result = imageParse.replacer(content)
+    const result = imageParse.formatter(content)
     expect(result).to.include(
       'Some text <img src="https://raw.githubusercontent.com/user/repo/main/image.jpg"/> some more text'
     )
   })
 
   it('should keep markdown external image links unchanged', async () => {
-    const imageParse = new ReplacerTextProvider('https://github.com/user/repo')
+    const imageParse = new FormatterContent('https://github.com/user/repo')
     const content = 'Some text ![alt text](https://external.com/image.jpg) some more text'
-    const result = imageParse.replacer(content)
+    const result = imageParse.formatter(content)
     expect(result).to.include(
       'Some text <img src="https://external.com/image.jpg"/> some more text'
     )
   })
 
   it('should keep external image with github  links unchanged', async () => {
-    const imageParse = new ReplacerTextProvider('https://github.com/user/repo')
+    const imageParse = new FormatterContent('https://github.com/user/repo')
     const content = '<img src="https://github.com/image.jpg"/>'
-    const result = imageParse.replacer(content)
+    const result = imageParse.formatter(content)
 
     expect(result).to.include('<img src="https://github.com/image.jpg"/>')
   })
 
   it('should transform relative paths in HTML image tags', async () => {
-    const imageParse = new ReplacerTextProvider('https://github.com/user/repo')
+    const imageParse = new FormatterContent('https://github.com/user/repo')
     const content = "<img src='/image.jpg'>"
-    const result = imageParse.replacer(content)
+    const result = imageParse.formatter(content)
     expect(result).to.include(
       '<img src="https://raw.githubusercontent.com/user/repo/main/image.jpg"/>'
     )
   })
 
   it('should keep HTML image tags with external links unchanged', async () => {
-    const imageParse = new ReplacerTextProvider('https://github.com/user/repo')
+    const imageParse = new FormatterContent('https://github.com/user/repo')
     const content = '<img src="https://external.com/image.jpg" alt="an image"/>'
-    const result = imageParse.replacer(content)
+    const result = imageParse.formatter(content)
 
     expect(result).to.include('<img src="https://external.com/image.jpg" alt="an image"/>')
   })

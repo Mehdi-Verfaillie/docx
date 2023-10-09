@@ -1,8 +1,8 @@
 import { Documentation } from '../association.manager'
-import { FileSystemManager } from '../utils/fileSystem.utils'
 import { Octokit } from 'octokit'
-import { ReplacerTextProvider } from '../utils/replacerText.utils'
+import { AbstractGit } from './abstractGit.provider'
 import { AbstractRepositoryFactory } from '../api/repository.factory'
+import { FormatterContent } from '../utils/formatterContent'
 
 interface GithubResponse {
   type: string
@@ -13,40 +13,39 @@ interface GithubResponse {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   html_url: string
 }
-export class GithubProvider implements AbstractRepositoryFactory {
+
+export class GithubProvider extends AbstractGit implements AbstractRepositoryFactory {
   public octokit: Octokit
-  private fileSystem
-  private repository
-  private transformImageURL
+  protected formatterContent
 
   constructor(repository: string[], token?: string) {
+    super('github', repository)
     this.octokit = new Octokit({ auth: token })
-    this.repository = this.getOwnerRepo(repository)
-    this.fileSystem = new FileSystemManager()
-    this.transformImageURL = new ReplacerTextProvider(repository[0], token)
+    this.formatterContent = new FormatterContent('github', token)
   }
 
   public async getDocumentations(): Promise<Documentation[]> {
     const documentations: Documentation[] = []
+
     const { data } = await this.getRepoContent(
-      `GET /repos/${this.repository.owner}/${this.repository.name}/contents`
+      `GET /repos/${this.repositoryParams.owner}/${this.repositoryParams.name}/contents`
     )
 
     await this.fetchDocumentation(data, documentations)
     return documentations
   }
 
-  private fetchDocumentation = async (
+  private async fetchDocumentation(
     repositoryContents: GithubResponse[],
     documentations: Documentation[]
-  ): Promise<void> => {
+  ): Promise<void> {
     for (const repositoryContent of repositoryContents) {
       if (
         repositoryContent.type === 'file' &&
         this.fileSystem.isFileOfInterest(repositoryContent.name)
       ) {
         const documentation = await this.getFile(repositoryContent)
-        documentation.content = this.transformImageURL.replacer(documentation.content)
+        documentation.content = this.formatterContent.formatter(documentation.content)
         documentations.push(documentation)
       }
       if (repositoryContent.type === 'dir') {
@@ -69,9 +68,5 @@ export class GithubProvider implements AbstractRepositoryFactory {
       content: content.data,
       path: file.html_url,
     }
-  }
-  public getOwnerRepo(repository: string[]) {
-    const urlParts = repository[0].split('/')
-    return { owner: urlParts[3], name: urlParts[4] }
   }
 }
