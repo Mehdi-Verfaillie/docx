@@ -48,7 +48,7 @@ export async function activate(context: vscode.ExtensionContext) {
     ;[jsonConfig, documentations] = await refreshDocumentations()
   })
 
-  const disposable = vscode.commands.registerCommand('extension.openDropdown', async () => {
+  const disposable = vscode.commands.registerCommand('docx.openDropdown', async () => {
     const currentUserPath = WorkspaceManager.getCurrentUserPath()
     if (!currentUserPath) return
 
@@ -84,12 +84,12 @@ export async function activate(context: vscode.ExtensionContext) {
   })
 
   const commandGithubAddToken = vscode.commands.registerCommand(
-    'Docx Github Add Token',
+    'docx.addGithubToken',
     async () => await credentialManager.openTokenInputBox('github')
   )
 
   const commandGitlabAddToken = vscode.commands.registerCommand(
-    'Docx Gitlab Add Token',
+    'docx.addGitlabToken',
     async () => await credentialManager.openTokenInputBox('gitlab')
   )
 
