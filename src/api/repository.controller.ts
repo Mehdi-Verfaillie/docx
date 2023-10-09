@@ -101,7 +101,11 @@ class ProviderConfigMapper {
           strategy.isMatch(docLocation)
         )
         if (matchingStrategy) {
-          const providerConfig = matchingStrategy.getProviderConfig(docLocation, tokens)
+          const providerConfig = matchingStrategy.getProviderConfig(
+            docLocation,
+            tokens,
+            config.ignorePatterns
+          )
           const key = JSON.stringify(providerConfig) // Create a unique key for each config
           providerConfigsMap.set(key, providerConfig)
         }
