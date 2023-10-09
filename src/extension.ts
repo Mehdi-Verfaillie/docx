@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import { webView } from './webview/webview'
 import { WorkspaceManager } from './utils/workspace.utils'
 import { FileSystemManager } from './utils/fileSystem.utils'
-import { AssociationsManager } from './association.manager'
+import { AssociationsManager, Documentation } from './association.manager'
 import { ErrorManager } from './utils/error.utils'
 import { SchemaManager } from './config/schema.manager'
 import { RepositoryController } from './api/repository.controller'
@@ -10,6 +10,7 @@ import { RepositoryProviderStrategy, LocalProviderStrategy } from './api/reposit
 import { CredentialManager } from './utils/credentials.utils'
 
 export async function activate(context: vscode.ExtensionContext) {
+  const configFilename = '.docx.json'
   const credentialManager = new CredentialManager(context.secrets)
   let tokens = await credentialManager.getTokens()
 
@@ -22,16 +23,30 @@ export async function activate(context: vscode.ExtensionContext) {
     '/.docx.json',
     'https://raw.githubusercontent.com/Mehdi-Verfaillie/docx/main/src/config/.docx.schema.json'
   )
+
   const fileSystem = new FileSystemManager()
   const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
   const providerStrategies = [new LocalProviderStrategy(), new RepositoryProviderStrategy()]
-  const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/.docx.json`)
-  const repositoryController = await RepositoryController.create(
-    jsonConfig,
-    providerStrategies,
-    tokens
+
+  const refreshDocumentations = async (): Promise<[string, Documentation[]]> => {
+    const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/${configFilename}`)
+    const repositoryController = await RepositoryController.create(
+      jsonConfig,
+      providerStrategies,
+      tokens
+    )
+    const documentations = await repositoryController.getDocumentations()
+    return [jsonConfig, documentations]
+  }
+
+  let [jsonConfig, documentations] = await refreshDocumentations()
+
+  const configFileObserver = vscode.workspace.createFileSystemWatcher(
+    `${workspaceFolder}/${configFilename}`
   )
-  const documentations = await repositoryController.getDocumentations()
+  configFileObserver.onDidChange(async () => {
+    ;[jsonConfig, documentations] = await refreshDocumentations()
+  })
 
   const disposable = vscode.commands.registerCommand('extension.openDropdown', async () => {
     const currentUserPath = WorkspaceManager.getCurrentUserPath()
