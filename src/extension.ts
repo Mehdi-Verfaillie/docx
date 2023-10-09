@@ -93,8 +93,17 @@ export async function activate(context: vscode.ExtensionContext) {
     async () => await credentialManager.openTokenInputBox('gitlab')
   )
 
+  const commandGithubDeleteToken = vscode.commands.registerCommand('docx.deleteGithubToken', () =>
+    credentialManager.deleteTokenAndNotify('github')
+  )
+  const commandGitlabDeleteToken = vscode.commands.registerCommand('docx.deleteGitlabToken', () =>
+    credentialManager.deleteTokenAndNotify('gitlab')
+  )
+
   context.subscriptions.push(commandGithubAddToken)
   context.subscriptions.push(commandGitlabAddToken)
+  context.subscriptions.push(commandGithubDeleteToken)
+  context.subscriptions.push(commandGitlabDeleteToken)
   context.subscriptions.push(disposable)
 }
 export function deactivate() {}

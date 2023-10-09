@@ -26,11 +26,20 @@ export class CredentialManager {
         provider,
         key: inputValue,
       })
-      vscode.window.showInformationMessage(
-        `Docx ${provider} Personnal Access Token has been saved successfully.`,
-        'Close'
-      )
-    }
+
+  public deleteTokenAndNotify = async (provider: Token['provider']) => {
+    this.deleteToken(provider)
+    vscode.window.showInformationMessage(
+      `Docx
+      ${
+        provider.charAt(0).toUpperCase() + provider.slice(1)
+      } Personnal Access Token has been deleted successfully.`,
+      'Close'
+    )
+  }
+
+  private saveToken = async (token: Token) => {
+    await this.secretStorage.store(token.provider, token.key)
   }
 
   private getToken = async (provider: Token['provider']): Promise<Token | undefined> => {
@@ -54,7 +63,7 @@ export class CredentialManager {
     return tokens
   }
 
-  public deleteToken = (provider: Token['provider']) => {
+  private deleteToken = (provider: Token['provider']) => {
     this.secretStorage.delete(provider)
   }
 

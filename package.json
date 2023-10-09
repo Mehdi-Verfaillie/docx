@@ -34,8 +34,12 @@
         "title": "Docx: Gitlab - Add token"
       },
       {
-        "command": "Docx Gitlab Add Token",
-        "title": "Docx Gitlab - Add token"
+        "command": "docx.deleteGithubToken",
+        "title": "Docx: Github - Delete token"
+      },
+      {
+        "command": "docx.deleteGitlabToken",
+        "title": "Docx: Gitlab - Delete token"
       }
     ],
     "menus": {
