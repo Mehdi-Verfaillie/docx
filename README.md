@@ -111,7 +111,14 @@ Here's an example `.docx.json`:
 
 This means that `myFile.ts` is linked to the documentation from the **public/private repository** (https://github.com/Lynch-cai/docx-documentations-local-template/blob/main/documentations/controllers/controllers.md)
 
-**Note:** To access private repositories, you'll need to provide authorization through a personal access token. Follow these steps to add your access token.<br>
+<br>
+
+**Important note:**
+We highly recommend adding your access token not only for accessing private repositories but also for public ones to avoid potential API limitations.
+
+<br>
+
+**How to add your access token**
 
 **Step 1**: Create your access token by visiting the following links: [Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token), [Gitlab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token)
 
@@ -119,7 +126,8 @@ This means that `myFile.ts` is linked to the documentation from the **public/pri
 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Windows/Linux).<br />
 <kbd>Shift</kbd>+<kbd>Command</kbd>+<kbd>P</kbd> (Mac)
 
-**Step 3**: Select the appropriate command based on your provider:
+**Step 3**: Type the appropriate command based on your provider (you can have both):
+<img src="./src/assets/access-token-step-3.png" >
 
 ```bash
 # For Github Provider
@@ -132,6 +140,7 @@ docx gitlab add token
 ```
 
 **Step 4**: Enter your access token in the input field and press <kbd>Enter</kbd>.
+<img src="./src/assets/access-token-step-4.png" >
 
 ## Usage
 
@@ -175,6 +184,12 @@ Here are the upcoming planned features:
 - [ ] Integration with CI to provide information about documentations and associated standards for changes made by developers.
 - [ ] Adding documentation editing functionality.
 - [ ] Adding the ability to select only one file type per documentation, e.g., only "\*.controller.ts" files are related to "controllers.md."
+
+See the <a href="https://github.com/Mehdi-Verfaillie/docx/issues">open issues</a> for a full list known issues.
+
+## License
+
+Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 ## Contribution
 
