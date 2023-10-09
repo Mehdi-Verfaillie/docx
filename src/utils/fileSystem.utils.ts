@@ -1,5 +1,6 @@
 import { minimatch } from 'minimatch'
 import { Uri, workspace, FileSystemError, FileSystem, FileType } from 'vscode'
+import { ErrorManager } from './error.utils'
 
 const extensionsOfInterest = ['.md', '.bpmn'] as const
 export type Extension = (typeof extensionsOfInterest)[number]
@@ -36,14 +37,9 @@ export class FileSystemManager {
     }
   }
 
-  public async readDirectory(directoryPath: string): Promise<[string, FileType][]> {
-    if (this.matchesIgnorePattern(directoryPath)) return []
-
-    try {
-      return await this.fs.readDirectory(Uri.file(directoryPath))
-    } catch (error) {
-      return []
-    }
+  public async retrieveNonIgnoredEntries(directoryPath: string): Promise<[string, FileType][]> {
+    const directoryEntries = await this.getDirectoryEntries(directoryPath)
+    return directoryEntries.filter(this.filterOutIgnoredDirectories(directoryPath))
   }
 
   public processFileContent<T>(fileContent: string): T {
@@ -59,7 +55,36 @@ export class FileSystemManager {
     return !!this.getExtension(filename)
   }
 
-  private matchesIgnorePattern(directoryPath: string): boolean {
-    return this.ignorePatterns.some((pattern) => minimatch(directoryPath, pattern))
+  private filterOutIgnoredDirectories(directoryPath: string) {
+    return ([entryName, entryType]: [string, FileType]): boolean => {
+      if (entryType === FileType.Directory) {
+        const fullPath = this.buildFullPath(directoryPath, entryName)
+        return !this.isEntryIgnored(fullPath, entryName)
+      }
+      return true
+    }
+  }
+
+  private async getDirectoryEntries(directoryPath: string): Promise<[string, FileType][]> {
+    try {
+      return await this.fs.readDirectory(Uri.file(directoryPath))
+    } catch (error) {
+      ErrorManager.outputError(
+        `Something went wrong when trying to read local directories ${error}`
+      )
+      return []
+    }
+  }
+
+  private buildFullPath(directoryPath: string, entryName: string): string {
+    return Uri.file(directoryPath).with({
+      path: Uri.file(directoryPath).path + '/' + entryName,
+    }).fsPath
+  }
+
+  private isEntryIgnored(fullPath: string, entryName: string): boolean {
+    return this.ignorePatterns.some(
+      (pattern) => minimatch(entryName, pattern) || minimatch(fullPath, pattern)
+    )
   }
 }
