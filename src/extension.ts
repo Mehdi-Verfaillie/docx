@@ -14,10 +14,6 @@ export async function activate(context: vscode.ExtensionContext) {
   const credentialManager = new CredentialManager(context.secrets)
   let tokens = await credentialManager.getTokens()
 
-  credentialManager.onTokenChange(async () => {
-    tokens = await credentialManager.getTokens()
-  })
-
   ErrorManager.initialize()
   SchemaManager.initialize(
     '/.docx.json',
@@ -45,6 +41,11 @@ export async function activate(context: vscode.ExtensionContext) {
     `${workspaceFolder}/${configFilename}`
   )
   configFileObserver.onDidChange(async () => {
+    ;[jsonConfig, documentations] = await refreshDocumentations()
+  })
+
+  credentialManager.onTokenChange(async () => {
+    tokens = await credentialManager.getTokens()
     ;[jsonConfig, documentations] = await refreshDocumentations()
   })
 
