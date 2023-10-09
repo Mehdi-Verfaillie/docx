@@ -15,10 +15,10 @@ export class LocalProvider implements AbstractRepositoryFactory {
   }
 
   public async fetchDocumentation(directoryUri: Uri): Promise<Documentation[]> {
-    const allFiles = (await this.fileSystem.readDirectory(directoryUri.fsPath)) ?? []
+    const entries = (await this.fileSystem.retrieveNonIgnoredEntries(directoryUri.fsPath)) ?? []
     let documentation: Documentation[] = []
 
-    for (const [filename, fileType] of allFiles) {
+    for (const [filename, fileType] of entries) {
       const filePath = Uri.joinPath(directoryUri, filename)
 
       if (fileType === FileType.Directory) {

@@ -146,7 +146,7 @@ describe('Folder Validation', () => {
   })
 
   it('should correctly read the directory content', async () => {
-    const result = await manager.readDirectory('/test-directory')
+    const result = await manager.retrieveNonIgnoredEntries('/test-directory')
 
     expect(result).to.deep.equal([
       ['file1.txt', vscode.FileType.File],
@@ -155,7 +155,7 @@ describe('Folder Validation', () => {
   })
 
   it('should return an empty array for an empty directory', async () => {
-    const result = await manager.readDirectory('/empty-directory')
+    const result = await manager.retrieveNonIgnoredEntries('/empty-directory')
     expect(result).to.deep.equal([])
   })
 })
