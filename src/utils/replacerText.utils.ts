@@ -2,7 +2,7 @@ import { ReplacerGithubImg } from './replacerGithubImg'
 import { ReplacerGitLabImg } from './replacerGitlabImg'
 
 export interface ReplacerInterface {
-  replace: (content: string) => string
+  replace: (content: string) => Promise<string>
 }
 
 export class ReplacerTextProvider {
@@ -20,10 +20,11 @@ export class ReplacerTextProvider {
     this.replacersList.push(replacer)
   }
 
-  public replacer(content: string): string {
-    return this.replacersList.reduce(
-      (currentContent, currentReplacer) => currentReplacer.replace(currentContent),
-      content
-    )
+  public async replacer(content: string): Promise<string> {
+    let replacedContent = content
+    for (const replacer of this.replacersList) {
+      replacedContent = await replacer.replace(replacedContent)
+    }
+    return replacedContent
   }
 }

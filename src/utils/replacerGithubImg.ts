@@ -17,55 +17,80 @@ export class ReplacerGithubImg implements ReplacerInterface {
     this.token = token
   }
 
-  public replace = (content: string): string => {
+  public replace = async (content: string): Promise<string> => {
     const replacements = [this.replaceMarkdownImg, this.replaceTagImg]
 
-    const replacedContent = replacements.reduce(
-      (currentContent, replacementFunction) => replacementFunction(currentContent),
-      content
-    )
+    let replacedContent = content
+    for (const replacementFunction of replacements) {
+      replacedContent = await replacementFunction(replacedContent)
+    }
 
     return replacedContent
   }
-  private replaceMarkdownImg = (content: string): string => {
-    const markdownImageRegex = /!\[[^\]]*\]\(([^)]+)\)/g // regex to get markdown img  ex : ![dragon](https://github.com/vincentli77/test-api/blob/main/image/drg.png)
-    return this.replaceToGithubImgTag(content, markdownImageRegex)
-  }
-  private replaceTagImg = (content: string): string => {
-    const htmlImageRegex = /<img src='([^']*)'(?:\s+alt='([^']*)')?>/g // regex to get img tag ex : <img src='/image/drg.png' alt='drag'>
-    return this.replaceToGithubImgTag(content, htmlImageRegex)
+  private replaceMarkdownImg = async (content: string): Promise<string> => {
+    const markdownImageRegex = /!\[[^\]]*\]\(([^)]+)\)/g
+    return await this.replaceToGithubImgTag(content, markdownImageRegex)
   }
 
-  private replaceToGithubImgTag = (content: string, regex: RegExp) => {
-    return content.replace(regex, (_, imageUrl) => {
-      if (this.isGithubImageUrl(imageUrl)) {
-        const path = imageUrl.split('/main')[1]
-        return `<img src="${this.getRawGithubUrl(path)}"/>`
-      }
-      if (this.isLocalImg(imageUrl)) {
-        return `<img src="${this.getRawGithubUrl(imageUrl)}"/>`
-      }
-      return `<img src="${imageUrl}"/>`
-    })
+  private replaceTagImg = async (content: string): Promise<string> => {
+    const htmlImageRegex = /<img src='([^']*)'(?:\s+alt='([^']*)')?>/g
+    return await this.replaceToGithubImgTag(content, htmlImageRegex)
   }
 
+  private replaceToGithubImgTag = async (content: string, regex: RegExp): Promise<string> => {
+    const allMatchesContent = Array.from(content.matchAll(regex))
+    const replaceImageSourceList = await this.replaceImageGithubToHTML(allMatchesContent)
+    let result = content
+    for (const { originalText, imageHTML } of replaceImageSourceList) {
+      result = result.replace(originalText, imageHTML)
+    }
+
+    return result
+  }
+
+  private async replaceImageGithubToHTML(imageSources: RegExpMatchArray[]) {
+    return await Promise.all(
+      imageSources.map(async (imageSource) => {
+        let imageHTML
+        if (this.isGithubImageSource(imageSource[1])) {
+          const path = imageSource[1].split('/main')[1]
+          const data = await this.getGithubFile(
+            `https://api.github.com/repos/${this.username}/${this.repo}/contents${path}`
+          )
+
+          imageHTML = `<img src="${data.download_url}"/>`
+        } else if (this.isGithubLocalImage(imageSource[1])) {
+          const data = await this.getGithubFile(
+            `https://api.github.com/repos/${this.username}/${this.repo}/contents${imageSource[1]}`
+          )
+
+          imageHTML = `<img src="${data.download_url}"/>`
+        } else {
+          imageHTML = `<img src="${imageSource[1]}"/>`
+        }
+
+        return { originalText: imageSource[0], imageHTML }
+      })
+    )
+  }
+
+  public async getGithubFile(url: string) {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const headers: HeadersInit = this.token ? { Authorization: `Bearer ${this.token}` } : {}
+    const response = await fetch(url, { headers })
+
+    return await response.json()
+  }
   private extractRepoParams(url: string): { username: string; repo: string } | undefined {
     const match = url.match(/https:\/\/github\.com\/([^/]+)\/([^/]+)/) // regex to get username and repo name from github url
     if (!match) return undefined
     return { username: match?.[1], repo: match?.[2] }
   }
 
-  private getRawGithubUrl(url: string): string {
-    return (
-      `https://raw.githubusercontent.com/${this.username}/${this.repo}/main${url}` +
-      (this.token ? `?access_token=${this.token}` : '')
-    )
-  }
-
-  private isGithubImageUrl(url: string): boolean {
+  private isGithubImageSource(url: string): boolean {
     return url.startsWith(`https://github.com/${this.username}/${this.repo}/blob/main/`)
   }
-  private isLocalImg(url: string): boolean {
+  private isGithubLocalImage(url: string): boolean {
     return url.startsWith('/')
   }
 }
