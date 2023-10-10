@@ -85,9 +85,10 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "octokit": "^3.1.0",
     "axios": "^1.5.0",
     "markdown-it": "^13.0.2",
-    "minimatch": "^9.0.3"
+    "minimatch": "^9.0.3",
+    "markdown-it-anchor": "^8.6.7",
+    "octokit": "^3.1.0"
   }
 }
