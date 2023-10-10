@@ -4,8 +4,9 @@ import { GitlabProvider } from '../provider/gitlab.provider'
 import { LocalProvider } from '../provider/local.provider'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { ProviderConfig } from './repository.controller'
+import { WebProvider } from '../provider/web.provider'
 
-export type Provider = LocalProvider | GithubProvider | GitlabProvider
+export type Provider = LocalProvider | GithubProvider | GitlabProvider | WebProvider
 
 export class RepositoryProvider {
   private provider!: Provider
@@ -22,8 +23,13 @@ export class RepositoryProvider {
       case 'github':
         this.provider = new GithubProvider(config.repositories, config.token)
         break
+
       case 'gitlab':
         this.provider = new GitlabProvider(config.repositories, config.token)
+        break
+
+      case 'web':
+        this.provider = new WebProvider(config.url)
         break
       default:
         break
