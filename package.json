@@ -4,7 +4,7 @@
   "description": "A doc just in time to access the right doc when you need it the most",
   "version": "1.0.2",
   "publisher": "docx-mt5",
-  "icon": "images/logo.png",
+  "icon": "src/assets/logo.png",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -21,8 +21,8 @@
         "command": "docx.openDropdown",
         "title": "Docx: Show related documentations",
         "icon": {
-          "light": "images/book-light.svg",
-          "dark": "images/book-light.svg"
+          "light": "src/assets/dropdown-icon-light.svg",
+          "dark": "src/assets/dropdown-icon-dark.svg"
         }
       },
       {
