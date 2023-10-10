@@ -1,6 +1,7 @@
 import { ErrorManager } from '../utils/error.utils'
 import { ProviderConfig } from './repository.controller'
 import { Token } from '../utils/credentials.utils'
+import { DataTransformManager } from '../utils/transform.utils'
 
 const knownRepositories = ['github.com', 'gitlab.com'] as const
 
@@ -32,6 +33,8 @@ export class RepositoryProviderStrategy implements ProviderStrategy {
   }
 
   getProviderConfig(docLocation: string, tokens?: Token[]): ProviderConfig {
+    docLocation = DataTransformManager.removeQueryParamsFromUrl(docLocation)
+
     const domain = knownRepositories.find((domain) => docLocation.includes(domain))
     if (!domain) {
       ErrorManager.outputError(`Unrecognized repository domain in URL: ${docLocation}`)
