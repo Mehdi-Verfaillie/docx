@@ -31,18 +31,22 @@ export class RepositoryProviderStrategy implements ProviderStrategy {
     return knownRepositories.some((domain) => docLocation.includes(domain))
   }
 
-  getProviderConfig(docLocation: string, tokens: Token[]): ProviderConfig {
+  getProviderConfig(docLocation: string, tokens?: Token[]): ProviderConfig {
     const domain = knownRepositories.find((domain) => docLocation.includes(domain))
     if (!domain) {
       ErrorManager.outputError(`Unrecognized repository domain in URL: ${docLocation}`)
       throw new Error(`Unrecognized repository domain in URL: ${docLocation}`)
     }
     const repositoryName = this.extractRepositoryName(domain)
-    const token = tokens.find((token) => token.provider === repositoryName)!.key
+
+    let token
+    if (tokens && tokens.length > 0) {
+      token = tokens.find((token) => token.provider === repositoryName)?.key
+    }
     return {
       type: repositoryName,
       repositories: [docLocation],
-      token: token,
+      token,
     }
   }
 

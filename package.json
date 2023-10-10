@@ -18,26 +18,34 @@
   "contributes": {
     "commands": [
       {
-        "command": "extension.openDropdown",
-        "title": "Show related documentations",
+        "command": "docx.openDropdown",
+        "title": "Docx: Show related documentations",
         "icon": {
           "light": "images/book-light.svg",
           "dark": "images/book-light.svg"
         }
       },
       {
-        "command": "Docx Github Add Token",
-        "title": "Docx Github - Add token"
+        "command": "docx.addGithubToken",
+        "title": "Docx: Github - Add token"
       },
       {
-        "command": "Docx Gitlab Add Token",
-        "title": "Docx Gitlab - Add token"
+        "command": "docx.addGitlabToken",
+        "title": "Docx: Gitlab - Add token"
+      },
+      {
+        "command": "docx.deleteGithubToken",
+        "title": "Docx: Github - Delete token"
+      },
+      {
+        "command": "docx.deleteGitlabToken",
+        "title": "Docx: Gitlab - Delete token"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "command": "extension.openDropdown",
+          "command": "docx.openDropdown",
           "group": "navigation"
         }
       ]

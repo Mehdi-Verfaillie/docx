@@ -14,8 +14,10 @@ export class GitlabProvider implements AbstractRepositoryFactory {
   private fileSystem
   private repository
   private transformImageURL
+  private token: string | undefined
 
   constructor(repository: string[], token?: string) {
+    this.token = token
     this.repository = this.getOwnerRepo(repository)
     this.fileSystem = new FileSystemManager()
     this.transformImageURL = new ReplacerTextProvider(repository[0], token)
@@ -49,14 +51,22 @@ export class GitlabProvider implements AbstractRepositoryFactory {
   }
 
   public async getRepoContent(route: string) {
-    const response = await fetch(this.baseUrl + route)
+    const requestOptions: RequestInit = this.token
+      ? { headers: { 'PRIVATE-TOKEN': this.token } }
+      : {}
+
+    const response = await fetch(this.baseUrl + route, requestOptions)
     return await response.json()
   }
 
   public async getFile(file: GitlabResponse): Promise<Documentation> {
     const filePathEncoded = encodeURIComponent(file.path)
     const url = `https://gitlab.com/api/v4/projects/${this.repository.owner}%2F${this.repository.name}/repository/files/${filePathEncoded}/raw`
-    const response = await fetch(url)
+    const requestOptions: RequestInit = this.token
+      ? { headers: { 'PRIVATE-TOKEN': this.token } }
+      : {}
+
+    const response = await fetch(url, requestOptions)
     const content = await response.text()
     return {
       type: this.fileSystem.getExtension(file.name)!,

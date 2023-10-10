@@ -13,13 +13,9 @@ export class CredentialManager {
     this.providers = ['github', 'gitlab']
   }
 
-  private saveToken = async (token: Token) => {
-    await this.secretStorage.store(token.provider, token.key)
-  }
-
   public openTokenInputBox = async (provider: Token['provider']) => {
     const inputValue = await vscode.window.showInputBox({
-      placeHolder: `${provider.charAt(0).toUpperCase()}${provider.slice(1)} Personnal Access Token`,
+      placeHolder: `${provider.charAt(0).toUpperCase() + provider.slice(1)} Personnal Access Token`,
     })
     if (inputValue) {
       this.saveToken({
@@ -27,10 +23,28 @@ export class CredentialManager {
         key: inputValue,
       })
       vscode.window.showInformationMessage(
-        `Docx ${provider} Personnal Access Token has been saved successfully.`,
+        `Docx ${
+          provider.charAt(0).toUpperCase() + provider.slice(1)
+        } Personnal Access Token has been saved successfully.
+        `,
         'Close'
       )
     }
+  }
+
+  public deleteTokenAndNotify = async (provider: Token['provider']) => {
+    this.deleteToken(provider)
+    vscode.window.showInformationMessage(
+      `Docx
+      ${
+        provider.charAt(0).toUpperCase() + provider.slice(1)
+      } Personnal Access Token has been deleted successfully.`,
+      'Close'
+    )
+  }
+
+  private saveToken = async (token: Token) => {
+    await this.secretStorage.store(token.provider, token.key)
   }
 
   private getToken = async (provider: Token['provider']): Promise<Token | undefined> => {
@@ -43,7 +57,7 @@ export class CredentialManager {
     }
   }
 
-  public getTokens = async (): Promise<Token[]> => {
+  public getTokens = async (): Promise<Token[] | undefined> => {
     const tokens: Token[] = []
 
     for (const provider of this.providers) {
@@ -51,10 +65,10 @@ export class CredentialManager {
       if (token) tokens.push(token)
     }
 
-    return tokens
+    return tokens.length ? tokens : undefined
   }
 
-  public deleteToken = (provider: Token['provider']) => {
+  private deleteToken = (provider: Token['provider']) => {
     this.secretStorage.delete(provider)
   }
 

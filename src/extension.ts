@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import { webView } from './webview/webview'
 import { WorkspaceManager } from './utils/workspace.utils'
 import { FileSystemManager } from './utils/fileSystem.utils'
-import { AssociationsManager } from './association.manager'
+import { AssociationsManager, Documentation } from './association.manager'
 import { ErrorManager } from './utils/error.utils'
 import { SchemaManager } from './config/schema.manager'
 import { RepositoryController } from './api/repository.controller'
@@ -10,30 +10,44 @@ import { RepositoryProviderStrategy, LocalProviderStrategy } from './api/reposit
 import { CredentialManager } from './utils/credentials.utils'
 
 export async function activate(context: vscode.ExtensionContext) {
-  const credentialManager = new CredentialManager(context.secrets)
-  let tokens = await credentialManager.getTokens()
-
-  credentialManager.onTokenChange(async () => {
-    tokens = await credentialManager.getTokens()
-  })
-
-  ErrorManager.initialize()
-  SchemaManager.initialize(
-    '/.docx.json',
-    'https://raw.githubusercontent.com/Mehdi-Verfaillie/docx/main/src/config/.docx.schema.json'
-  )
+  const configFilename = '.docx.json'
   const fileSystem = new FileSystemManager()
   const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
   const providerStrategies = [new LocalProviderStrategy(), new RepositoryProviderStrategy()]
-  const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/.docx.json`)
-  const repositoryController = await RepositoryController.create(
-    jsonConfig,
-    providerStrategies,
-    tokens
+  const credentialManager = new CredentialManager(context.secrets)
+  const configFileObserver = vscode.workspace.createFileSystemWatcher(
+    `${workspaceFolder}/${configFilename}`
   )
-  const documentations = await repositoryController.getDocumentations()
+  ErrorManager.initialize()
+  SchemaManager.initialize(
+    `/${configFilename}`,
+    'https://raw.githubusercontent.com/Mehdi-Verfaillie/docx/main/src/config/.docx.schema.json'
+  )
 
-  const disposable = vscode.commands.registerCommand('extension.openDropdown', async () => {
+  const refreshDocumentations = async (): Promise<[string, Documentation[]]> => {
+    const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/${configFilename}`)
+    const repositoryController = await RepositoryController.create(
+      jsonConfig,
+      providerStrategies,
+      tokens
+    )
+    const documentations = await repositoryController.getDocumentations()
+    return [jsonConfig, documentations]
+  }
+
+  let tokens = await credentialManager.getTokens()
+  let [jsonConfig, documentations] = await refreshDocumentations()
+
+  configFileObserver.onDidChange(async () => {
+    ;[jsonConfig, documentations] = await refreshDocumentations()
+  })
+
+  credentialManager.onTokenChange(async () => {
+    tokens = await credentialManager.getTokens()
+    ;[jsonConfig, documentations] = await refreshDocumentations()
+  })
+
+  const commandOpenDropdown = vscode.commands.registerCommand('docx.openDropdown', async () => {
     const currentUserPath = WorkspaceManager.getCurrentUserPath()
     if (!currentUserPath) return
 
@@ -45,41 +59,34 @@ export async function activate(context: vscode.ExtensionContext) {
       currentUserPath
     )
 
-    vscode.window
-      .showQuickPick(
-        filteredDocumentations.map((doc) => {
-          return {
-            label: doc.name,
-            content: doc.content,
-            path: doc.path,
-            type: doc.type,
-          }
-        })
-      )
-      .then((selectedDoc) => {
-        if (selectedDoc) {
-          webView({
-            name: selectedDoc.label,
-            content: selectedDoc.content,
-            path: selectedDoc.path,
-            type: selectedDoc.type,
-          })
-        }
+    const selectedDoc = await vscode.window.showQuickPick(
+      filteredDocumentations.map((doc) => {
+        return { label: doc.name, content: doc.content, path: doc.path, type: doc.type }
       })
+    )
+    if (selectedDoc) {
+      webView({
+        name: selectedDoc.label,
+        content: selectedDoc.content,
+        path: selectedDoc.path,
+        type: selectedDoc.type,
+      })
+    }
   })
 
-  const commandGithubAddToken = vscode.commands.registerCommand(
-    'Docx Github Add Token',
-    async () => await credentialManager.openTokenInputBox('github')
-  )
+  for (const provider of ['Github', 'Gitlab']) {
+    const providerLowerCase: 'github' | 'gitlab' = provider.toLowerCase() as 'github' | 'gitlab'
 
-  const commandGitlabAddToken = vscode.commands.registerCommand(
-    'Docx Gitlab Add Token',
-    async () => await credentialManager.openTokenInputBox('gitlab')
-  )
+    const commandAdd = vscode.commands.registerCommand(`docx.add${provider}Token`, async () => {
+      await credentialManager.openTokenInputBox(providerLowerCase)
+    })
+    const commandDelete = vscode.commands.registerCommand(`docx.delete${provider}Token`, () => {
+      credentialManager.deleteTokenAndNotify(providerLowerCase)
+    })
 
-  context.subscriptions.push(commandGithubAddToken)
-  context.subscriptions.push(commandGitlabAddToken)
-  context.subscriptions.push(disposable)
+    context.subscriptions.push(commandAdd)
+    context.subscriptions.push(commandDelete)
+  }
+  context.subscriptions.push(commandOpenDropdown)
 }
 export function deactivate() {}
