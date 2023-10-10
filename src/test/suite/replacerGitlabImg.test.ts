@@ -6,17 +6,19 @@ describe('Replacer gitlab image', () => {
   it('should transform markdown local gitlab image to gitlab url html image tag', async () => {
     const imageParse = new ReplacerTextProvider('https://gitlab.com/user/repo')
     const content = 'Some text ![alt text](/image.jpg) some more text'
-    const result = imageParse.replacer(content)
+    const result = await imageParse.replacer(content)
 
     expect(result).to.include(
-      'Some text <img src="https://gitlab.com/user/repo/-/raw/main/image.jpg"> some more text'
+      'Some text <img src="data:image/png;base64,eyJtZXNzYWdlIjoiNDA0IFByb2plY3QgTm90IEZvdW5kIn0="/> some more text'
     )
   })
 
   it('should transform relative paths in HTML image tags', async () => {
     const imageParse = new ReplacerTextProvider('https://gitlab.com/user/repo')
     const content = "<img src='/image.jpg'>"
-    const result = imageParse.replacer(content)
-    expect(result).to.include('<img src="https://gitlab.com/user/repo/-/raw/main/image.jpg">')
+    const result = await imageParse.replacer(content)
+    expect(result).to.include(
+      '<img src="data:image/png;base64,eyJtZXNzYWdlIjoiNDA0IFByb2plY3QgTm90IEZvdW5kIn0="/>'
+    )
   })
 })

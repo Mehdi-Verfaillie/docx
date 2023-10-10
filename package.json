@@ -63,7 +63,6 @@
     "format": "prettier --write ./src"
   },
   "devDependencies": {
-    "@octokit/types": "^11.1.0",
     "@types/chai": "^4.3.6",
     "@types/glob": "^8.1.0",
     "@types/markdown-it": "^13.0.2",
@@ -85,7 +84,6 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "octokit": "^3.1.0",
     "axios": "^1.5.0",
     "markdown-it": "^13.0.2",
     "minimatch": "^9.0.3"

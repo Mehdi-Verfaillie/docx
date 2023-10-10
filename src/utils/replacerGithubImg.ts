@@ -10,6 +10,7 @@ export class ReplacerGithubImg implements ReplacerInterface {
     const repoInfo = this.extractRepoParams(repository)
     if (!repoInfo || !repoInfo.username || !repoInfo.repo) {
       ErrorManager.outputError('Invalid repository information')
+      return
     }
 
     this.username = repoInfo?.username
@@ -53,16 +54,12 @@ export class ReplacerGithubImg implements ReplacerInterface {
       imageSources.map(async (imageSource) => {
         let imageHTML
         if (this.isGithubImageSource(imageSource[1])) {
-          const path = imageSource[1].split('/main')[1]
-          const data = await this.getGithubFile(
-            `https://api.github.com/repos/${this.username}/${this.repo}/contents${path}`
-          )
+          const url = imageSource[1].split('/main')[1]
+          const data = await this.getGithubFile(url)
 
           imageHTML = `<img src="${data.download_url}"/>`
         } else if (this.isGithubLocalImage(imageSource[1])) {
-          const data = await this.getGithubFile(
-            `https://api.github.com/repos/${this.username}/${this.repo}/contents${imageSource[1]}`
-          )
+          const data = await this.getGithubFile(imageSource[1])
 
           imageHTML = `<img src="${data.download_url}"/>`
         } else {
@@ -77,7 +74,10 @@ export class ReplacerGithubImg implements ReplacerInterface {
   public async getGithubFile(url: string) {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const headers: HeadersInit = this.token ? { Authorization: `Bearer ${this.token}` } : {}
-    const response = await fetch(url, { headers })
+    const response = await fetch(
+      `https://api.github.com/repos/${this.username}/${this.repo}/contents${url}`,
+      { headers }
+    )
 
     return await response.json()
   }

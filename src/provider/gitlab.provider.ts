@@ -44,7 +44,7 @@ export class GitlabProvider implements AbstractRepositoryFactory {
         this.fileSystem.isFileOfInterest(repositoryContent.name)
       ) {
         const documentation = await this.getFile(repositoryContent)
-        documentation.content = this.transformImageURL.replacer(documentation.content)
+        documentation.content = await this.transformImageURL.replacer(documentation.content)
         documentations.push(documentation)
       }
     }
