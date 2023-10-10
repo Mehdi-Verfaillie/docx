@@ -11,4 +11,8 @@ export class DataTransformManager {
       return a.type.localeCompare(b.type)
     })
   }
+
+  static removeQueryParamsFromUrl = (url: string): string => {
+    return url.split('?')[0]
+  }
 }

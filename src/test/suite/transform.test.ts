@@ -39,4 +39,13 @@ describe('Data Sorter', () => {
 
     expect(sortedData).to.deep.equal(expectedData)
   })
+
+  it('should remove params from an url', () => {
+    const url = 'https://test.com/test?param1=1&param2=2'
+    const expectedUrl = 'https://test.com/test'
+
+    const result = transform.removeQueryParamsFromUrl(url)
+
+    expect(result).to.equal(expectedUrl)
+  })
 })
