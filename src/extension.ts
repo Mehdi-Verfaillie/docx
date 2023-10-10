@@ -6,14 +6,22 @@ import { AssociationsManager, Documentation } from './association.manager'
 import { ErrorManager } from './utils/error.utils'
 import { SchemaManager } from './config/schema.manager'
 import { RepositoryController } from './api/repository.controller'
-import { RepositoryProviderStrategy, LocalProviderStrategy } from './api/repository.strategy'
+import {
+  RepositoryProviderStrategy,
+  LocalProviderStrategy,
+  WebProviderStrategy,
+} from './api/repository.strategy'
 import { CredentialManager } from './utils/credentials.utils'
 
 export async function activate(context: vscode.ExtensionContext) {
   const configFilename = '.docx.json'
   const fileSystem = new FileSystemManager()
   const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
-  const providerStrategies = [new LocalProviderStrategy(), new RepositoryProviderStrategy()]
+  const providerStrategies = [
+    new LocalProviderStrategy(),
+    new RepositoryProviderStrategy(),
+    new WebProviderStrategy(),
+  ]
   const credentialManager = new CredentialManager(context.secrets)
   const configFileObserver = vscode.workspace.createFileSystemWatcher(
     `${workspaceFolder}/${configFilename}`
