@@ -1,5 +1,6 @@
 import { Uri } from 'vscode'
 import { FileSystemManager } from './utils/fileSystem.utils'
+import { LocalProviderStrategy } from './api/repository.strategy'
 
 export interface DocAssociationsConfig {
   associations: Record<string, string[]>
@@ -28,6 +29,7 @@ export interface DuplicateEntityError extends EntityError {
 export class AssociationsValidator {
   private baseDir: string
   private fileSystem: FileSystemManager
+  private localStrategy = new LocalProviderStrategy()
 
   constructor(baseDir: string, fileSystem: FileSystemManager) {
     this.baseDir = baseDir
@@ -59,7 +61,9 @@ export class AssociationsValidator {
   ): Promise<MissingEntityError[]> {
     const allDocumentPaths = Object.values(associations).flat()
     const errors = await Promise.all(
-      allDocumentPaths.map((doc) => this.checkExistence(doc, 'documentationFile'))
+      allDocumentPaths.map(
+        (doc) => this.localStrategy.isMatch(doc) && this.checkExistence(doc, 'documentationFile')
+      )
     )
     return errors.filter(Boolean) as MissingEntityError[]
   }
