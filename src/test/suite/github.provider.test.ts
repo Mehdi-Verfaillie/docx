@@ -7,15 +7,13 @@ describe('GithubProvider', function () {
   describe('should get documentation .md github', function () {
     it('should fetch and return documentation from GitHub', async function () {
       const getContentGithubStub = sinon.stub()
-      getContentGithubStub.resolves({
-        data: [
-          {
-            type: 'file',
-            name: 'example.md',
-            download_url: 'https://example.com/example.md',
-          },
-        ],
-      })
+      getContentGithubStub.resolves([
+        {
+          type: 'file',
+          name: 'example.md',
+          download_url: 'https://example.com/example.md',
+        },
+      ])
 
       const readFileGithubStub = sinon.stub()
       readFileGithubStub
@@ -46,20 +44,18 @@ describe('GithubProvider', function () {
 
     it('should fetch and return list documentation from GitHub', async function () {
       const getContentGithubStub = sinon.stub()
-      getContentGithubStub.resolves({
-        data: [
-          {
-            type: 'file',
-            name: 'example.md',
-            url: 'https://example.com/example.md',
-          },
-          {
-            type: 'file',
-            name: 'example2.md',
-            download_url: 'https://example.com/example2.md',
-          },
-        ],
-      })
+      getContentGithubStub.resolves([
+        {
+          type: 'file',
+          name: 'example.md',
+          url: 'https://example.com/example.md',
+        },
+        {
+          type: 'file',
+          name: 'example2.md',
+          download_url: 'https://example.com/example2.md',
+        },
+      ])
 
       const readFileGithubStub = sinon.stub()
 
@@ -94,35 +90,31 @@ describe('GithubProvider', function () {
       const getContentGithubStub = sinon.stub()
       getContentGithubStub
         .onFirstCall()
-        .resolves({
-          data: [
-            {
-              type: 'dir',
-              name: 'example',
-              url: 'https://example.com/?ref=main',
-            },
-            {
-              type: 'file',
-              name: 'example.md',
-              url: 'https://example.com/example.md',
-            },
-          ],
-        })
+        .resolves([
+          {
+            type: 'dir',
+            name: 'example',
+            url: 'https://example.com/?ref=main',
+          },
+          {
+            type: 'file',
+            name: 'example.md',
+            url: 'https://example.com/example.md',
+          },
+        ])
         .onSecondCall()
-        .resolves({
-          data: [
-            {
-              type: 'file',
-              name: 'example2.md',
-              url: 'https://example.com/example2.md',
-            },
-            {
-              type: 'file',
-              name: 'example3.md',
-              url: 'https://example.com/example3.md',
-            },
-          ],
-        })
+        .resolves([
+          {
+            type: 'file',
+            name: 'example2.md',
+            url: 'https://example.com/example2.md',
+          },
+          {
+            type: 'file',
+            name: 'example3.md',
+            url: 'https://example.com/example3.md',
+          },
+        ])
 
       const readFileGithubStub = sinon.stub()
 

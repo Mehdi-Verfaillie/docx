@@ -1,6 +1,5 @@
 import { Documentation } from '../association.manager'
 import { FileSystemManager } from '../utils/fileSystem.utils'
-import { Octokit } from 'octokit'
 import { ReplacerTextProvider } from '../utils/replacerText.utils'
 import { AbstractRepositoryFactory } from '../api/repository.factory'
 
@@ -14,22 +13,22 @@ interface GithubResponse {
   html_url: string
 }
 export class GithubProvider implements AbstractRepositoryFactory {
-  public octokit: Octokit
   private fileSystem
   private repository
   private transformImageURL
+  private token: string | undefined
 
   constructor(repository: string[], token?: string) {
-    this.octokit = new Octokit({ auth: token })
     this.repository = this.getOwnerRepo(repository)
     this.fileSystem = new FileSystemManager()
     this.transformImageURL = new ReplacerTextProvider(repository[0], token)
+    this.token = token
   }
 
   public async getDocumentations(): Promise<Documentation[]> {
     const documentations: Documentation[] = []
-    const { data } = await this.getRepoContent(
-      `GET /repos/${this.repository.owner}/${this.repository.name}/contents`
+    const data = await this.getRepoContent(
+      `https://api.github.com/repos/${this.repository.owner}/${this.repository.name}/contents`
     )
 
     await this.fetchDocumentation(data, documentations)
@@ -46,27 +45,29 @@ export class GithubProvider implements AbstractRepositoryFactory {
         this.fileSystem.isFileOfInterest(repositoryContent.name)
       ) {
         const documentation = await this.getFile(repositoryContent)
-        documentation.content = this.transformImageURL.replacer(documentation.content)
+        documentation.content = await this.transformImageURL.replacer(documentation.content)
+
         documentations.push(documentation)
       }
       if (repositoryContent.type === 'dir') {
-        const { data } = await this.getRepoContent(repositoryContent.url)
+        const data = await this.getRepoContent(repositoryContent.url)
         await this.fetchDocumentation(data, documentations)
       }
     }
   }
 
   public async getRepoContent(route: string) {
-    return await this.octokit.request(route)
+    const headers: HeadersInit = this.token ? { Authorization: `Bearer ${this.token}` } : {}
+    const response = await fetch(route, { headers })
+    return await await response.json()
   }
 
   public async getFile(file: GithubResponse): Promise<Documentation> {
-    const content = await this.octokit.request(`GET ${file.download_url}`)
-
+    const data = await this.getRepoContent(file.url)
     return {
       type: this.fileSystem.getExtension(file.name)!,
       name: file.name,
-      content: content.data,
+      content: atob(data.content),
       path: file.html_url,
     }
   }

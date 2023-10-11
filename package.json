@@ -63,7 +63,6 @@
     "format": "prettier --write ./src"
   },
   "devDependencies": {
-    "@octokit/types": "^11.1.0",
     "@types/chai": "^4.3.6",
     "@types/glob": "^8.1.0",
     "@types/markdown-it": "^13.0.2",
