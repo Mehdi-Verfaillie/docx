@@ -2,7 +2,6 @@ import * as vscode from 'vscode'
 import { Documentation } from '../association.manager'
 import markdownItAnchor from 'markdown-it-anchor'
 import markdownIt = require('markdown-it')
-import cssStyles from './webviewStyle'
 
 export function webView(file: Documentation) {
   //create and show panel and show window on the right
@@ -19,9 +18,6 @@ export function webView(file: Documentation) {
   <!DOCTYPE html>
   <html lang="en">
   <head>
-  <style>
-  ${cssStyles}
-  </style>
   </head>
   <body>
     <div>
