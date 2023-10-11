@@ -2,7 +2,7 @@ import { minimatch } from 'minimatch'
 import { Uri, workspace, FileSystemError, FileSystem, FileType } from 'vscode'
 import { ErrorManager } from './error.utils'
 
-const extensionsOfInterest = ['.md', '.bpmn'] as const
+const extensionsOfInterest = ['.md', '.bpmn', '.html'] as const
 export type Extension = (typeof extensionsOfInterest)[number]
 
 export class FileSystemManager {

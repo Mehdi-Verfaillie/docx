@@ -5,11 +5,16 @@ import markdownIt = require('markdown-it')
 
 export function webView(file: Documentation) {
   //create and show panel and show window on the right
-  const panel = vscode.window.createWebviewPanel(file.type, file.name, vscode.ViewColumn.Two)
+  const panel = vscode.window.createWebviewPanel(file.type, file.name, vscode.ViewColumn.Two, {
+    enableScripts: true,
+  })
 
   const md = markdownIt({ html: true }).use(markdownItAnchor)
-  //add sets its HTML shows like md preview
-  panel.webview.html = `
+
+  panel.webview.html =
+    file.type === '.html'
+      ? file.content
+      : `
   <!DOCTYPE html>
   <html lang="en">
   <head>
