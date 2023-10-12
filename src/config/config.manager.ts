@@ -7,6 +7,19 @@ import { ErrorManager } from '../utils/error.utils'
 export class ConfigGenerator {
   constructor(private readonly fileSystem: FileSystemManager) {}
 
+  private async createFolderObject(directoryPath: string): Promise<Record<string, string[]>> {
+    const entries = await this.fileSystem.retrieveNonIgnoredEntries(directoryPath)
+    const folderObject: Record<string, string[]> = {}
+    for (const [name, type] of entries) {
+      if (type === FileType.Directory) {
+        folderObject[name] = []
+        const subfolder = await this.createFolderObject(join(directoryPath, name))
+        Object.assign(folderObject, subfolder) // Merge with the main object
+      }
+    }
+    return folderObject
+  }
+
   private async readDocxJson(filePath: string): Promise<DocAssociationsConfig> {
     try {
       const fileContent = await this.fileSystem.readFile(filePath)
