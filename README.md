@@ -1,12 +1,13 @@
 <p align="center">
-  <img src="./src//assets/logo.png" alt="Docx" width="200">
+  <img src="./src/assets/logo.png" alt="Docx" width="200">
 </p>
 <h1 align="center">DOCX</h1>
-<p align="center">Visual Studio Code extension that facilitate access to your company's standards and documentation for the technical team</p>
+
+<p align="center">Visual Studio Code extension that facilitate access to your documentations</p>
 
 <div align="center">
   <a href="https://marketplace.visualstudio.com/items?itemName=docx-mt5.docx">
-    <img src="./src/assets/get-it-on-vs-code.png" height="50">
+    <img src="./src/assets/get-it-on-vs-code.png" height="50" alt="Get it on vscode button">
   </a>
 </div>
 
@@ -15,11 +16,10 @@
 <p align="center">
   <a href="#demo">Demo</a> •
   <a href="#installation">Installation</a> •
-  <a href="#configuration">Configuration</a> •
+  <a href="#configuration-manual">Configuration</a> •
+  <a href="#how-to-add-your-access-token">Access token</a> •
   <a href="#usage">Usage</a> •
   <a href="#features">Features</a> •
-  <a href="#roadmap">Roadmap</a> •
-  <a href="#contribution">Contribution</a> •
   <a href="#other">Other</a>
 </p>
 
@@ -32,120 +32,83 @@
 
 ## Installation
 
-1. Visit the extension's page on the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=docx-mt5.docx).
-2. Click "Install" for the extension.
+Visit the extension's page on the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=docx-mt5.docx).
 
-## Configuration
+## Configuration (manual)
 
-To configure the extension, follow these steps:
-
-1. Open a project in Visual Studio Code.
-2. Use the following command to create a `.docx.json` file at the root of the project. <br />
-   This command will generate a configuration file with all files and folders associations possible based on the project.
-
-   ```bash
-   docx generate-config
-   ```
-
-3. When you have finished the associations between files/folders and the documentations, you can type the following command to remove all unused associations :
-
-   ```bash
-   docx clean-config
-   ```
-
-<br />
-
-The `.docx.json` file follows this structure:
+Create a `.docx.json` file at the root of the project.
 
 ```json
 {
+  "ignorePatterns": ["node_modules", ".git", "dist"],
   "associations": {
-    "file/or/folder": ["path/to/documentation.md"],
+    "file/or/folder": ["path/to/your/documentation.md"],
     "file/or/folder/2": [
-        "path/to/documentation.bpmn"
-        "github/or/gitlab/url/to/documentation.md",
+        "path/to/your/documentation.md"
+        "github/or/gitlab/url/to/your/documentation.md",
     ]
   }
 }
 ```
 
-<br />
+Examples:<br />
+[Local documentations](examples/local-documentations/)<br />
+[Github documentations](examples/github-documentations/)<br />
+[Gitlab documentations](examples/gitlab-documentations/)<br />
+[Website documentations](examples/website-documentations/)<br />
 
-### Configuring Associations with local documentations
+## Configuration (automatic)
 
-Here's an example of `.docx.json`:
+Generate your `.docx.json` automatically based on the project.
 
-```json
-{
-  "associations": {
-    "myFile.ts": ["myFileDoc.md"],
-    "myFolder": ["myFolderDoc.md"],
-    "myFolder/mySecondFile.ts": ["mySecondFileDoc.md", "mySecondFileSecondDoc.md"]
-  }
-}
-```
+- Open the [command palette](https://docs.github.com/en/codespaces/codespaces-reference/using-the-vs-code-command-palette-in-codespaces#accessing-the-vs-code-command-palette) in Visual Studio Code:<br>
+  <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Windows/Linux) or
+  <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Mac)
 
-This means that :
+<img src="./src/assets/config-auto.png" alt="Generate config command: 'Docx: Generate config file'. Clean up config command: 'Docx: Clean up config file'" >
 
-- File `myFile.ts` is linked to `myFileDoc.md`
-- Files in `myFolder` are linked to `myFolderDoc.md`
-- File `myFolder/mySecondFile.ts` is linked to `mySecondFileDoc.md`, `mySecondFileSecondDoc.md` and `myFolderDoc.md` because it is in `myFolder`.
+Remove unused associations :
 
-You can also check out a sample repository where these associations have already been created: [Link to Example Repository](https://github.com/Lynch-cai/docx-documentations-local-template)
+- Open the [command palette](https://docs.github.com/en/codespaces/codespaces-reference/using-the-vs-code-command-palette-in-codespaces#accessing-the-vs-code-command-palette) in Visual Studio Code:<br>
+  <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Windows/Linux) or
+  <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Mac)
 
-<br />
+- ```bash
+  docx clean-config
+  ```
 
-### Configuring Associations with public/private repository documentations (Github / Gitlab)
+## How to add your access token
 
-Here's an example `.docx.json`:
+Access tokens are indispensable for private repositories. <br/>
+We highly suggest adding your access token if you use public repositories to avoid API restrictions :
 
-```json
-{
-  "associations": {
-    "myFile.ts": [
-      "https://github.com/Lynch-cai/docx-documentations-local-template/blob/main/documentations/controllers/controllers.md"
-    ]
-  }
-}
-```
+| Provider | Without token    | With token        |
+| -------- | ---------------- | ----------------- |
+| Github   | 50 requests/h    | 5000 requests/h   |
+| Gitlab   | 500 requests/min | 1500 requests/min |
 
-This means that `myFile.ts` is linked to the documentation from the **public/private repository** (https://github.com/Lynch-cai/docx-documentations-local-template/blob/main/documentations/controllers/controllers.md)
-
-<br>
-
-**Important note:**
-We highly recommend adding your access token not only for accessing private repositories but also for public ones to avoid potential API limitations.
-
-<br>
-
-**How to add your access token**
+<br/>
 
 **Step 1**: Create your access token by visiting the following links: [Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token), [Gitlab](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token)
 
 **Step 2**: Open the [command palette](https://docs.github.com/en/codespaces/codespaces-reference/using-the-vs-code-command-palette-in-codespaces#accessing-the-vs-code-command-palette) in Visual Studio Code:<br>
-<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Windows/Linux).<br />
-<kbd>Shift</kbd>+<kbd>Command</kbd>+<kbd>P</kbd> (Mac)
+<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Windows/Linux) or <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Mac)
 
-**Step 3**: Type the appropriate command based on your provider (you can have both):
-<img src="./src/assets/access-token-step-3.png" >
-
-```bash
-# For Github Provider
-docx github add token
-```
-
-```bash
-# For Gitlab Provider
-docx gitlab add token
-```
-
-**Step 4**: Enter your access token in the input field and press <kbd>Enter</kbd>.
-<img src="./src/assets/access-token-step-4.png" >
+**Step 3**: Type the appropriate command based on your provider:
+<img src="./src/assets/access-token-step-3.png" alt="Add Github token command: 'Docx: Github - Add token'. Add Gitlab token command: 'Docx: Gitlab - Add token" >
 
 ## Usage
 
-1. Make sure you did the <a href="#Configuration">configuration part</a>. <br>
-   For the example, that's my `.docx.json` configuration:
+1. Example project architecture:
+
+   ```
+     .
+     ├── .docx.json
+     ├── myFile.ts
+     └── myDoc.md
+   ```
+
+   `.docx.json`:
 
    ```json
    {
@@ -155,55 +118,27 @@ docx gitlab add token
    }
    ```
 
-   That's how my project is architectured:<br>
-   ├── .docx.json # my configuration file<br>
-   ├── myFile.ts # my functionnal file<br>
-   └── myDoc.md # my documentation file<br>
-
-2. Open a file linked to documentation, e.g., "myFile.ts." and click the book icon in the top right corner of the screen.
-   <img src="./src/assets/usage-step-2.png" >
+2. Open a file linked to a documentation, e.g., "myFile.ts." and click on the button "doc" in the top right corner of the screen.
+   <img src="./src/assets/usage-step-2.png" alt="click on the button 'doc'">
 3. Choose the documentation you're interested in from the list.
-   <img src="./src/assets/usage-step-3.png" >
+   <img src="./src/assets/usage-step-3.png" alt="dropdown with a list of documentation">
 4. Enjoy your documentation.
-   <img src="./src/assets/usage-step-4.png" >
+   <img src="./src/assets/usage-step-4.png" alt="documentation appear on the right">
 
 ## Features
 
-- [x] Ability to link a file to documentation.
-- [x] Ability to link a file to multiple documentations.
-- [x] Linking all files in a folder to documentation.
+- [x] Ability to link a file to one or multiple documentations.
 - [x] Support for local documentation.
-- [x] Support for documentation in a public or private repository
-- [ ] Support for documentation from website.
-- [ ] Support for different file types (.md, .bpmn, etc.).
-
-## Roadmap
-
-Here are the upcoming planned features:
-
-- [ ] Integration with CI to provide information about documentations and associated standards for changes made by developers.
-- [ ] Adding documentation editing functionality.
-- [ ] Adding the ability to select only one file type per documentation, e.g., only "\*.controller.ts" files are related to "controllers.md."
-
-See the <a href="https://github.com/Mehdi-Verfaillie/docx/issues">open issues</a> for a full list known issues.
+- [x] Support for documentation in a public or private repository ([access token needed](#how-to-add-your-access-token))
+- [x] Support for documentation from website.
 
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
-## Contribution
-
-Contributions are welcome! To contribute by proposing new features or fixing bugs, please follow these steps:
-
-1. Fork the repository.
-2. Make your changes.
-3. Submit a pull request to the main branch.
-
-Thank you for your interest in the extension and potential contributions!
-
 ## Other
 
-Note: The extension will add the following configuration to your Visual Studio Code settings:
+Note: The extension will add the following configuration to your Visual Studio Code user settings (`settings.json`):
 
 ```json
 "json.schemas": [
@@ -216,5 +151,4 @@ Note: The extension will add the following configuration to your Visual Studio C
 ]
 ```
 
-This configuration ensures that Visual Studio Code recognizes the .docx.json file format and provides schema support.
-This addition to your settings is essential for the proper functioning of the extension, so please keep it enabled.
+This configuration ensures that Visual Studio Code recognizes the `.docx.json` file format and provides schema support.

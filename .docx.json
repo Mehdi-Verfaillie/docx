@@ -1,8 +1,0 @@
-{
-    "associations": {
-        "src": ["/docx/ifTernary.md", "/docx/asyncAwait.md"],
-        "src/Controllers": ["/docx/controllers.md"],
-        "src/Modules": ["/docx/modules.md"],
-        "src/Utils/dates.ts": ["/docx/utils/dates.md"]
-    }
-}
