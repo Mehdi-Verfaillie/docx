@@ -65,7 +65,10 @@ export class ConfigGenerator {
     existingConfig: DocAssociationsConfig,
     folderObject: Record<string, string[]>
   ): DocAssociationsConfig {
-    const newConfig: DocAssociationsConfig = { associations: { ...existingConfig.associations } }
+    const newConfig: DocAssociationsConfig = {
+      ignorePatterns: existingConfig.ignorePatterns || [],
+      associations: { ...existingConfig.associations },
+    }
     for (const key in folderObject) {
       if (!newConfig.associations[key]) {
         newConfig.associations[key] = []
