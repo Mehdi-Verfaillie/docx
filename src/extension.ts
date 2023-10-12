@@ -1,8 +1,7 @@
 import * as vscode from 'vscode'
-import { webView } from './webview/webview'
 import { WorkspaceManager } from './utils/workspace.utils'
 import { FileSystemManager } from './utils/fileSystem.utils'
-import { AssociationsManager, Documentation } from './association.manager'
+import { Documentation } from './association.manager'
 import { ErrorManager } from './utils/error.utils'
 import { SchemaManager } from './config/schema.manager'
 import { RepositoryController } from './api/repository.controller'
@@ -56,38 +55,9 @@ export async function activate(context: vscode.ExtensionContext) {
     ;[jsonConfig, documentations] = await refreshDocumentations()
   })
 
-  const commandOpenDropdown = vscode.commands.registerCommand('docx.openDropdown', async () => {
-    const currentUserPath = WorkspaceManager.getCurrentUserPath()
-    if (!currentUserPath) return
-
-    const manager = new AssociationsManager()
-
-    const filteredDocumentations = await manager.associate(
-      documentations,
-      fileSystem.processFileContent(jsonConfig),
-      currentUserPath
-    )
-
-    const selectedDoc = await vscode.window.showQuickPick(
-      filteredDocumentations.map((doc) => {
-        return { label: doc.name, content: doc.content, path: doc.path, type: doc.type }
-      })
-    )
-    if (selectedDoc) {
-      webView({
-        name: selectedDoc.label,
-        content: selectedDoc.content,
-        path: selectedDoc.path,
-        type: selectedDoc.type,
-      })
-    }
-  })
-
-  context.subscriptions.push(commandOpenDropdown)
-
   // --------------------------------------------------------------
 
-  const extensionManager = new ExtensionManager(context)
+  const extensionManager = new ExtensionManager(context, documentations, jsonConfig)
   extensionManager.registerCommands(context)
 }
 export function deactivate() {}

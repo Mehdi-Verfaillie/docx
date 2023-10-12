@@ -9,19 +9,26 @@ import {
 } from './commands'
 import { CommandRegistry } from './commands/command.registry'
 import { Notifier, VsCodeNotifier } from './utils/notifier.utils'
+import { DropdownCommand } from './commands/dropdown.command'
+import { Documentation } from './association.manager'
 
 export class ExtensionManager {
   private commandRegistry: CommandRegistry
   private generator: ConfigGenerator
   private notifier: Notifier
   private context: ExtensionContext
+  private fileSystem: FileSystemManager
+  private documentations: Documentation[]
+  private jsonConfig: string
 
-  constructor(context: ExtensionContext) {
+  constructor(context: ExtensionContext, documentations: Documentation[], jsonConfig: string) {
     this.commandRegistry = new CommandRegistry()
     this.notifier = new VsCodeNotifier()
-    const fileSystem = new FileSystemManager()
-    this.generator = new ConfigGenerator(fileSystem)
+    this.fileSystem = new FileSystemManager()
+    this.generator = new ConfigGenerator(this.fileSystem)
     this.context = context
+    this.documentations = documentations
+    this.jsonConfig = jsonConfig
     // Configure the commands
     this.configureCommands()
   }
@@ -38,6 +45,10 @@ export class ExtensionManager {
     )
     this.commandRegistry.register('docx.addGithubToken', new GithubTokenCommand(this.context))
     this.commandRegistry.register('docx.addGitlabToken', new GitlabTokenCommand(this.context))
+    this.commandRegistry.register(
+      'docx.openDropdown',
+      new DropdownCommand(this.documentations, this.fileSystem, this.jsonConfig)
+    )
   }
 
   public registerCommands(context: ExtensionContext): void {
