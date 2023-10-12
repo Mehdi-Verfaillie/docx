@@ -1,8 +1,9 @@
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as vscode from 'vscode'
-import { describe, setup, teardown, it } from 'mocha'
+import { describe, setup, teardown, it, before } from 'mocha'
 import { FileSystemManager } from '../../utils/fileSystem.utils'
+import { ErrorManager } from '../../utils/error.utils'
 
 describe('File Validation', () => {
   let readFileStub: sinon.SinonStub
@@ -157,5 +158,59 @@ describe('Folder Validation', () => {
   it('should return an empty array for an empty directory', async () => {
     const result = await manager.retrieveNonIgnoredEntries('/empty-directory')
     expect(result).to.deep.equal([])
+  })
+})
+
+describe('File Writing', () => {
+  let writeFileStub: sinon.SinonStub
+  let errorOutputStub: sinon.SinonStub
+  let fileSystem: FileSystemManager
+  let fsWrapper
+
+  before(() => {
+    ErrorManager.initialize()
+  })
+
+  setup(() => {
+    fsWrapper = {
+      ...vscode.workspace.fs,
+      writeFile: async (uri: vscode.Uri, content: Uint8Array) => {
+        return vscode.workspace.fs.writeFile(uri, content)
+      },
+    }
+
+    writeFileStub = sinon.stub(fsWrapper, 'writeFile')
+    errorOutputStub = sinon.stub(ErrorManager, 'outputError')
+
+    fileSystem = new FileSystemManager(fsWrapper)
+  })
+
+  teardown(() => {
+    writeFileStub.restore()
+    errorOutputStub.restore()
+  })
+
+  it('should handle write errors gracefully', async () => {
+    writeFileStub.rejects(new Error('Some write error'))
+
+    await fileSystem.writeFile('some/file/path', 'some content')
+
+    sinon.assert.calledWith(
+      errorOutputStub,
+      'Failed to write to file: some/file/path. Error: Some write error'
+    )
+  })
+
+  it('should write to the file successfully', async () => {
+    const uri = vscode.Uri.file('some/file/path.txt')
+    const content = 'Hello, world!'
+
+    await fileSystem.writeFile(uri.fsPath, content)
+
+    sinon.assert.calledWith(
+      writeFileStub,
+      uri,
+      sinon.match.instanceOf(Buffer).and(sinon.match.has('length', Buffer.from(content).length))
+    )
   })
 })
