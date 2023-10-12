@@ -1,7 +1,7 @@
 {
   "name": "docx",
   "license": "MIT",
-  "description": "A doc just in time to access the right doc when you need it the most",
+  "description": "Instantly snap to the right documentation in VSCode, bypassing the search hurdle.",
   "version": "1.0.2",
   "publisher": "docx-mt5",
   "icon": "src/assets/logo.png",
