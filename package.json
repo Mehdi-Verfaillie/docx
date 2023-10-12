@@ -2,7 +2,7 @@
   "name": "docx",
   "license": "MIT",
   "description": "Instantly snap to the right documentation in VSCode, bypassing the search hurdle.",
-  "version": "1.0.2",
+  "version": "1.0.5",
   "publisher": "docx-mt5",
   "icon": "src/assets/logo.png",
   "engines": {
@@ -11,6 +11,10 @@
   "categories": [
     "Other"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mehdi-Verfaillie/docx"
+  },
   "keywords": [
     "documentations",
     "quickfind",
