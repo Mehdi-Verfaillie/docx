@@ -18,6 +18,18 @@ export class ConfigGenerator {
     }
   }
 
+  public async cleanupDocxJson(configFilePath: string) {
+    try {
+      const existingConfig = await this.readDocxJson(configFilePath)
+      const cleanedConfig = this.sanitizeConfig(existingConfig)
+      await this.writeDocxJson(cleanedConfig, configFilePath)
+    } catch (error) {
+      ErrorManager.outputError(
+        `An error occurred while trying to clean up the config file. ${error}`
+      )
+    }
+  }
+
   private async createFolderObject(directoryPath: string): Promise<Record<string, string[]>> {
     const entries = await this.fileSystem.retrieveNonIgnoredEntries(directoryPath)
     const folderObject: Record<string, string[]> = {}
