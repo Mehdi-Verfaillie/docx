@@ -11,6 +11,13 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "documentations",
+    "quickfind",
+    "standards",
+    "bpmn",
+    "docx"
+  ],
   "activationEvents": [
     "workspaceContains:.docx.json"
   ],
