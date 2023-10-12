@@ -40,6 +40,11 @@
       {
         "command": "docx.deleteGitlabToken",
         "title": "Docx: Gitlab - Delete token"
+      },
+      {
+        "command": "docx.generateDocxJson",
+        "title": "Docx: Generate .docx.json file"
+      },
       }
     ],
     "menus": {
