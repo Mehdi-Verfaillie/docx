@@ -7,6 +7,19 @@ import { ErrorManager } from '../utils/error.utils'
 export class ConfigGenerator {
   constructor(private readonly fileSystem: FileSystemManager) {}
 
+  private mergeConfigurations(
+    existingConfig: DocAssociationsConfig,
+    folderObject: Record<string, string[]>
+  ): DocAssociationsConfig {
+    const newConfig: DocAssociationsConfig = { associations: { ...existingConfig.associations } }
+    for (const key in folderObject) {
+      if (!newConfig.associations[key]) {
+        newConfig.associations[key] = []
+      }
+    }
+    return newConfig
+  }
+
   private async writeDocxJson(config: DocAssociationsConfig, filePath: string): Promise<void> {
     try {
       const content = JSON.stringify(config, null, 2)
