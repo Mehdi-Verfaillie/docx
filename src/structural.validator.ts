@@ -85,14 +85,6 @@ export class StructuralValidator {
             'Expected an array of documentation files path. Example: ["doc1.md", "doc2.md"]',
         })
         break
-      } else if (!documentations || !documentations.length) {
-        errors.push({
-          errorType: 'MISSING',
-          entityType: 'documentationFile',
-          entityPath: '',
-          errorMsg: 'Missing documentation files path. Example: ["doc1.md", "doc2.md"]',
-        })
-        break
       }
 
       for (const [i, documentation] of documentations.entries()) {

@@ -96,7 +96,7 @@ describe('Configuration JSON Structure Validation', () => {
     globalFaultiesData = globalFaultiesData.concat(faultiesMissingData).concat(faultiesInvalidData)
   })
 
-  it('should ensure that file has valid associations key structure.', async () => {
+  it('should ensure that file has valid associations key structure', async () => {
     const errorText = `Some file has invalid associations key structure.\n\n${expectedStructureError}`
     const mocksData = [
       `{"associations": {}}`,
@@ -117,7 +117,7 @@ describe('Configuration JSON Structure Validation', () => {
     })
   })
 
-  it('should detect that file has invalid directories structure.', async () => {
+  it('should detect that file has invalid directories structure', async () => {
     const errorText = `Expected file has invalid directories structure.\n\n${expectedStructureError}`
     const faultiesData = [
       `{ 
@@ -143,14 +143,14 @@ describe('Configuration JSON Structure Validation', () => {
     globalFaultiesData = globalFaultiesData.concat(faultiesData)
   })
 
-  it('should ensure that file has valid directories structure.', async () => {
+  it('should ensure that file has valid directories structure', async () => {
     const errorText = `Some file has invalid directories structure.\n\n${expectedStructureError}`
     const jsonConfig = fileSystem.processFileContent(jsonMock) as DocAssociationsConfig
     const errors = StructuralValidator.validateDirectoriesKeyStructure(jsonConfig)
     expect(errors, errorText).to.have.lengthOf(0)
   })
 
-  it('should detect that file has invalid documentations structure.', async () => {
+  it('should detect that file has invalid documentations structure', async () => {
     const errorText = `Expected file has invalid documentations structure.\n\n${expectedStructureError}`
     const faultiesInvalidData = [
       `{ "associations": { "src": "" } }`,
@@ -162,8 +162,6 @@ describe('Configuration JSON Structure Validation', () => {
     ]
 
     const faultiesMissingData = [
-      `{ "associations": { "src": [] } }`,
-      `{ "associations": { "src": [""] } }`,
       `{
         "associations": {
           "src": ["docs/global.md", "docs/global2.md", ""],
@@ -188,14 +186,14 @@ describe('Configuration JSON Structure Validation', () => {
     globalFaultiesData = globalFaultiesData.concat(faultiesInvalidData).concat(faultiesMissingData)
   })
 
-  it('should ensure that file has valid documentations structure.', async () => {
+  it('should ensure that file has valid documentations structure', async () => {
     const errorText = `Some file has invalid documentations structure.\n\n${expectedStructureError}`
     const jsonConfig = fileSystem.processFileContent(jsonMock) as DocAssociationsConfig
     const errors = StructuralValidator.validateDocsValuesStructure(jsonConfig)
     expect(errors, errorText).to.lengthOf(0)
   })
 
-  it('should detect that file has backslash in path.', async () => {
+  it('should detect that file has backslash in path', async () => {
     const errorText = `Expected file has backslash in path.\n\n${expectedStructureError}`
     const faultyData1 = `{
         "associations": {
@@ -257,7 +255,7 @@ describe('Configuration JSON Structure Validation', () => {
     expect(errors, errorText).to.lengthOf(0)
   })
 
-  it('should detect that file has invalid structure.', async () => {
+  it('should detect that file has invalid structure', async () => {
     const errorText = `Expected file has invalid structure.\n\n${expectedStructureError}`
     const faultiesData = globalFaultiesData
     faultiesData.forEach((faultyData) => {
@@ -267,14 +265,14 @@ describe('Configuration JSON Structure Validation', () => {
     })
   })
 
-  it('should ensure that file has valid structure.', async () => {
+  it('should ensure that file has valid structure', async () => {
     const errorText = `Some file has invalid structure.\n\n${expectedStructureError}`
     const jsonConfig = fileSystem.processFileContent(jsonMock) as DocAssociationsConfig
     const errors = StructuralValidator.validateConfigStructure(jsonConfig)
     expect(errors, errorText).to.have.lengthOf(0)
   })
 
-  it('should return false if validation error occurred.', async () => {
+  it('should return false if validation error occurred', async () => {
     const faultyData = `{
       "associations": {
         "": ["docs/nothing.md"],
@@ -298,7 +296,7 @@ describe('Configuration JSON Structure Validation', () => {
     expect(errors[2].entityPath).to.equal('docs\\services.md')
   })
 
-  it('should return true if no validation error occurred.', async () => {
+  it('should return true if no validation error occurred', async () => {
     const jsonConfig = fileSystem.processFileContent(jsonMock) as DocAssociationsConfig
 
     const errors = StructuralValidator.validateConfigStructure(jsonConfig)
