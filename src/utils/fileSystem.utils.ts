@@ -55,6 +55,16 @@ export class FileSystemManager {
     return !!this.getExtension(filename)
   }
 
+  public async writeFile(filePath: string, content: string | Buffer): Promise<void> {
+    try {
+      const uri = Uri.file(filePath)
+      const contentBuffer = typeof content === 'string' ? Buffer.from(content) : content
+      await this.fs.writeFile(uri, contentBuffer)
+    } catch (error) {
+      ErrorManager.outputError(`Failed to write to file: ${filePath}. ${error}`)
+    }
+  }
+
   private filterOutIgnoredDirectories(directoryPath: string) {
     return ([entryName, entryType]: [string, FileType]): boolean => {
       if (entryType === FileType.Directory) {
