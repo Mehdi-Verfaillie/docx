@@ -2,7 +2,7 @@
   "name": "docx",
   "license": "MIT",
   "description": "Instantly snap to the right documentation in VSCode, bypassing the search hurdle.",
-  "version": "2.1.0",
+  "version": "1.0.5",
   "publisher": "docx-mt5",
   "icon": "src/assets/logo.png",
   "engines": {
