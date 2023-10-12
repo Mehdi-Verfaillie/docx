@@ -10,8 +10,8 @@ export class ConfigGenerator {
 
   public async generateDocxJson(rootPath: string, configFilePath: string) {
     try {
-      const folderObject = await this.createFolderObject(rootPath)
       const existingConfig = await this.readDocxJson(configFilePath)
+      const folderObject = await this.createFolderObject(rootPath, existingConfig.ignorePatterns)
       const newConfig = this.mergeConfigurations(existingConfig, folderObject)
       await this.writeDocxJson(newConfig, configFilePath)
     } catch (error) {
@@ -33,6 +33,7 @@ export class ConfigGenerator {
 
   private async createFolderObject(
     directoryPath: string,
+    ignorePatterns: string[] = [],
     parentPath = ''
   ): Promise<Record<string, string[]>> {
     const entries = await this.fileSystem.retrieveNonIgnoredEntries(directoryPath)
@@ -41,9 +42,18 @@ export class ConfigGenerator {
     for (const [name, type] of entries) {
       const fullPath = join(parentPath, name)
 
+      // Skip the current entry if it matches any of the ignore patterns
+      if (ignorePatterns.some((pattern) => fullPath.includes(pattern))) {
+        continue
+      }
+
       if (type === FileType.Directory) {
         folderObject[fullPath] = [] // Use the full path as the key
-        const subfolder = await this.createFolderObject(join(directoryPath, name), fullPath)
+        const subfolder = await this.createFolderObject(
+          join(directoryPath, name),
+          ignorePatterns,
+          fullPath
+        )
         Object.assign(folderObject, subfolder) // Merge with the main object
       }
     }
@@ -57,7 +67,7 @@ export class ConfigGenerator {
       return this.fileSystem.processFileContent<DocAssociationsConfig>(fileContent)
     } catch (error) {
       ErrorManager.outputError(`An error occur when trying to read the config file. ${error}`)
-      return { associations: {}, ignorePatterns: [] }
+      return { ignorePatterns: [], associations: {} }
     }
   }
 
@@ -98,8 +108,8 @@ export class ConfigGenerator {
     }
 
     return {
-      associations: cleanedAssociations,
       ignorePatterns: config.ignorePatterns || [],
+      associations: cleanedAssociations,
     }
   }
 }
