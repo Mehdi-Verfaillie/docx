@@ -1,0 +1,9 @@
+{
+  "ignorePatterns": ["node_modules", ".git"],
+  "associations": {
+    "src/index.ts": ["https://gitlab.com/Lynch-cai/docx-documentations-local-template/-/blob/main/documentations/ifTernary.md", "https://gitlab.com/Lynch-cai/docx-documentations-local-template/-/blob/main/documentations/asyncAwait.md"],
+    "src/modules": ["https://gitlab.com/Lynch-cai/docx-documentations-local-template/-/blob/main/documentations/modules.md"],
+    "src/controllers": ["https://gitlab.com/Lynch-cai/docx-documentations-local-template/-/blob/main/documentations/controllers/controllers.md"],
+    "src/controllers/auth.controller.ts": ["https://gitlab.com/Lynch-cai/docx-documentations-local-template/-/blob/main/documentations/controllers/authControllers.md"]
+  }
+}

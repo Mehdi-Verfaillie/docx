@@ -1,0 +1,9 @@
+{
+  "ignorePatterns": ["node_modules", ".git"],
+  "associations": {
+    "src/index.ts": ["docs/index.md", "docs/setup.md"],
+    "src/modules": ["docs/modules/modules.md"],
+    "src/controllers": ["docs/controllers/controllers.md"],
+    "src/controllers/auth.controller.ts": ["docs/controllers/authController.md"]
+  }
+}
