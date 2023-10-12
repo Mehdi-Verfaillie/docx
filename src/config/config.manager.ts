@@ -31,16 +31,23 @@ export class ConfigGenerator {
     }
   }
 
-  private async createFolderObject(directoryPath: string): Promise<Record<string, string[]>> {
+  private async createFolderObject(
+    directoryPath: string,
+    parentPath = ''
+  ): Promise<Record<string, string[]>> {
     const entries = await this.fileSystem.retrieveNonIgnoredEntries(directoryPath)
     const folderObject: Record<string, string[]> = {}
+
     for (const [name, type] of entries) {
+      const fullPath = join(parentPath, name)
+
       if (type === FileType.Directory) {
-        folderObject[name] = []
-        const subfolder = await this.createFolderObject(join(directoryPath, name))
+        folderObject[fullPath] = [] // Use the full path as the key
+        const subfolder = await this.createFolderObject(join(directoryPath, name), fullPath)
         Object.assign(folderObject, subfolder) // Merge with the main object
       }
     }
+
     return folderObject
   }
 
@@ -50,7 +57,7 @@ export class ConfigGenerator {
       return this.fileSystem.processFileContent<DocAssociationsConfig>(fileContent)
     } catch (error) {
       ErrorManager.outputError(`An error occur when trying to read the config file. ${error}`)
-      return { associations: {} }
+      return { associations: {}, ignorePatterns: [] }
     }
   }
 
