@@ -7,6 +7,16 @@ import { ErrorManager } from '../utils/error.utils'
 export class ConfigGenerator {
   constructor(private readonly fileSystem: FileSystemManager) {}
 
+  private async readDocxJson(filePath: string): Promise<DocAssociationsConfig> {
+    try {
+      const fileContent = await this.fileSystem.readFile(filePath)
+      return this.fileSystem.processFileContent<DocAssociationsConfig>(fileContent)
+    } catch (error) {
+      ErrorManager.outputError(`An error occur when trying to read the config file. ${error}`)
+      return { associations: {} }
+    }
+  }
+
   private mergeConfigurations(
     existingConfig: DocAssociationsConfig,
     folderObject: Record<string, string[]>
@@ -29,3 +39,4 @@ export class ConfigGenerator {
     }
   }
 }
+
