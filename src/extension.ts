@@ -83,25 +83,11 @@ export async function activate(context: vscode.ExtensionContext) {
     }
   })
 
-  for (const provider of ['Github', 'Gitlab']) {
-    const providerLowerCase: 'github' | 'gitlab' = provider.toLowerCase() as 'github' | 'gitlab'
-
-    const commandAdd = vscode.commands.registerCommand(`docx.add${provider}Token`, async () => {
-      await credentialManager.openTokenInputBox(providerLowerCase)
-    })
-    const commandDelete = vscode.commands.registerCommand(`docx.delete${provider}Token`, () => {
-      credentialManager.deleteTokenAndNotify(providerLowerCase)
-    })
-
-    context.subscriptions.push(commandAdd)
-    context.subscriptions.push(commandDelete)
-  }
-
   context.subscriptions.push(commandOpenDropdown)
 
   // --------------------------------------------------------------
 
-  const extensionManager = new ExtensionManager()
+  const extensionManager = new ExtensionManager(context)
   extensionManager.registerCommands(context)
 }
 export function deactivate() {}
