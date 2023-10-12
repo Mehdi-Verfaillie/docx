@@ -12,6 +12,7 @@ import {
   WebProviderStrategy,
 } from './api/repository.strategy'
 import { CredentialManager } from './utils/credentials.utils'
+import { ExtensionManager } from './extension.manager'
 
 export async function activate(context: vscode.ExtensionContext) {
   const configFilename = '.docx.json'
@@ -95,6 +96,12 @@ export async function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(commandAdd)
     context.subscriptions.push(commandDelete)
   }
+
   context.subscriptions.push(commandOpenDropdown)
+
+  // --------------------------------------------------------------
+
+  const extensionManager = new ExtensionManager()
+  extensionManager.registerCommands(context)
 }
 export function deactivate() {}
