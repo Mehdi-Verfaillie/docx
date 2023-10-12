@@ -1,0 +1,9 @@
+{
+  "ignorePatterns": ["node_modules", ".git"],
+  "associations": {
+    "src/index.ts": ["https://expressjs.com/fr/starter/basic-routing.html", "https://expressjs.com/fr/starter/static-files.html"],
+    "src/modules": ["https://expressjs.com/fr/guide/database-integration.html"],
+    "src/controllers": ["https://expressjs.com/fr/guide/writing-middleware.html"],
+    "src/controllers/auth.controller.ts": ["https://expressjs.com/fr/guide/using-middleware.html"]
+  }
+}
