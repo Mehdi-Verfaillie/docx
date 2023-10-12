@@ -65,7 +65,7 @@ Generate your `.docx.json` automatically based on the project.
   <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Windows/Linux) or
   <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Mac)
 
-<img src="./src/assets/config-auto.png" alt="Generate config command: 'Docx: Generate config file'. Clean up config command: 'Docx: Clean up config file'" >
+<img src="./src/assets/config-auto-generate.png" alt="Generate config command: 'Docx: Generate config file'. Clean up config command: 'Docx: Clean up config file'" >
 
 Remove unused associations :
 
@@ -73,9 +73,7 @@ Remove unused associations :
   <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Windows/Linux) or
   <kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> (Mac)
 
-- ```bash
-  docx clean-config
-  ```
+<img src="./src/assets/config-auto-clean.png" alt="Generate config command: 'Docx: Generate config file'. Clean up config command: 'Docx: Clean up config file'" >
 
 ## How to add your access token
 
@@ -127,18 +125,18 @@ We highly suggest adding your access token if you use public repositories to avo
 
 ## Features
 
-- [x] Ability to link a file to one or multiple documentations.
+- [x] Ability to link a file or folder to one or multiple documentations.
 - [x] Support for local documentation.
 - [x] Support for documentation in a public or private repository ([access token needed](#how-to-add-your-access-token))
-- [x] Support for documentation from website.
+- [x] Support for documentation as website.
 
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Other
 
-Note: The extension will add the following configuration to your Visual Studio Code user settings (`settings.json`):
+Note: The extension will add the following configuration to your Visual Studio Code user `settings.json`:
 
 ```json
 "json.schemas": [
