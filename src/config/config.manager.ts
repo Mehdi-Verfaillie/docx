@@ -7,6 +7,17 @@ import { ErrorManager } from '../utils/error.utils'
 export class ConfigGenerator {
   constructor(private readonly fileSystem: FileSystemManager) {}
 
+  public async generateDocxJson(rootPath: string, configFilePath: string) {
+    try {
+      const folderObject = await this.createFolderObject(rootPath)
+      const existingConfig = await this.readDocxJson(configFilePath)
+      const newConfig = this.mergeConfigurations(existingConfig, folderObject)
+      await this.writeDocxJson(newConfig, configFilePath)
+    } catch (error) {
+      ErrorManager.outputError(`An error occur when trying to generate the config file. ${error}`)
+    }
+  }
+
   private async createFolderObject(directoryPath: string): Promise<Record<string, string[]>> {
     const entries = await this.fileSystem.retrieveNonIgnoredEntries(directoryPath)
     const folderObject: Record<string, string[]> = {}
