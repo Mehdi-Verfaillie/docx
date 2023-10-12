@@ -6,10 +6,10 @@ import {
   GenerateDocxJsonCommand,
   GithubTokenCommand,
   GitlabTokenCommand,
+  DropdownCommand,
 } from './commands'
 import { CommandRegistry } from './commands/command.registry'
 import { Notifier, VsCodeNotifier } from './utils/notifier.utils'
-import { DropdownCommand } from './commands/dropdown.command'
 import { Documentation } from './association.manager'
 
 export class ExtensionManager {
