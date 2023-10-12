@@ -33,14 +33,18 @@ export async function activate(context: vscode.ExtensionContext) {
   )
 
   const refreshDocumentations = async (): Promise<[string, Documentation[]]> => {
-    const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/${configFilename}`)
-    const repositoryController = await RepositoryController.create(
-      jsonConfig,
-      providerStrategies,
-      tokens
-    )
-    const documentations = await repositoryController.getDocumentations()
-    return [jsonConfig, documentations]
+    try {
+      const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/${configFilename}`)
+      const repositoryController = await RepositoryController.create(
+        jsonConfig,
+        providerStrategies,
+        tokens
+      )
+      const documentations = await repositoryController.getDocumentations()
+      return [jsonConfig, documentations]
+    } catch (error) {
+      return ['', []]
+    }
   }
 
   let tokens = await credentialManager.getTokens()
