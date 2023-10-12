@@ -62,5 +62,19 @@ export class ConfigGenerator {
       ErrorManager.outputError(`An error occur when trying to write in the config file. ${error}`)
     }
   }
-}
 
+  private sanitizeConfig(config: DocAssociationsConfig): DocAssociationsConfig {
+    const cleanedAssociations: Record<string, string[]> = {}
+
+    for (const [key, value] of Object.entries(config.associations)) {
+      if (value.length > 0) {
+        cleanedAssociations[key] = value
+      }
+    }
+
+    return {
+      associations: cleanedAssociations,
+      ignorePatterns: config.ignorePatterns || [],
+    }
+  }
+}
