@@ -12,6 +12,11 @@ export class DataTransformManager {
     })
   }
 
+  static sortObjectKeys(obj: Record<string, string[]>): Record<string, string[]> {
+    const sortedMap = new Map([...Object.entries(obj)].sort())
+    return Object.fromEntries(sortedMap)
+  }
+
   static removeQueryParamsFromUrl = (url: string): string => {
     return url.split('?')[0]
   }

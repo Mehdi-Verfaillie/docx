@@ -3,6 +3,7 @@ import { FileType } from 'vscode'
 import { DocAssociationsConfig } from '../association.validator'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { ErrorManager } from '../utils/error.utils'
+import { DataTransformManager } from '../utils/transform.utils'
 
 export class ConfigGenerator {
   constructor(private readonly fileSystem: FileSystemManager) {}
@@ -63,6 +64,8 @@ export class ConfigGenerator {
         newConfig.associations[key] = []
       }
     }
+
+    newConfig.associations = DataTransformManager.sortObjectKeys(newConfig.associations)
     return newConfig
   }
 
