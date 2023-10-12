@@ -45,6 +45,9 @@
         "command": "docx.generateDocxJson",
         "title": "Docx: Generate .docx.json file"
       },
+      {
+        "command": "docx.cleanupDocxJson",
+        "title": "Docx: Clean up .docx.json file"
       }
     ],
     "menus": {
