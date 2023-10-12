@@ -65,8 +65,7 @@ export class ConfigGenerator {
     try {
       const fileContent = await this.fileSystem.readFile(filePath)
       return this.fileSystem.processFileContent<DocAssociationsConfig>(fileContent)
-    } catch (error) {
-      ErrorManager.outputError(`An error occur when trying to read the config file. ${error}`)
+    } catch {
       return { ignorePatterns: [], associations: {} }
     }
   }
