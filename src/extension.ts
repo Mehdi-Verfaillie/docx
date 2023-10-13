@@ -45,9 +45,6 @@ export async function activate(context: vscode.ExtensionContext) {
     await refreshDocumentations()
   })
 
-  // --------------------------------------------------------------
-
-  const extensionManager = new ExtensionManager(context)
-  extensionManager.registerCommands(context)
+  new ExtensionManager(context).registerCommands(context)
 }
 export function deactivate() {}
