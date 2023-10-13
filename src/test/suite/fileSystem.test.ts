@@ -1,33 +1,31 @@
 import { expect } from 'chai'
-import * as sinon from 'sinon'
-import * as vscode from 'vscode'
+import { SinonStub, match, stub, assert } from 'sinon'
+import { FileSystemError, FileType, Uri, workspace } from 'vscode'
 import { describe, setup, teardown, it, before } from 'mocha'
 import { FileSystemManager } from '../../utils/fileSystem.utils'
 import { ErrorManager } from '../../utils/error.utils'
 
 describe('File Validation', () => {
-  let readFileStub: sinon.SinonStub
-  let statStub: sinon.SinonStub
+  let readFileStub: SinonStub
+  let statStub: SinonStub
   let fileSystem: FileSystemManager
 
   const jsonMock =
     '{"associations":{"src":["/docx/ifTernary.md","/docx/asyncAwait.md"],"src/Controllers":["/docx/controllers.md"],"src/Modules":["/docx/modules.md"],"src/Utils/dates.ts":["/docx/utils/dates.md"]}}'
 
   setup(() => {
-    const workspaceFs = { ...vscode.workspace.fs }
+    const workspaceFs = { ...workspace.fs }
 
     // Stubbing for readFile
-    readFileStub = sinon.stub(workspaceFs, 'readFile')
+    readFileStub = stub(workspaceFs, 'readFile')
     readFileStub
-      .withArgs(sinon.match((uri: vscode.Uri) => uri.fsPath.endsWith('association.json')))
+      .withArgs(match((uri: Uri) => uri.fsPath.endsWith('association.json')))
       .resolves(new Uint8Array(Buffer.from(jsonMock)))
     readFileStub.rejects(new Error('File not found'))
 
     // Stubbing for stat
-    statStub = sinon.stub(workspaceFs, 'stat')
-    statStub
-      .withArgs(sinon.match((uri: vscode.Uri) => uri.fsPath.endsWith('association.json')))
-      .resolves()
+    statStub = stub(workspaceFs, 'stat')
+    statStub.withArgs(match((uri: Uri) => uri.fsPath.endsWith('association.json'))).resolves()
     statStub.rejects(new Error('File not found'))
 
     fileSystem = new FileSystemManager(workspaceFs)
@@ -39,12 +37,12 @@ describe('File Validation', () => {
   })
 
   it('should return true if the file exists', async () => {
-    const result = await fileSystem.ensureFileExists(vscode.Uri.file('association.json'))
+    const result = await fileSystem.ensureFileExists(Uri.file('association.json'))
     expect(result).to.be.equal(true)
   })
 
   it('should return false if the file does not exist', async () => {
-    const result = await fileSystem.ensureFileExists(vscode.Uri.file('nonexistentfile.json'))
+    const result = await fileSystem.ensureFileExists(Uri.file('nonexistentfile.json'))
     expect(result).to.be.equal(false)
   })
 
@@ -54,7 +52,7 @@ describe('File Validation', () => {
       await fileSystem.ensureFileExists(undefined)
       expect.fail('Expected ensureFileExists to throw, but it did not.')
     } catch (error) {
-      expect(error as Error).to.be.instanceOf(vscode.FileSystemError)
+      expect(error as Error).to.be.instanceOf(FileSystemError)
     }
   })
 
@@ -118,23 +116,23 @@ describe('File Validation', () => {
 })
 
 describe('Folder Validation', () => {
-  let readDirectoryStub: sinon.SinonStub
+  let readDirectoryStub: SinonStub
   let manager: FileSystemManager
 
   setup(() => {
-    const workspaceFs = { ...vscode.workspace.fs }
+    const workspaceFs = { ...workspace.fs }
 
     // Stubbing for readDirectory
-    readDirectoryStub = sinon.stub(workspaceFs, 'readDirectory')
+    readDirectoryStub = stub(workspaceFs, 'readDirectory')
     readDirectoryStub
-      .withArgs(sinon.match((uri: vscode.Uri) => uri.fsPath.endsWith('/test-directory')))
+      .withArgs(match((uri: Uri) => uri.fsPath.endsWith('/test-directory')))
       .resolves([
-        ['file1.txt', vscode.FileType.File],
-        ['subdir', vscode.FileType.Directory],
+        ['file1.txt', FileType.File],
+        ['subdir', FileType.Directory],
       ])
 
     readDirectoryStub
-      .withArgs(sinon.match((uri: vscode.Uri) => uri.fsPath.endsWith('/empty-directory')))
+      .withArgs(match((uri: Uri) => uri.fsPath.endsWith('/empty-directory')))
       .resolves([])
 
     readDirectoryStub.rejects(new Error('Directory not found'))
@@ -150,8 +148,8 @@ describe('Folder Validation', () => {
     const result = await manager.retrieveNonIgnoredEntries('/test-directory')
 
     expect(result).to.deep.equal([
-      ['file1.txt', vscode.FileType.File],
-      ['subdir', vscode.FileType.Directory],
+      ['file1.txt', FileType.File],
+      ['subdir', FileType.Directory],
     ])
   })
 
@@ -162,8 +160,8 @@ describe('Folder Validation', () => {
 })
 
 describe('File Writing', () => {
-  let writeFileStub: sinon.SinonStub
-  let errorOutputStub: sinon.SinonStub
+  let writeFileStub: SinonStub
+  let errorOutputStub: SinonStub
   let fileSystem: FileSystemManager
   let fsWrapper
 
@@ -173,14 +171,14 @@ describe('File Writing', () => {
 
   setup(() => {
     fsWrapper = {
-      ...vscode.workspace.fs,
-      writeFile: async (uri: vscode.Uri, content: Uint8Array) => {
-        return vscode.workspace.fs.writeFile(uri, content)
+      ...workspace.fs,
+      writeFile: async (uri: Uri, content: Uint8Array) => {
+        return workspace.fs.writeFile(uri, content)
       },
     }
 
-    writeFileStub = sinon.stub(fsWrapper, 'writeFile')
-    errorOutputStub = sinon.stub(ErrorManager, 'outputError')
+    writeFileStub = stub(fsWrapper, 'writeFile')
+    errorOutputStub = stub(ErrorManager, 'outputError')
 
     fileSystem = new FileSystemManager(fsWrapper)
   })
@@ -195,22 +193,22 @@ describe('File Writing', () => {
 
     await fileSystem.writeFile('some/file/path', 'some content')
 
-    sinon.assert.calledWith(
+    assert.calledWith(
       errorOutputStub,
       'Failed to write to file: some/file/path. Error: Some write error'
     )
   })
 
   it('should write to the file successfully', async () => {
-    const uri = vscode.Uri.file('some/file/path.txt')
+    const uri = Uri.file('some/file/path.txt')
     const content = 'Hello, world!'
 
     await fileSystem.writeFile(uri.fsPath, content)
 
-    sinon.assert.calledWith(
+    assert.calledWith(
       writeFileStub,
       uri,
-      sinon.match.instanceOf(Buffer).and(sinon.match.has('length', Buffer.from(content).length))
+      match.instanceOf(Buffer).and(match.has('length', Buffer.from(content).length))
     )
   })
 })

@@ -1,4 +1,4 @@
-import * as vscode from 'vscode'
+import { ExtensionContext, workspace } from 'vscode'
 import { WorkspaceManager } from './utils/workspace.utils'
 import { FileSystemManager } from './utils/fileSystem.utils'
 import { ErrorManager } from './utils/error.utils'
@@ -8,13 +8,13 @@ import { CredentialManager } from './utils/credentials.utils'
 import { ExtensionManager } from './extension.manager'
 import { DataStore } from './data.store'
 
-export async function activate(context: vscode.ExtensionContext) {
+export async function activate(context: ExtensionContext) {
   const configFilename = '.docx.json'
   const fileSystem = new FileSystemManager()
   const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
 
   const credentialManager = new CredentialManager(context.secrets)
-  const configFileObserver = vscode.workspace.createFileSystemWatcher(
+  const configFileObserver = workspace.createFileSystemWatcher(
     `${workspaceFolder}/${configFilename}`
   )
 
@@ -38,7 +38,7 @@ export async function activate(context: vscode.ExtensionContext) {
       const documentations = await repositoryController.getDocumentations()
       dataStore.documentations = documentations
     } catch (error) {
-      ErrorManager.outputError('An error occur when trying to refetch the documentation')
+      /** empty */
     }
   }
 

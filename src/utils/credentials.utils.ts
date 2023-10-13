@@ -1,4 +1,4 @@
-import * as vscode from 'vscode'
+import { SecretStorage, window } from 'vscode'
 
 export interface Token {
   provider: 'github' | 'gitlab'
@@ -6,15 +6,15 @@ export interface Token {
 }
 
 export class CredentialManager {
-  private secretStorage: vscode.SecretStorage
+  private secretStorage: SecretStorage
   private providers: Token['provider'][]
-  constructor(secretStorage: vscode.SecretStorage) {
+  constructor(secretStorage: SecretStorage) {
     this.secretStorage = secretStorage
     this.providers = ['github', 'gitlab']
   }
 
   public openTokenInputBox = async (provider: Token['provider']) => {
-    const inputValue = await vscode.window.showInputBox({
+    const inputValue = await window.showInputBox({
       placeHolder: `${provider.charAt(0).toUpperCase() + provider.slice(1)} Personnal Access Token`,
     })
     if (inputValue) {
@@ -22,7 +22,7 @@ export class CredentialManager {
         provider,
         key: inputValue,
       })
-      vscode.window.showInformationMessage(
+      window.showInformationMessage(
         `Docx ${
           provider.charAt(0).toUpperCase() + provider.slice(1)
         } Personnal Access Token has been saved successfully.
@@ -34,7 +34,7 @@ export class CredentialManager {
 
   public deleteTokenAndNotify = async (provider: Token['provider']) => {
     this.deleteToken(provider)
-    vscode.window.showInformationMessage(
+    window.showInformationMessage(
       `Docx
       ${
         provider.charAt(0).toUpperCase() + provider.slice(1)

@@ -1,4 +1,4 @@
-import * as vscode from 'vscode'
+import { Uri, ViewColumn, window } from 'vscode'
 import { Documentation } from '../association.manager'
 import markdownItAnchor from 'markdown-it-anchor'
 import markdownIt = require('markdown-it')
@@ -6,9 +6,9 @@ import path = require('path')
 import { createBpmnWebview } from './_bpmn_webview'
 
 export function webView(file: Documentation) {
-  const panel = vscode.window.createWebviewPanel(file.type, file.name, vscode.ViewColumn.Two, {
+  const panel = window.createWebviewPanel(file.type, file.name, ViewColumn.Two, {
     enableScripts: true,
-    localResourceRoots: [vscode.Uri.file(path.join(__dirname, '../../'))],
+    localResourceRoots: [Uri.file(path.join(__dirname, '../../'))],
   })
 
   const md = markdownIt({ html: true }).use(markdownItAnchor)
