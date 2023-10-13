@@ -12,10 +12,12 @@ export async function activate(context: vscode.ExtensionContext) {
   const configFilename = '.docx.json'
   const fileSystem = new FileSystemManager()
   const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
+
   const credentialManager = new CredentialManager(context.secrets)
   const configFileObserver = vscode.workspace.createFileSystemWatcher(
     `${workspaceFolder}/${configFilename}`
   )
+
   ErrorManager.initialize()
   SchemaManager.initialize(
     `/${configFilename}`,
@@ -23,18 +25,25 @@ export async function activate(context: vscode.ExtensionContext) {
   )
 
   const dataStore = DataStore.getInstance()
+
   let tokens = await credentialManager.getTokens()
 
   const refreshDocumentations = async (): Promise<void> => {
     try {
-      dataStore.jsonConfig = await fileSystem.readFile(`${workspaceFolder}/${configFilename}`)
+      const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/${configFilename}`)
+      dataStore.jsonConfig = jsonConfig
+
       const repositoryController = await RepositoryController.create(dataStore.jsonConfig, tokens)
-      dataStore.documentations = await repositoryController.getDocumentations()
+
+      const documentations = await repositoryController.getDocumentations()
+      dataStore.documentations = documentations
     } catch (error) {
-      dataStore.jsonConfig = ''
-      dataStore.documentations = []
+      ErrorManager.outputError('An error occur when trying to refetch the documentation')
     }
   }
+
+  /** Initial fetch */
+  await refreshDocumentations()
 
   configFileObserver.onDidChange(async () => {
     await refreshDocumentations()
