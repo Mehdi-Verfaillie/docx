@@ -1,7 +1,7 @@
-import * as vscode from 'vscode'
+import { Uri, WebviewPanel } from 'vscode'
 import { Documentation } from '../association.manager'
 
-export function createBpmnWebview(panel: vscode.WebviewPanel, file: Documentation) {
+export function createBpmnWebview(panel: WebviewPanel, file: Documentation) {
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -10,7 +10,7 @@ export function createBpmnWebview(panel: vscode.WebviewPanel, file: Documentatio
 <body>
 <div id="canvas" style="width: 100vw; height: 100vh;"></div>
     <script src="${panel.webview.asWebviewUri(
-      vscode.Uri.file(require.resolve('bpmn-js/dist/bpmn-viewer.production.min.js'))
+      Uri.file(require.resolve('bpmn-js/dist/bpmn-viewer.production.min.js'))
     )}"></script>
     
     <script>

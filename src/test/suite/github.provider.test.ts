@@ -1,12 +1,12 @@
 import { assert } from 'chai'
-import * as sinon from 'sinon'
+import { match, stub } from 'sinon'
 import { GithubProvider } from '../../provider/github.provider'
 import { describe, it } from 'mocha'
 
 describe('GithubProvider', function () {
   describe('should get documentation .md github', function () {
     it('should fetch and return documentation from GitHub', async function () {
-      const getContentGithubStub = sinon.stub()
+      const getContentGithubStub = stub()
       getContentGithubStub.resolves([
         {
           type: 'file',
@@ -15,10 +15,10 @@ describe('GithubProvider', function () {
         },
       ])
 
-      const readFileGithubStub = sinon.stub()
+      const readFileGithubStub = stub()
       readFileGithubStub
         .withArgs(
-          sinon.match({
+          match({
             type: 'file',
             name: 'example.md',
             download_url: 'https://example.com/example.md',
@@ -43,7 +43,7 @@ describe('GithubProvider', function () {
     })
 
     it('should fetch and return list documentation from GitHub', async function () {
-      const getContentGithubStub = sinon.stub()
+      const getContentGithubStub = stub()
       getContentGithubStub.resolves([
         {
           type: 'file',
@@ -57,7 +57,7 @@ describe('GithubProvider', function () {
         },
       ])
 
-      const readFileGithubStub = sinon.stub()
+      const readFileGithubStub = stub()
 
       readFileGithubStub
         .onFirstCall()
@@ -87,7 +87,7 @@ describe('GithubProvider', function () {
       })
     })
     it('should fetch and return list documentation from the file and all the files in the folder', async function () {
-      const getContentGithubStub = sinon.stub()
+      const getContentGithubStub = stub()
       getContentGithubStub
         .onFirstCall()
         .resolves([
@@ -116,7 +116,7 @@ describe('GithubProvider', function () {
           },
         ])
 
-      const readFileGithubStub = sinon.stub()
+      const readFileGithubStub = stub()
 
       readFileGithubStub
         .onFirstCall()

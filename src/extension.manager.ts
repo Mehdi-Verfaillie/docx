@@ -29,8 +29,16 @@ export class ExtensionManager {
       CommandFactory.createGithubTokenCommand(this.context)
     )
     this.commandRegistry.register(
+      'docx.deleteGithubToken',
+      CommandFactory.deleteGithubTokenCommand(this.context)
+    )
+    this.commandRegistry.register(
       'docx.addGitlabToken',
       CommandFactory.createGitlabTokenCommand(this.context)
+    )
+    this.commandRegistry.register(
+      'docx.deleteGitlabToken',
+      CommandFactory.deleteGitlabTokenCommand(this.context)
     )
   }
 

@@ -8,8 +8,8 @@ import {
   CleanupDocxJsonCommand,
   DropdownCommand,
   GenerateDocxJsonCommand,
-  GithubTokenCommand,
-  GitlabTokenCommand,
+  TokenAddGithubCommand,
+  TokenAddGitlabCommand,
 } from './index'
 
 export class CommandFactory {
@@ -31,10 +31,18 @@ export class CommandFactory {
   }
 
   static createGithubTokenCommand(context: ExtensionContext): Command {
-    return new GithubTokenCommand(context)
+    return new TokenAddGithubCommand(context)
+  }
+
+  static deleteGithubTokenCommand(context: ExtensionContext): Command {
+    return new TokenAddGitlabCommand(context)
   }
 
   static createGitlabTokenCommand(context: ExtensionContext): Command {
-    return new GitlabTokenCommand(context)
+    return new TokenAddGitlabCommand(context)
+  }
+
+  static deleteGitlabTokenCommand(context: ExtensionContext): Command {
+    return new TokenAddGitlabCommand(context)
   }
 }

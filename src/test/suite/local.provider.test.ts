@@ -1,7 +1,7 @@
 import { describe, it, setup, teardown } from 'mocha'
 import * as sinon from 'sinon'
 import { expect } from 'chai'
-import * as vscode from 'vscode'
+import { FileType, Uri } from 'vscode'
 import { FileSystemManager } from '../../utils/fileSystem.utils'
 import { LocalProvider } from '../../provider/local.provider'
 
@@ -15,29 +15,29 @@ describe('fetchDocumentation', () => {
 
     sinon
       .stub(fileSystem, 'retrieveNonIgnoredEntries')
-      .withArgs(vscode.Uri.file('/test-directory').fsPath)
+      .withArgs(Uri.file('/test-directory').fsPath)
       .resolves([
-        ['document.md', vscode.FileType.File],
-        ['diagram.bpmn', vscode.FileType.File],
-        ['sub-directory', vscode.FileType.Directory],
+        ['document.md', FileType.File],
+        ['diagram.bpmn', FileType.File],
+        ['sub-directory', FileType.Directory],
       ])
-      .withArgs(vscode.Uri.file('/test-directory/sub-directory').fsPath)
-      .resolves([['nested-doc.md', vscode.FileType.File]])
+      .withArgs(Uri.file('/test-directory/sub-directory').fsPath)
+      .resolves([['nested-doc.md', FileType.File]])
 
     sinon
       .stub(fileSystem, 'readFile')
-      .withArgs(vscode.Uri.file('/test-directory/document.md').fsPath)
+      .withArgs(Uri.file('/test-directory/document.md').fsPath)
       .resolves(Buffer.from('MD Content').toString())
-      .withArgs(vscode.Uri.file('/test-directory/diagram.bpmn').fsPath)
+      .withArgs(Uri.file('/test-directory/diagram.bpmn').fsPath)
       .resolves(Buffer.from('BPMN Content').toString())
-      .withArgs(vscode.Uri.file('/test-directory/sub-directory/nested-doc.md').fsPath)
+      .withArgs(Uri.file('/test-directory/sub-directory/nested-doc.md').fsPath)
       .resolves(Buffer.from('Nested MD Content').toString())
   })
 
   teardown(() => sinon.restore())
 
   it('should fetch documentation for files of interest including nested directories', async () => {
-    const result = await localProvider.fetchDocumentation(vscode.Uri.file('/test-directory'))
+    const result = await localProvider.fetchDocumentation(Uri.file('/test-directory'))
     expect(result).to.deep.equal([
       {
         name: 'document.md',
@@ -61,7 +61,7 @@ describe('fetchDocumentation', () => {
   })
 
   it('should return an empty array if no documentation files are found', async () => {
-    const result = await localProvider.fetchDocumentation(vscode.Uri.file('/empty-directory'))
+    const result = await localProvider.fetchDocumentation(Uri.file('/empty-directory'))
     expect(result).to.deep.equal([])
   })
 })

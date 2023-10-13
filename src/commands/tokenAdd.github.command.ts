@@ -2,7 +2,7 @@ import { ExtensionContext } from 'vscode'
 import { CredentialManager } from '../utils/credentials.utils'
 import { Command } from './command.registry'
 
-export class GithubTokenCommand implements Command {
+export class TokenAddGithubCommand implements Command {
   private credentialManager: CredentialManager
 
   constructor(context: ExtensionContext) {

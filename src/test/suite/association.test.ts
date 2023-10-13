@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import * as sinon from 'sinon'
+import { SinonStub, SinonStubbedInstance, createStubInstance, match, stub } from 'sinon'
 import { Uri, workspace } from 'vscode'
 import { describe, setup, teardown, it } from 'mocha'
 import { DocAssociationsConfig, AssociationsValidator } from '../../association.validator'
@@ -20,21 +20,21 @@ describe('Associations JSON Validation', () => {
     },
   })
 
-  let fileSystemStub: sinon.SinonStubbedInstance<FileSystemManager>
-  let validatorStub: sinon.SinonStubbedInstance<AssociationsValidator>
-  let errorManagerStub: sinon.SinonStub
+  let fileSystemStub: SinonStubbedInstance<FileSystemManager>
+  let validatorStub: SinonStubbedInstance<AssociationsValidator>
+  let errorManagerStub: SinonStub
 
   let validator: AssociationsValidator
   let manager: AssociationsManager
 
   setup(() => {
-    fileSystemStub = sinon.createStubInstance(FileSystemManager)
-    validatorStub = sinon.createStubInstance(AssociationsValidator)
-    errorManagerStub = sinon.stub(ErrorManager, 'outputError')
+    fileSystemStub = createStubInstance(FileSystemManager)
+    validatorStub = createStubInstance(AssociationsValidator)
+    errorManagerStub = stub(ErrorManager, 'outputError')
 
     fileSystemStub.ensureFileExists
       .withArgs(
-        sinon.match((uri: Uri) => {
+        match((uri: Uri) => {
           return (
             // Folder structure mock
             uri.fsPath.endsWith('src') ||

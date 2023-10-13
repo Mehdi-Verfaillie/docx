@@ -1,12 +1,12 @@
 import { assert } from 'chai'
-import * as sinon from 'sinon'
+import { match, stub } from 'sinon'
 import { GitlabProvider } from '../../provider/gitlab.provider'
 import { describe, it } from 'mocha'
 
 describe('GitlabProvider', function () {
   describe('should get documentation .md from GitLab', function () {
     it('should fetch and return documentation from GitLab', async function () {
-      const getContentGitlabStub = sinon.stub()
+      const getContentGitlabStub = stub()
       getContentGitlabStub.resolves([
         {
           type: 'blob',
@@ -14,10 +14,10 @@ describe('GitlabProvider', function () {
         },
       ])
 
-      const readFileGitlabStub = sinon.stub()
+      const readFileGitlabStub = stub()
       readFileGitlabStub
         .withArgs(
-          sinon.match({
+          match({
             type: 'blob',
             name: 'example.md',
           })

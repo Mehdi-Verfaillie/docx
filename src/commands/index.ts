@@ -1,13 +1,13 @@
 import { GenerateDocxJsonCommand } from './config.generate.command'
 import { CleanupDocxJsonCommand } from './config.cleanup.command'
-import { GithubTokenCommand } from './github.token.command'
-import { GitlabTokenCommand } from './gitlab.token.command'
+import { TokenAddGithubCommand } from './tokenAdd.github.command'
+import { TokenAddGitlabCommand } from './tokenAdd.gitlab.command'
 import { DropdownCommand } from './dropdown.command'
 
 export {
   GenerateDocxJsonCommand,
   CleanupDocxJsonCommand,
-  GithubTokenCommand,
-  GitlabTokenCommand,
+  TokenAddGithubCommand,
+  TokenAddGitlabCommand,
   DropdownCommand,
 }

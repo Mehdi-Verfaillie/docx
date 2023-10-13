@@ -1,4 +1,4 @@
-import * as vscode from 'vscode'
+import { Uri, window } from 'vscode'
 import { expect } from 'chai'
 import { describe, it, afterEach } from 'mocha'
 import { WorkspaceManager } from '../../utils/workspace.utils'
@@ -10,19 +10,19 @@ describe('WorkspaceManager Tests', () => {
   })
 
   it('should return undefined when there is no active editor', async () => {
-    sinon.stub(vscode.window, 'activeTextEditor').value(undefined)
+    sinon.stub(window, 'activeTextEditor').value(undefined)
     const path = WorkspaceManager.getCurrentUserPath()
     expect(path).to.be.equal(undefined)
   })
 
   it('should return the correct path when there is an active editor', async () => {
     const fakeDocument = {
-      uri: vscode.Uri.file('/accountController.ts'),
+      uri: Uri.file('/accountController.ts'),
     }
     const fakeEditor = {
       document: fakeDocument,
     }
-    sinon.stub(vscode.window, 'activeTextEditor').value(fakeEditor)
+    sinon.stub(window, 'activeTextEditor').value(fakeEditor)
 
     const path = WorkspaceManager.getCurrentUserPath()
     expect(path).to.equal('/accountController.ts')
