@@ -5,6 +5,7 @@ import { LocalProvider } from '../provider/local.provider'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { ProviderConfig } from './repository.controller'
 import { WebProvider } from '../provider/web.provider'
+import { WorkspaceManager } from '../utils/workspace.utils'
 
 export type Provider = LocalProvider | GithubProvider | GitlabProvider | WebProvider
 
@@ -15,7 +16,8 @@ export class RepositoryProvider {
     switch (config.type) {
       case 'local':
         {
-          const fileSystem = new FileSystemManager(workspace.fs, config.ignorePatterns)
+          const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
+          const fileSystem = new FileSystemManager(workspace.fs, `${workspaceFolder}/.gitignore`)
           this.provider = new LocalProvider(fileSystem)
         }
         break

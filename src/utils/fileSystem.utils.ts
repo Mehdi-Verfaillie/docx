@@ -6,14 +6,14 @@ const extensionsOfInterest = ['.md', '.bpmn', '.html'] as const
 export type Extension = (typeof extensionsOfInterest)[number]
 
 export class FileSystemManager {
-  private ignorePatterns: string[] = []
+  public ignorePatterns: string[] = ['.git']
 
   constructor(
     private fs: FileSystem = workspace.fs,
-    ignorePatterns?: string[]
+    gitignoreFilePath?: string
   ) {
     this.fs = fs
-    if (ignorePatterns && ignorePatterns.length) this.ignorePatterns = ignorePatterns
+    if (gitignoreFilePath) this.loadGitignorePatterns(gitignoreFilePath)
   }
 
   public async ensureFileExists(uri: Uri): Promise<boolean> {
@@ -93,8 +93,35 @@ export class FileSystemManager {
   }
 
   private isEntryIgnored(fullPath: string, entryName: string): boolean {
-    return this.ignorePatterns.some(
-      (pattern) => minimatch(entryName, pattern) || minimatch(fullPath, pattern)
+    return this.ignorePatterns.some((pattern) =>
+      this.isPatternMatching(pattern, fullPath, entryName)
     )
+  }
+
+  private isPatternMatching(pattern: string, fullPath: string, entryName: string): boolean {
+    const isRootLevel = pattern.startsWith('/')
+    const normalizedPattern = this.normalizePattern(pattern)
+    const matchFullPath = isRootLevel
+      ? fullPath.startsWith(normalizedPattern)
+      : fullPath.includes(normalizedPattern)
+    const matchEntryName =
+      minimatch(entryName, normalizedPattern) || minimatch(fullPath, normalizedPattern)
+    return matchEntryName || matchFullPath
+  }
+
+  private normalizePattern(pattern: string): string {
+    return pattern.replace(/^\//, '') // Remove leading slash
+  }
+
+  private async loadGitignorePatterns(gitignoreFilePath: string) {
+    try {
+      const fileContent = await this.readFile(gitignoreFilePath)
+      const gitignorePatterns = fileContent
+        .split('\n')
+        .filter((pattern) => pattern && !pattern.startsWith('#'))
+      this.ignorePatterns = [...this.ignorePatterns, ...gitignorePatterns]
+    } catch (error) {
+      /* empty */
+    }
   }
 }

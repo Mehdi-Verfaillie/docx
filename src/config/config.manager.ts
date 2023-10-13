@@ -11,7 +11,10 @@ export class ConfigGenerator {
   public async generateDocxJson(rootPath: string, configFilePath: string) {
     try {
       const existingConfig = await this.readDocxJson(configFilePath)
-      const folderObject = await this.createFolderObject(rootPath, existingConfig.ignorePatterns)
+      const mergedIgnorePatterns = Array.from(
+        new Set([...this.fileSystem.ignorePatterns, ...(existingConfig.ignorePatterns ?? [])])
+      )
+      const folderObject = await this.createFolderObject(rootPath, mergedIgnorePatterns)
       const newConfig = this.mergeConfigurations(existingConfig, folderObject)
       await this.writeDocxJson(newConfig, configFilePath)
     } catch (error) {
@@ -33,7 +36,7 @@ export class ConfigGenerator {
 
   private async createFolderObject(
     directoryPath: string,
-    ignorePatterns: string[] = [],
+    ignorePatterns: string[],
     parentPath = ''
   ): Promise<Record<string, string[]>> {
     const entries = await this.fileSystem.retrieveNonIgnoredEntries(directoryPath)
