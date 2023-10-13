@@ -23,7 +23,7 @@
     "docx"
   ],
   "activationEvents": [
-    "workspaceContains:.docx.json"
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "contributes": {

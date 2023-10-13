@@ -1,4 +1,4 @@
-import { ExtensionContext, commands } from 'vscode'
+import { ExtensionContext, commands, workspace } from 'vscode'
 import { ConfigGenerator } from './config/config.manager'
 import { FileSystemManager } from './utils/fileSystem.utils'
 import {
@@ -6,11 +6,12 @@ import {
   GenerateDocxJsonCommand,
   GithubTokenCommand,
   GitlabTokenCommand,
+  DropdownCommand,
 } from './commands'
 import { CommandRegistry } from './commands/command.registry'
 import { Notifier, VsCodeNotifier } from './utils/notifier.utils'
-import { DropdownCommand } from './commands/dropdown.command'
 import { Documentation } from './association.manager'
+import { WorkspaceManager } from './utils/workspace.utils'
 
 export class ExtensionManager {
   private commandRegistry: CommandRegistry
@@ -20,11 +21,12 @@ export class ExtensionManager {
   private fileSystem: FileSystemManager
   private documentations: Documentation[]
   private jsonConfig: string
+  private workspaceFolder = WorkspaceManager.getWorkspaceFolder()
 
   constructor(context: ExtensionContext, documentations: Documentation[], jsonConfig: string) {
     this.commandRegistry = new CommandRegistry()
     this.notifier = new VsCodeNotifier()
-    this.fileSystem = new FileSystemManager()
+    this.fileSystem = new FileSystemManager(workspace.fs, `${this.workspaceFolder}/.gitignore`)
     this.generator = new ConfigGenerator(this.fileSystem)
     this.context = context
     this.documentations = documentations
