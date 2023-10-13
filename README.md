@@ -129,6 +129,7 @@ We highly suggest adding your access token if you use public repositories to avo
 - [x] Support for local documentation.
 - [x] Support for documentation in a public or private repository ([access token needed](#how-to-add-your-access-token))
 - [x] Support for documentation as website.
+- [ ] Support workspace
 
 ## License
 
