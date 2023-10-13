@@ -59,7 +59,7 @@ export class GithubProvider implements AbstractRepositoryFactory {
   public async getRepoContent(route: string) {
     const headers: HeadersInit = this.token ? { Authorization: `Bearer ${this.token}` } : {}
     const response = await fetch(route, { headers })
-    return await await response.json()
+    return await response.json()
   }
 
   public async getFile(file: GithubResponse): Promise<Documentation> {
