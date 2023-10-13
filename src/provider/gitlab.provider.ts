@@ -1,5 +1,6 @@
 import { AbstractRepositoryFactory } from '../api/repository.factory'
 import { Documentation } from '../association.manager'
+import { ErrorManager } from '../utils/error.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { ReplacerTextProvider } from '../utils/replacerText.utils'
 
@@ -51,11 +52,14 @@ export class GitlabProvider implements AbstractRepositoryFactory {
   }
 
   public async getRepoContent(route: string) {
-    const requestOptions: RequestInit = this.token
-      ? { headers: { 'PRIVATE-TOKEN': this.token } }
-      : {}
-
-    const response = await fetch(this.baseUrl + route, requestOptions)
+    const headers: RequestInit = this.token ? { headers: { 'PRIVATE-TOKEN': this.token } } : {}
+    const response = await fetch(this.baseUrl + route, headers)
+    if (response.status === 401) {
+      ErrorManager.outputError(
+        "Gitlab Bad Credential: Votre token d'authentification est invalide ou expiré."
+      )
+      return
+    }
     return await response.json()
   }
 
@@ -67,6 +71,7 @@ export class GitlabProvider implements AbstractRepositoryFactory {
       : {}
 
     const response = await fetch(url, requestOptions)
+
     const content = await response.text()
     return {
       type: this.fileSystem.getExtension(file.name)!,
