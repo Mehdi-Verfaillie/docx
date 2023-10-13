@@ -1,7 +1,8 @@
-import { ExtensionContext } from 'vscode'
+import { ExtensionContext, workspace } from 'vscode'
 import { ConfigGenerator } from '../config/config.manager'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { Notifier, VsCodeNotifier } from '../utils/notifier.utils'
+import { WorkspaceManager } from '../utils/workspace.utils'
 import { Command } from './command.registry'
 import {
   CleanupDocxJsonCommand,
@@ -12,9 +13,10 @@ import {
 } from './index'
 
 export class CommandFactory {
-  static configGenerator = new ConfigGenerator(new FileSystemManager())
+  static workspaceFolder = WorkspaceManager.getWorkspaceFolder()
+  static fileSystem = new FileSystemManager(workspace.fs, `${this.workspaceFolder}/.gitignore`)
+  static configGenerator = new ConfigGenerator(this.fileSystem)
   static notifier: Notifier = new VsCodeNotifier()
-  static fileSystem = new FileSystemManager()
 
   static createCleanupDocxJsonCommand(): Command {
     return new CleanupDocxJsonCommand(this.configGenerator, '.docx.json', this.notifier)

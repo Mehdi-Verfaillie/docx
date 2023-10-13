@@ -1,25 +1,15 @@
-import { ExtensionContext, commands, workspace } from 'vscode'
-import { ConfigGenerator } from './config/config.manager'
-import { FileSystemManager } from './utils/fileSystem.utils'
+import { ExtensionContext, commands } from 'vscode'
 import { CommandRegistry } from './commands/command.registry'
-import { Notifier, VsCodeNotifier } from './utils/notifier.utils'
-import { WorkspaceManager } from './utils/workspace.utils'
 import { CommandFactory } from './commands/command.factory'
 
 export class ExtensionManager {
   private commandRegistry: CommandRegistry
-  private generator: ConfigGenerator
-  private notifier: Notifier
   private context: ExtensionContext
-  private fileSystem: FileSystemManager
-  private workspaceFolder = WorkspaceManager.getWorkspaceFolder()
 
   constructor(context: ExtensionContext) {
     this.commandRegistry = new CommandRegistry()
-    this.notifier = new VsCodeNotifier()
-    this.fileSystem = new FileSystemManager(workspace.fs, `${this.workspaceFolder}/.gitignore`)
-    this.generator = new ConfigGenerator(this.fileSystem)
     this.context = context
+
     // Configure the commands
     this.configureCommands()
   }
