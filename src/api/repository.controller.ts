@@ -6,7 +6,12 @@ import { ErrorManager } from '../utils/error.utils'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { WorkspaceManager } from '../utils/workspace.utils'
 import { RepositoryFactory } from './repository.factory'
-import { ProviderStrategy } from './repository.strategy'
+import {
+  LocalProviderStrategy,
+  ProviderStrategy,
+  RepositoryProviderStrategy,
+  WebProviderStrategy,
+} from './repository.strategy'
 
 interface LocalProviderConfig {
   type: 'local'
@@ -30,28 +35,26 @@ export class RepositoryController {
   private repository!: RepositoryFactory
   private fileSystem: FileSystemManager
   private baseDir = WorkspaceManager.getWorkspaceFolder()
-  private providerStrategies: ProviderStrategy[]
+  private providerStrategies = [
+    new LocalProviderStrategy(),
+    new RepositoryProviderStrategy(),
+    new WebProviderStrategy(),
+  ]
   private validator: AssociationsValidator
   private configMapper: ProviderConfigMapper
 
-  private constructor(
-    json: string,
-    fileSystem = new FileSystemManager(),
-    providerStrategies: ProviderStrategy[]
-  ) {
+  private constructor(json: string, fileSystem = new FileSystemManager()) {
     this.fileSystem = fileSystem
-    this.providerStrategies = providerStrategies
     this.validator = new AssociationsValidator(this.baseDir, this.fileSystem)
-    this.configMapper = new ProviderConfigMapper(providerStrategies)
+    this.configMapper = new ProviderConfigMapper(this.providerStrategies)
   }
 
   public static async create(
     json: string,
-    providerStrategies: ProviderStrategy[],
     tokens: Token[] = [],
     fileSystem = new FileSystemManager()
   ): Promise<RepositoryController> {
-    const instance = new RepositoryController(json, fileSystem, providerStrategies)
+    const instance = new RepositoryController(json, fileSystem)
     await instance.initialize(json, tokens)
     return instance
   }

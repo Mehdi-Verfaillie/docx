@@ -4,11 +4,6 @@ import { FileSystemManager } from './utils/fileSystem.utils'
 import { ErrorManager } from './utils/error.utils'
 import { SchemaManager } from './config/schema.manager'
 import { RepositoryController } from './api/repository.controller'
-import {
-  RepositoryProviderStrategy,
-  LocalProviderStrategy,
-  WebProviderStrategy,
-} from './api/repository.strategy'
 import { CredentialManager } from './utils/credentials.utils'
 import { ExtensionManager } from './extension.manager'
 import { DataStore } from './data.store'
@@ -17,11 +12,6 @@ export async function activate(context: vscode.ExtensionContext) {
   const configFilename = '.docx.json'
   const fileSystem = new FileSystemManager()
   const workspaceFolder = WorkspaceManager.getWorkspaceFolder()
-  const providerStrategies = [
-    new LocalProviderStrategy(),
-    new RepositoryProviderStrategy(),
-    new WebProviderStrategy(),
-  ]
   const credentialManager = new CredentialManager(context.secrets)
   const configFileObserver = vscode.workspace.createFileSystemWatcher(
     `${workspaceFolder}/${configFilename}`
@@ -38,11 +28,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const refreshDocumentations = async (): Promise<void> => {
     try {
       dataStore.jsonConfig = await fileSystem.readFile(`${workspaceFolder}/${configFilename}`)
-      const repositoryController = await RepositoryController.create(
-        dataStore.jsonConfig,
-        providerStrategies,
-        tokens
-      )
+      const repositoryController = await RepositoryController.create(dataStore.jsonConfig, tokens)
       dataStore.documentations = await repositoryController.getDocumentations()
     } catch (error) {
       dataStore.jsonConfig = ''
