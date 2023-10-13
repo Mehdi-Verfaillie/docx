@@ -34,7 +34,15 @@ export class CommandFactory {
     return new TokenAddGithubCommand(context)
   }
 
+  static deleteGithubTokenCommand(context: ExtensionContext): Command {
+    return new TokenAddGitlabCommand(context)
+  }
+
   static createGitlabTokenCommand(context: ExtensionContext): Command {
+    return new TokenAddGitlabCommand(context)
+  }
+
+  static deleteGitlabTokenCommand(context: ExtensionContext): Command {
     return new TokenAddGitlabCommand(context)
   }
 }
