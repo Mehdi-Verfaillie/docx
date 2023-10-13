@@ -1,7 +1,6 @@
 import * as vscode from 'vscode'
 import { WorkspaceManager } from './utils/workspace.utils'
 import { FileSystemManager } from './utils/fileSystem.utils'
-import { Documentation } from './association.manager'
 import { ErrorManager } from './utils/error.utils'
 import { SchemaManager } from './config/schema.manager'
 import { RepositoryController } from './api/repository.controller'
@@ -12,6 +11,7 @@ import {
 } from './api/repository.strategy'
 import { CredentialManager } from './utils/credentials.utils'
 import { ExtensionManager } from './extension.manager'
+import { DataStore } from './data.store'
 
 export async function activate(context: vscode.ExtensionContext) {
   const configFilename = '.docx.json'
@@ -32,31 +32,31 @@ export async function activate(context: vscode.ExtensionContext) {
     'https://raw.githubusercontent.com/Mehdi-Verfaillie/docx/main/src/config/.docx.schema.json'
   )
 
-  const refreshDocumentations = async (): Promise<[string, Documentation[]]> => {
+  const dataStore = DataStore.getInstance()
+  let tokens = await credentialManager.getTokens()
+
+  const refreshDocumentations = async (): Promise<void> => {
     try {
-      const jsonConfig = await fileSystem.readFile(`${workspaceFolder}/${configFilename}`)
+      dataStore.jsonConfig = await fileSystem.readFile(`${workspaceFolder}/${configFilename}`)
       const repositoryController = await RepositoryController.create(
-        jsonConfig,
+        dataStore.jsonConfig,
         providerStrategies,
         tokens
       )
-      const documentations = await repositoryController.getDocumentations()
-      return [jsonConfig, documentations]
+      dataStore.documentations = await repositoryController.getDocumentations()
     } catch (error) {
-      return ['', []]
+      dataStore.jsonConfig = ''
+      dataStore.documentations = []
     }
   }
 
-  let tokens = await credentialManager.getTokens()
-  let [jsonConfig, documentations] = await refreshDocumentations()
-
   configFileObserver.onDidChange(async () => {
-    ;[jsonConfig, documentations] = await refreshDocumentations()
+    await refreshDocumentations()
   })
 
   credentialManager.onTokenChange(async () => {
     tokens = await credentialManager.getTokens()
-    ;[jsonConfig, documentations] = await refreshDocumentations()
+    await refreshDocumentations()
   })
 
   // --------------------------------------------------------------

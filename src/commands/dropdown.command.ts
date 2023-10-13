@@ -1,4 +1,5 @@
-import { AssociationsManager, Documentation } from '../association.manager'
+import { AssociationsManager } from '../association.manager'
+import { DataStore } from '../data.store'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { WorkspaceManager } from '../utils/workspace.utils'
 import { webView } from '../webview/webview'
@@ -6,14 +7,11 @@ import { Command } from './command.registry'
 import { window } from 'vscode'
 
 export class DropdownCommand implements Command {
-  private documentations: Documentation[]
-  private fileSystem: FileSystemManager
-  private jsonConfig: string
+  private dataStore: DataStore
 
-  constructor(documentations: Documentation[], fileSystem: FileSystemManager, jsonConfig: string) {
-    this.documentations = documentations
+  constructor(private fileSystem: FileSystemManager) {
+    this.dataStore = DataStore.getInstance()
     this.fileSystem = fileSystem
-    this.jsonConfig = jsonConfig
   }
 
   async execute() {
@@ -21,10 +19,9 @@ export class DropdownCommand implements Command {
     if (!currentUserPath) return
 
     const manager = new AssociationsManager()
-
     const filteredDocumentations = await manager.associate(
-      this.documentations,
-      this.fileSystem.processFileContent(this.jsonConfig),
+      this.dataStore.documentations,
+      this.fileSystem.processFileContent(this.dataStore.jsonConfig),
       currentUserPath
     )
 
