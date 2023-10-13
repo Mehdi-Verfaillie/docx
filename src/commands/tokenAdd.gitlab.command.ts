@@ -2,7 +2,7 @@ import { ExtensionContext } from 'vscode'
 import { CredentialManager } from '../utils/credentials.utils'
 import { Command } from './command.registry'
 
-export class GithubTokenCommand implements Command {
+export class TokenAddGitlabCommand implements Command {
   private credentialManager: CredentialManager
 
   constructor(context: ExtensionContext) {
@@ -10,6 +10,6 @@ export class GithubTokenCommand implements Command {
   }
 
   async execute() {
-    await this.credentialManager.openTokenInputBox('github')
+    await this.credentialManager.openTokenInputBox('gitlab')
   }
 }
