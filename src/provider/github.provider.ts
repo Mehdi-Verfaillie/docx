@@ -2,6 +2,7 @@ import { Documentation } from '../association.manager'
 import { FileSystemManager } from '../utils/fileSystem.utils'
 import { ReplacerTextProvider } from '../utils/replacerText.utils'
 import { AbstractRepositoryFactory } from '../api/repository.factory'
+import { ErrorManager } from '../utils/error.utils'
 
 interface GithubResponse {
   type: string
@@ -59,6 +60,12 @@ export class GithubProvider implements AbstractRepositoryFactory {
   public async getRepoContent(route: string) {
     const headers: HeadersInit = this.token ? { Authorization: `Bearer ${this.token}` } : {}
     const response = await fetch(route, { headers })
+    if (response.status === 401) {
+      ErrorManager.outputError(
+        "Github Bad Credential: Votre token d'authentification est invalide ou expiré."
+      )
+      return
+    }
     return await response.json()
   }
 
