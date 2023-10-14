@@ -71,6 +71,10 @@ export class GithubProvider implements AbstractRepositoryFactory {
       ErrorManager.outputError('Github API rate limit exceeded add token for higher limit')
       return
     }
+    if (response.status === 404) {
+      ErrorManager.outputError("Github repository not found (add token if it's private repository)")
+      return
+    }
     return await response.json()
   }
 

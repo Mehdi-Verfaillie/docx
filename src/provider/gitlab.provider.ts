@@ -56,16 +56,19 @@ export class GitlabProvider implements AbstractRepositoryFactory {
   public async getRepoContent(route: string) {
     const headers: RequestInit = this.token ? { headers: { 'PRIVATE-TOKEN': this.token } } : {}
     const response = await fetch(this.baseUrl + route, headers)
+
     if (response.status === 401) {
       ErrorManager.outputError(
         "Gitlab Bad Credential: Votre token d'authentification est invalide ou expiré."
       )
       return
     }
+    if (response.status === 403) {
+      ErrorManager.outputError('Gitlab API rate limit exceeded add token for higher limit')
+      return
+    }
     if (response.status === 404) {
-      ErrorManager.outputError(
-        "Gitlab repository not found ( add token if it's private repository )"
-      )
+      ErrorManager.outputError("Gitlab repository not found (add token if it's private repository)")
       return
     }
     return await response.json()
