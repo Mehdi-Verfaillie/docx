@@ -45,8 +45,10 @@ export class GitlabProvider implements AbstractRepositoryFactory {
         this.fileSystem.isFileOfInterest(repositoryContent.name)
       ) {
         const documentation = await this.getFile(repositoryContent)
-        documentation.content = await this.transformImageURL.replacer(documentation.content)
-        documentations.push(documentation)
+        if (documentation) {
+          documentation.content = await this.transformImageURL.replacer(documentation.content)
+          documentations.push(documentation)
+        }
       }
     }
   }
@@ -60,10 +62,16 @@ export class GitlabProvider implements AbstractRepositoryFactory {
       )
       return
     }
+    if (response.status === 404) {
+      ErrorManager.outputError(
+        "Gitlab repository not found ( add token if it's private repository )"
+      )
+      return
+    }
     return await response.json()
   }
 
-  public async getFile(file: GitlabResponse): Promise<Documentation> {
+  public async getFile(file: GitlabResponse): Promise<Documentation | undefined> {
     const filePathEncoded = encodeURIComponent(file.path)
     const url = `https://gitlab.com/api/v4/projects/${this.repository.owner}%2F${this.repository.name}/repository/files/${filePathEncoded}/raw`
     const requestOptions: RequestInit = this.token
@@ -71,7 +79,12 @@ export class GitlabProvider implements AbstractRepositoryFactory {
       : {}
 
     const response = await fetch(url, requestOptions)
-
+    if (response.status === 401) {
+      ErrorManager.outputError(
+        "Gitlab Bad Credential: Votre token d'authentification est invalide ou expiré."
+      )
+      return
+    }
     const content = await response.text()
     return {
       type: this.fileSystem.getExtension(file.name)!,
