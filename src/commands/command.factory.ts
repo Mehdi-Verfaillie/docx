@@ -10,6 +10,8 @@ import {
   GenerateDocxJsonCommand,
   TokenAddGithubCommand,
   TokenAddGitlabCommand,
+  TokenDeleteGithubCommand,
+  TokenDeleteGitlabCommand,
 } from './index'
 
 export class CommandFactory {
@@ -35,7 +37,7 @@ export class CommandFactory {
   }
 
   static deleteGithubTokenCommand(context: ExtensionContext): Command {
-    return new TokenAddGitlabCommand(context)
+    return new TokenDeleteGithubCommand(context)
   }
 
   static createGitlabTokenCommand(context: ExtensionContext): Command {
@@ -43,6 +45,6 @@ export class CommandFactory {
   }
 
   static deleteGitlabTokenCommand(context: ExtensionContext): Command {
-    return new TokenAddGitlabCommand(context)
+    return new TokenDeleteGitlabCommand(context)
   }
 }
