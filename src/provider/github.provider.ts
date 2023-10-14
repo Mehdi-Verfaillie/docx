@@ -60,10 +60,15 @@ export class GithubProvider implements AbstractRepositoryFactory {
   public async getRepoContent(route: string) {
     const headers: HeadersInit = this.token ? { Authorization: `Bearer ${this.token}` } : {}
     const response = await fetch(route, { headers })
+
     if (response.status === 401) {
       ErrorManager.outputError(
         "Github Bad Credential: Votre token d'authentification est invalide ou expiré."
       )
+      return
+    }
+    if (response.status === 403) {
+      ErrorManager.outputError('Github API rate limit exceeded add token for higher limit')
       return
     }
     return await response.json()
